@@ -24,6 +24,11 @@ export const IconHome = (p: P) => (
     <path d="M9.5 20v-6h5v6" />
   </S>
 );
+export const IconHash = (p: P) => (
+  <S {...p}>
+    <path d="M9 4 7 20M17 4l-2 16M4 9h16M3 15h16" />
+  </S>
+);
 export const IconBook = (p: P) => (
   <S {...p}>
     <path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H12v16H5.5A1.5 1.5 0 0 0 4 20.5Z" />
