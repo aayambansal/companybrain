@@ -8,6 +8,7 @@ import { useToast } from '@/components/toast';
 import { timeAgo } from '@/lib/format';
 import { IconPlus, IconTrash } from '@/components/icons';
 import { ProvidersSection } from './providers';
+import { BackupSection } from './backup';
 
 export default function SettingsPage() {
   const toast = useToast();
@@ -82,6 +83,9 @@ export default function SettingsPage() {
 
         {/* Providers */}
         <ProvidersSection />
+
+        {/* Backup */}
+        <BackupSection />
 
         {/* API keys */}
         <section>
