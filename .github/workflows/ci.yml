@@ -18,7 +18,7 @@ jobs:
     name: typecheck / test / format
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -72,7 +72,7 @@ jobs:
       DATABASE_URL: postgres://companybrain:companybrain@localhost:5432/companybrain
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
