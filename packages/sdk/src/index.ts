@@ -14,9 +14,13 @@ import type {
   ChatResponse,
   ConnectorInfo,
   Memory,
+  PlaybookInput,
+  PlaybookResponse,
   SearchInput,
   SearchResponse,
   Space,
+  TopicGroup,
+  TopicsInput,
 } from './types.js';
 
 export interface CompanyBrainOptions {
@@ -106,6 +110,18 @@ export class CompanyBrain {
 
   chat(input: ChatInput): Promise<ChatResponse> {
     return this.request<ChatResponse>('POST', '/v1/chat', { body: input });
+  }
+
+  /** Synthesize a cited playbook from the memories on a topic. */
+  playbook(input: PlaybookInput): Promise<PlaybookResponse> {
+    return this.request<PlaybookResponse>('POST', '/v1/playbooks', { body: input });
+  }
+
+  /** Group memories by tag to surface projects, people, and themes. */
+  topics(opts: TopicsInput = {}): Promise<{ topics: TopicGroup[] }> {
+    return this.request<{ topics: TopicGroup[] }>('GET', '/v1/topics', {
+      query: opts as Record<string, unknown>,
+    });
   }
 
   /** Stream a chat answer over SSE. Yields `{ event, data }` frames. */

@@ -37,6 +37,34 @@ describe('CompanyBrain SDK', () => {
     expect(seenUrl).toBe('http://x:1/v1/search');
   });
 
+  it('posts a playbook request', async () => {
+    let seenUrl = '';
+    let seenBody: unknown;
+    const fetchImpl = mockFetch((url, init) => {
+      seenUrl = url;
+      seenBody = init.body ? JSON.parse(String(init.body)) : undefined;
+      return { body: { playbook: { title: 'Shipping', content: '# Shipping', citations: [] } } };
+    });
+    const cb = new CompanyBrain({ apiUrl: 'http://x:1', fetch: fetchImpl });
+    const res = await cb.playbook({ topic: 'shipping' });
+    expect(seenUrl).toBe('http://x:1/v1/playbooks');
+    expect(seenBody).toMatchObject({ topic: 'shipping' });
+    expect(res.playbook.title).toBe('Shipping');
+  });
+
+  it('builds a topics query', async () => {
+    let seenUrl = '';
+    const fetchImpl = mockFetch((url) => {
+      seenUrl = url;
+      return { body: { topics: [{ topic: 'launch', count: 3, sample: [] }] } };
+    });
+    const cb = new CompanyBrain({ apiUrl: 'http://x:1', fetch: fetchImpl });
+    const res = await cb.topics({ minCount: 2 });
+    expect(seenUrl).toContain('/v1/topics');
+    expect(seenUrl).toContain('minCount=2');
+    expect(res.topics[0]?.topic).toBe('launch');
+  });
+
   it('throws a typed error on non-2xx', async () => {
     const fetchImpl = mockFetch(() => ({ status: 401, body: { error: 'unauthorized', message: 'nope' } }));
     const cb = new CompanyBrain({ fetch: fetchImpl });
