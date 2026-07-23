@@ -82,6 +82,33 @@ export interface ChatInput {
   history?: { role: 'user' | 'assistant'; content: string }[];
 }
 
+export interface PlaybookInput {
+  topic: string;
+  space?: string;
+  spaceId?: string;
+  limit?: number;
+  /** Store the playbook as a searchable memory. */
+  save?: boolean;
+}
+
+export interface PlaybookResponse {
+  playbook: { title: string; content: string; citations: Citation[] };
+  savedId?: string;
+}
+
+export interface TopicsInput {
+  space?: string;
+  spaceId?: string;
+  limit?: number;
+  minCount?: number;
+}
+
+export interface TopicGroup {
+  topic: string;
+  count: number;
+  sample: { id: string; title: string | null }[];
+}
+
 export interface Space {
   id: string;
   name: string;
