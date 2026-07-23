@@ -141,10 +141,12 @@ def test_base_url_trailing_slash_is_normalized():
 
 
 def test_chat_stream_yields_event_data_frames():
+    # The server JSON-encodes token payloads; the client decodes them back to
+    # text, preserving the whitespace that would otherwise be trimmed off.
     body = (
         "event: citations\ndata: []\n\n"
-        "event: token\ndata: Ship\n\n"
-        "event: token\ndata: Thursday\n\n"
+        'event: token\ndata: "Ship "\n\n'
+        'event: token\ndata: "Thursday"\n\n'
         "event: done\ndata: 1\n\n"
     )
 
@@ -157,14 +159,15 @@ def test_chat_stream_yields_event_data_frames():
     cb.close()
 
     assert frames[0] == ("citations", "[]")
-    assert ("token", "Ship") in frames
+    assert ("token", "Ship ") in frames  # trailing space survives
+    assert ("token", "Thursday") in frames
     assert frames[-1] == ("done", "1")
 
 
 def test_async_client_add_and_stream():
     def handler(request):
         if request.url.path == "/v1/chat/stream":
-            body = "event: token\ndata: hi\n\nevent: done\ndata: 1\n\n"
+            body = 'event: token\ndata: "hi"\n\nevent: done\ndata: 1\n\n'
             return httpx.Response(200, text=body, headers={"content-type": "text/event-stream"})
         return httpx.Response(200, json={"memory": {"id": "m9"}})
 

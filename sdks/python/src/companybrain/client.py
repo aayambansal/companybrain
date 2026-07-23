@@ -145,9 +145,9 @@ class CompanyBrain:
             buffer = _c.SSEBuffer()
             for chunk in response.iter_text():
                 for frame in buffer.push(chunk):
-                    yield frame
+                    yield _c.decode_stream_frame(frame)
             for frame in buffer.flush():
-                yield frame
+                yield _c.decode_stream_frame(frame)
 
     def status(self) -> Dict[str, Any]:
         return self.request("GET", "/v1/status")
