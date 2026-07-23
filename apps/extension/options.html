@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CompanyBrain — Options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="head">
+        <span class="prompt">&gt;</span>
+        <h1>companybrain <span class="dim">/ settings</span></h1>
+      </header>
+
+      <p class="lead">
+        Connect the extension to your self-hosted CompanyBrain API. Credentials are stored in
+        <code>chrome.storage.sync</code>.
+      </p>
+
+      <form id="form" class="form" autocomplete="off">
+        <div class="field">
+          <label for="apiUrl">API URL</label>
+          <input id="apiUrl" type="url" placeholder="http://localhost:3333" spellcheck="false" />
+          <span class="hint">Base URL of your CompanyBrain server. No trailing slash needed.</span>
+        </div>
+
+        <div class="field">
+          <label for="apiKey">API key</label>
+          <input id="apiKey" type="password" placeholder="cb_..." spellcheck="false" />
+          <span class="hint">Starts with <code>cb_</code>. Sent as a Bearer token.</span>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="defaultSpace">Default space <span class="dim">(optional)</span></label>
+            <input id="defaultSpace" type="text" placeholder="engineering" spellcheck="false" />
+            <span class="hint">Space slug to save into by default.</span>
+          </div>
+          <div class="field">
+            <label for="defaultTags">Default tags <span class="dim">(optional)</span></label>
+            <input id="defaultTags" type="text" placeholder="research, web" spellcheck="false" />
+            <span class="hint">Comma-separated, pre-filled in the popup.</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary" id="save">Save</button>
+          <button type="button" class="btn btn-ghost" id="test">Test connection</button>
+        </div>
+      </form>
+
+      <section class="result" id="result" hidden></section>
+    </main>
+    <script src="options.js"></script>
+  </body>
+</html>
