@@ -13,6 +13,7 @@
 
 > The open-source memory layer for your company. Index everything, recall anything, own all of it.
 
+[![Website](https://img.shields.io/badge/site-companybrain-e6ac3f)](https://aayambansal.github.io/companybrain/)
 [![License](https://img.shields.io/badge/license-MIT-black)](./LICENSE)
 [![Postgres](https://img.shields.io/badge/db-postgres%20%2B%20pgvector-336791)](https://github.com/pgvector/pgvector)
 [![Self-host](https://img.shields.io/badge/self--host-one%20command-2ea44f)](#run-it)
