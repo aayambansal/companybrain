@@ -111,7 +111,7 @@ function SearchInner() {
         ) : (
           <ul className="space-y-3">
             {res.hits.map((h) => (
-              <Hit key={h.chunkId} hit={h} />
+              <Hit key={h.chunkId} hit={h} query={res.query} />
             ))}
           </ul>
         )}
@@ -120,7 +120,26 @@ function SearchInner() {
   );
 }
 
-function Hit({ hit }: { hit: SearchHit }) {
+/** Wrap case-insensitive query-term matches in the text with a subtle mark. */
+function highlight(text: string, query: string): React.ReactNode {
+  const terms = Array.from(new Set(query.toLowerCase().split(/\s+/).filter((t) => t.length > 1))).map((t) =>
+    t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+  );
+  if (terms.length === 0) return text;
+  const re = new RegExp(`(${terms.join('|')})`, 'gi');
+  const parts = text.split(re);
+  return parts.map((part, i) =>
+    i % 2 === 1 ? (
+      <mark key={i} className="rounded bg-[var(--color-primary-soft)] px-0.5 text-[var(--color-primary-strong)]">
+        {part}
+      </mark>
+    ) : (
+      part
+    ),
+  );
+}
+
+function Hit({ hit, query }: { hit: SearchHit; query: string }) {
   const pct = Math.round(hit.score * 100);
   return (
     <li className="rounded-lg border border-border bg-surface p-4 transition-colors hover:border-border-strong">
@@ -135,7 +154,7 @@ function Hit({ hit }: { hit: SearchHit }) {
           <span className="font-mono text-[11px] text-ink-faint">{pct}</span>
         </div>
       </div>
-      <p className="mt-2 line-clamp-3 text-[13px] leading-relaxed text-ink-muted">{hit.content}</p>
+      <p className="mt-2 line-clamp-3 text-[13px] leading-relaxed text-ink-muted">{highlight(hit.content, query)}</p>
       <div className="mt-2.5 flex flex-wrap items-center gap-2">
         <Badge tone="neutral" mono>
           {hit.document.connector}
