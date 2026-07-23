@@ -192,6 +192,7 @@ Postgres, and the GHCR images.
 - [Deploy](./docs/deploy.md)
 - [API reference](./docs/api.md)
 - [Connectors](./docs/connectors.md)
+- [How it compares](./docs/comparison.md)
 
 ## Contributing
 
