@@ -1,11 +1,14 @@
 ```
- ███   ███  █   █ ████   ███  █   █ █   █    ████  ████   ███  ███ █   █   
-█ ░░░ █ ░░█ ██ ██░█░░░█ █ ░░█ ██  █░ █ █ ░   █░░░█ █░░░█ █ ░░█  █░░██  █░  
-█░ ░░░█░ ░█░█░█ █░████░░█████░█░█ █░░ █ ░ ░  ████░░████░░█████░ █░░█░█ █░░ 
-█░░   █░░ █░█░░░█░█░░░░ █░░░█░█░░██░░ █░ ░   █░░░█ █░░█░ █░░░█░░█░░█░░██░░ 
- ███   ███ ░█░░ █░█░░░░░█░░░█░█░░ █░░ █░░    ████░░█░░░█░█░░░█░███░█░░ █░░ 
-  ░░░   ░░░ ░░░  ░░░░    ░░  ░░░░  ░░  ░░     ░░░░ ░░░  ░ ░░  ░░░░░ ░░  ░░ 
-   ░░░   ░░░  ░   ░ ░     ░   ░ ░   ░   ░      ░░░░  ░   ░ ░   ░ ░░░ ░   ░ 
+                    _---~~(~~-_.                        __________  __  _______  ___    _   ____  __
+                  _{        )   )                      / ____/ __ \/  |/  / __ \/   |  / | / /\ \/ /
+                ,   ) -~~- ( ,-' )_                    / /   / / / / /|_/ / /_/ / /| | /  |/ /  \  /
+               (  `-,_..`., )-- '_,)                  / /___/ /_/ / /  / / ____/ ___ |/ /|  /   / /
+              ( ` _)  (  -~( -_ `,  }                 \____/\____/_/  /_/_/   /_/  |_/_/ |_/   /_/
+              (_-  _  ~_-~~~~`,  ,' )                     ____  ____  ___    _____   __
+                `~ -^(    __;-,((()))                    / __ )/ __ \/   |  /  _/ | / /
+                      ~~~~ {_ -_(())                    / __  / /_/ / /| |  / //  |/ /
+                             `\  }                     / /_/ / _, _/ ___ |_/ // /|  /
+                               { }                    /_____/_/ |_/_/  |_/___/_/ |_/
 ```
 
 > The open-source memory layer for your company. Index everything, recall anything, own all of it.
@@ -13,31 +16,38 @@
 [![License](https://img.shields.io/badge/license-MIT-black)](./LICENSE)
 [![Postgres](https://img.shields.io/badge/db-postgres%20%2B%20pgvector-336791)](https://github.com/pgvector/pgvector)
 [![Self-host](https://img.shields.io/badge/self--host-one%20command-2ea44f)](#run-it)
+[![No sign-in](https://img.shields.io/badge/local-no%20sign--in-8a6d1f)](#no-sign-in)
 [![PRs](https://img.shields.io/badge/PRs-welcome-blue)](./CONTRIBUTING.md)
 
-CompanyBrain is a self-hosted memory backend. You point it at your knowledge (Obsidian
-vaults, Google Docs, Slack, Notion, GitHub, PDFs, plain URLs) and it becomes one private,
-searchable brain that answers questions with citations. Your agents talk to it over MCP.
-Your apps talk to it over a typed SDK. Your data never leaves your Postgres.
+CompanyBrain is a self-hosted memory backend. Point it at your knowledge (Obsidian vaults,
+Google Docs, Slack, Notion, GitHub, web pages, RSS, plain files) and it becomes one private,
+searchable brain that answers questions with citations. Your agents talk to it over MCP. Your
+apps talk to it over a typed SDK. Your data never leaves your Postgres.
 
-It is a from-scratch, MIT-licensed alternative to hosted memory services like Supermemory
-and memory.store. No per-seat pricing, no vendor holding your knowledge hostage.
+It is a from-scratch, MIT-licensed alternative to hosted memory services like Supermemory and
+memory.store. No per-seat pricing, no vendor holding your knowledge hostage.
 
 ## Run it
+
+One command. It clones (if needed), asks two questions, and starts everything with Docker.
+
+```sh
+npx companybrain
+```
+
+Then open http://localhost:3000. That is the whole install. The default embedding model runs
+locally with no API key, so you can index and search in the first minute.
+
+Prefer to drive it yourself:
 
 ```sh
 git clone https://github.com/aayambansal/companybrain.git
 cd companybrain
 cp .env.example .env      # defaults work with zero keys
 docker compose up -d      # postgres + pgvector, api, dashboard
-open http://localhost:3000
 ```
 
-That is the whole install. The default embedding model runs locally with no API key, so you
-can ingest and search in the first minute. Swap in OpenAI, Ollama, or Google embeddings when
-you want to, by changing one line in `.env`.
-
-Prefer running it on the metal:
+Or on the metal, no Docker:
 
 ```sh
 pnpm install
@@ -45,6 +55,18 @@ docker compose up -d db   # just postgres
 pnpm db:migrate
 pnpm dev                  # api :3333, dashboard :3000
 ```
+
+## No sign-in
+
+By default CompanyBrain runs in single-user mode: no login wall, one workspace, you are in.
+That is the frictionless self-host experience. Flip `AUTH_MODE=multi` for full auth (register,
+login, sessions, API keys, many workspaces), or set `ACCESS_TOKEN` to gate an exposed instance.
+
+## Bring your own keys
+
+Runs zero-config on a local embedding model. Want real semantic search or grounded chat?
+Open Settings > Providers in the dashboard and paste an OpenAI, Anthropic, Google, or Ollama
+key. It reconfigures the running engine on the spot. Nothing is required to start.
 
 ## What you get
 
@@ -66,12 +88,11 @@ pnpm dev                  # api :3333, dashboard :3000
 ## How it fits together
 
 ```
-  dashboard        chrome ext        mcp server        sdk (ts / py)
+  dashboard        chrome ext        mcp server        sdk (ts / py)        cli
   (next.js)                          (agents)
-      \                 \                |                 /
-       \                 \               |                /
-        `------------------\-------------+---------------'
-                            \            |
+      \                 \                |                 /                 /
+       `------------------\-------------+----------------/-----------------'
+                           \            |
                         ┌────────────────────────┐
                         │    companybrain api     │   hono + node
                         │  auth · spaces · search │
@@ -85,7 +106,7 @@ pnpm dev                  # api :3333, dashboard :3000
                         └────────────────────────┘
 ```
 
-Full design notes live in [docs/architecture.md](./docs/architecture.md).
+Design notes: [docs/architecture.md](./docs/architecture.md).
 
 ## Repo layout
 
@@ -94,28 +115,41 @@ Full design notes live in [docs/architecture.md](./docs/architecture.md).
 | `apps/api`              | the HTTP API (Hono)                                   |
 | `apps/web`              | the dashboard (Next.js)                               |
 | `apps/mcp`              | Model Context Protocol server for agents              |
+| `apps/cli`              | the `companybrain` / `cb` command-line interface      |
 | `apps/extension`        | Chrome extension                                      |
 | `packages/core`         | ingestion, chunking, embeddings, hybrid search        |
 | `packages/db`           | Drizzle schema + migrations (Postgres / pgvector)     |
-| `packages/connectors`   | source integrations                                   |
+| `packages/connectors`   | source integrations + sync runner                     |
 | `packages/sdk`          | TypeScript SDK                                         |
+| `packages/launcher`     | the `npx companybrain` installer                      |
 | `sdks/python`           | Python SDK                                             |
+| `examples`              | runnable TS / Python / curl examples                  |
 
 ## Connectors
 
-| source                | status     |
-| --------------------- | ---------- |
-| Raw text / API        | `[core]`   |
-| Web pages / URLs      | `[planned]`|
-| Markdown / files      | `[planned]`|
-| Obsidian vault        | `[planned]`|
-| PDF / DOCX            | `[planned]`|
-| Google Docs / Drive   | `[planned]`|
-| Slack                 | `[planned]`|
-| Notion                | `[planned]`|
-| GitHub                | `[planned]`|
+| source                | id         | status      |
+| --------------------- | ---------- | ----------- |
+| Raw text / API        | `api`      | `[core]`    |
+| Web page / URL        | `web`      | `[core]`    |
+| Sitemap crawl         | `sitemap`  | `[core]`    |
+| Markdown / files      | `files`    | `[core]`    |
+| Obsidian vault        | `obsidian` | `[core]`    |
+| RSS / Atom            | `rss`      | `[core]`    |
+| Notion                | `notion`   | `[planned]` |
+| Slack                 | `slack`    | `[planned]` |
+| GitHub                | `github`   | `[planned]` |
+| Google Docs / Drive   | `google`   | `[planned]` |
 
-The table moves as connectors land.
+Configure and sync them from the dashboard under Connections. See
+[docs/connectors.md](./docs/connectors.md) to write your own.
+
+## Clients
+
+- TypeScript SDK: `npm install @companybrain/sdk`
+- Python SDK: `pip install companybrain`
+- CLI: `companybrain add`, `search`, `ask`, `spaces`
+- MCP: point Claude Desktop / Cursor at the server (`npx companybrain mcp` prints the config)
+- Chrome extension: save any page or selection to your brain
 
 ## Docs
 
