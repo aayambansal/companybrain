@@ -1,0 +1,30 @@
+{
+  "name": "@companybrain/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Model Context Protocol server for CompanyBrain. Exposes the company brain as MCP tools for Claude Desktop, Cursor, and other clients.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "companybrain-mcp": "./dist/index.js"
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "keywords": ["companybrain", "mcp", "model-context-protocol", "memory", "rag", "ai"],
+  "dependencies": {
+    "@companybrain/sdk": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2"
+  }
+}
