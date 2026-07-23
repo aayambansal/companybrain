@@ -84,6 +84,29 @@ export const Textarea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttrib
   },
 );
 
+export const Select = forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<HTMLSelectElement>>(
+  function Select({ className, children, ...rest }, ref) {
+    return (
+      <select
+        ref={ref}
+        className={cx(
+          'h-9.5 w-full rounded-md border border-border bg-bg-subtle px-3 text-sm text-ink',
+          'transition-colors hover:border-border-strong focus:border-[var(--color-primary-line)]',
+          'appearance-none bg-[right_0.6rem_center] bg-no-repeat pr-8',
+          className,
+        )}
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>\")",
+        }}
+        {...rest}
+      >
+        {children}
+      </select>
+    );
+  },
+);
+
 // ── Field ──────────────────────────────────────────────────────────────────
 export function Field({
   label,

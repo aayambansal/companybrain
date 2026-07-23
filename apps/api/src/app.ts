@@ -13,6 +13,7 @@ import chat from './routes/chat.js';
 import spaces from './routes/spaces.js';
 import connections from './routes/connections.js';
 import apikeys from './routes/apikeys.js';
+import providers from './routes/providers.js';
 
 export function createApp() {
   const env = getEnv();
@@ -25,7 +26,7 @@ export function createApp() {
       origin: env.corsOrigins.includes('*') ? '*' : env.corsOrigins,
       credentials: true,
       allowHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
-      allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     }),
   );
 
@@ -46,6 +47,7 @@ export function createApp() {
   v1.route('/spaces', spaces);
   v1.route('/connections', connections);
   v1.route('/api-keys', apikeys);
+  v1.route('/providers', providers);
   app.route('/v1', v1);
 
   app.notFound((c) => c.json({ error: 'not_found' }, 404));
