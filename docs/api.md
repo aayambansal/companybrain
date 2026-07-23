@@ -41,6 +41,11 @@ POST /v1/memories
 }
 ```
 
+The body also accepts `image`, `audio`, or `video` as `data:` URLs; each is turned into searchable
+text (image OCR + caption, audio transcription, and video = audio transcript + sampled-frame OCR
+via ffmpeg). With `TEMPORAL_RESOLUTION=true`, adding a memory that updates a fact already on record
+marks the older one superseded so recall returns the current truth.
+
 ## Search
 
 ```
@@ -48,8 +53,10 @@ GET  /v1/search?q=...&space=...&limit=...&mode=hybrid
 POST /v1/search           same, with a JSON body for complex filters
 ```
 
-`mode` is one of `hybrid` (default), `semantic`, or `keyword`. Results are ranked chunks with
-a score and the document they belong to.
+`mode` is one of `hybrid` (default), `semantic`, or `keyword`. Results are ranked chunks with a
+score and the document they belong to. Optional flags: `rerank` (LLM reranks the top results),
+`rerankMode` (`listwise` or `pointwise`), and `hyde` (blend the query with a hypothetical-answer
+embedding to lift recall). Superseded memories are excluded by default.
 
 ## Chat
 
@@ -57,6 +64,29 @@ a score and the document they belong to.
 POST /v1/chat             RAG answer over your memory, with citations
 POST /v1/chat/stream      server-sent events for token streaming
 ```
+
+## Playbooks
+
+Synthesize a structured, cited Markdown page from the memories on a topic.
+
+```json
+POST /v1/playbooks
+{ "topic": "how we ship a release", "space": "engineering", "save": false }
+```
+
+Returns `{ playbook: { title, content, citations }, savedId }`. With `save: true` the playbook is
+stored as a searchable memory. Regenerating reflects what the team knows now.
+
+## Topics
+
+Group memories by their tags (enrichment topics plus people from meeting/chat connectors) to
+surface the projects, people, and themes running through the brain.
+
+```
+GET /v1/topics?space=...&limit=24&minCount=2
+```
+
+Returns `{ topics: [{ topic, count, sample: [{ id, title }] }] }`, ordered by count.
 
 ## Spaces
 
