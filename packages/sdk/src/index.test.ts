@@ -77,3 +77,48 @@ describe('CompanyBrain SDK', () => {
     expect(cb.apiUrl).toBe('http://localhost:3333');
   });
 });
+
+/** A Response whose body streams the given string chunks as an SSE ReadableStream. */
+function streamResponse(chunks: string[]): Response {
+  const enc = new TextEncoder();
+  let i = 0;
+  const body = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (i < chunks.length) controller.enqueue(enc.encode(chunks[i++]));
+      else controller.close();
+    },
+  });
+  return { ok: true, status: 200, body } as unknown as Response;
+}
+
+describe('CompanyBrain SDK chatStream', () => {
+  it('parses SSE frames, reassembling one split across two reads', async () => {
+    const fetchImpl = vi.fn(async () =>
+      streamResponse([
+        'event: citations\ndata: [{"index":1}]\n\n',
+        'event: token\ndata: "Hel', // frame split mid-value
+        'lo world"\n\nevent: token\ndata: " again"\n\n',
+        'event: done\ndata: 1\n\n',
+      ]),
+    ) as unknown as typeof fetch;
+    const cb = new CompanyBrain({ fetch: fetchImpl });
+
+    const frames: { event: string; data: string }[] = [];
+    for await (const f of cb.chatStream({ message: 'hi' })) frames.push(f);
+
+    expect(frames[0]).toEqual({ event: 'citations', data: '[{"index":1}]' });
+    // The split frame is buffered and reassembled; the JSON-encoded token keeps
+    // its whitespace inside the quotes so consumers can JSON.parse it losslessly.
+    expect(frames[1]).toEqual({ event: 'token', data: '"Hello world"' });
+    expect(JSON.parse(frames[2]!.data)).toBe(' again');
+    expect(frames.some((f) => f.event === 'done')).toBe(true);
+  });
+
+  it('throws a typed error when the stream response is not ok', async () => {
+    const fetchImpl = vi.fn(async () => ({ ok: false, status: 500, body: null }) as unknown as Response) as unknown as typeof fetch;
+    const cb = new CompanyBrain({ fetch: fetchImpl });
+    await expect(async () => {
+      for await (const _ of cb.chatStream({ message: 'hi' })) void _;
+    }).rejects.toBeInstanceOf(CompanyBrainError);
+  });
+});
