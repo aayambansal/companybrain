@@ -32,15 +32,15 @@ function parseTags(raw) {
 // --- api ------------------------------------------------------------------
 
 async function postMemory(config, payload) {
-  if (!config.apiKey) throw new Error('No API key set. Open the extension options to configure it.');
+  // No key is required against a single-user instance (the default self-host).
+  // Only send the Authorization header when a key is actually configured.
+  const headers = { 'Content-Type': 'application/json' };
+  if (config.apiKey) headers.Authorization = 'Bearer ' + config.apiKey;
   let res;
   try {
     res = await fetch(config.apiUrl + '/v1/memories', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + config.apiKey,
-      },
+      headers: headers,
       body: JSON.stringify(payload),
     });
   } catch (e) {
@@ -48,6 +48,9 @@ async function postMemory(config, payload) {
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error('The API rejected the request. If it runs in multi-user mode, set an API key in the extension options.');
+    }
     const msg = (data && (data.message || data.error)) || 'HTTP ' + res.status;
     throw new Error(String(msg));
   }

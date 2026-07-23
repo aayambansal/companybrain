@@ -29,7 +29,10 @@ async function loadConfig() {
 }
 
 function authHeaders() {
-  return { 'Content-Type': 'application/json', Authorization: 'Bearer ' + config.apiKey };
+  // Single-user instances need no key; only send auth when one is configured.
+  const h = { 'Content-Type': 'application/json' };
+  if (config.apiKey) h.Authorization = 'Bearer ' + config.apiKey;
+  return h;
 }
 
 function setStatus(state, text) {
