@@ -152,6 +152,47 @@ class CompanyBrain:
     def status(self) -> Dict[str, Any]:
         return self.request("GET", "/v1/status")
 
+    def playbook(
+        self,
+        topic: str,
+        *,
+        space: Optional[str] = None,
+        space_id: Optional[str] = None,
+        limit: Optional[int] = None,
+        save: bool = False,
+    ) -> Dict[str, Any]:
+        """Synthesize a cited playbook from the memories on a topic."""
+        body: Dict[str, Any] = {"topic": topic}
+        if space is not None:
+            body["space"] = space
+        if space_id is not None:
+            body["spaceId"] = space_id
+        if limit is not None:
+            body["limit"] = limit
+        if save:
+            body["save"] = True
+        return self.request("POST", "/v1/playbooks", json=body)
+
+    def topics(
+        self,
+        *,
+        space: Optional[str] = None,
+        space_id: Optional[str] = None,
+        limit: Optional[int] = None,
+        min_count: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Group memories by tag to surface projects, people, and themes."""
+        params: Dict[str, Any] = {}
+        if space is not None:
+            params["space"] = space
+        if space_id is not None:
+            params["spaceId"] = space_id
+        if limit is not None:
+            params["limit"] = limit
+        if min_count is not None:
+            params["minCount"] = min_count
+        return self.request("GET", "/v1/topics", params=params)
+
 
 class MemoriesResource:
     def __init__(self, client: CompanyBrain) -> None:
