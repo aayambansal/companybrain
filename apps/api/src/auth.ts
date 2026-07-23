@@ -3,7 +3,7 @@ import { getCookie } from 'hono/cookie';
 import { verify, sign } from 'hono/jwt';
 import { and, eq, isNull, or, gt } from 'drizzle-orm';
 import { apiKeys } from '@companybrain/db';
-import { getEngine, getEnv, type AuthContext, type Variables } from './context.js';
+import { getEngine, getEnv, ensureDefaultOrg, type AuthContext, type Variables } from './context.js';
 import { hashApiKey } from './crypto.js';
 
 export const SESSION_COOKIE = 'cb_session';
@@ -30,46 +30,62 @@ function extractBearer(c: Context): string | null {
 
 /** Resolve an API key or session token into an AuthContext, or null. */
 export async function resolveAuth(c: Context): Promise<AuthContext | null> {
+  const env = getEnv();
   const token = extractBearer(c) ?? getCookie(c, SESSION_COOKIE) ?? null;
+
+  // Single-user mode: no sign-in. A presented API key still scopes to its own
+  // org; otherwise every request maps to the default workspace. If ACCESS_TOKEN
+  // is set, it gates access so an exposed instance is not wide open.
+  if (env.authMode === 'single') {
+    if (token && token.startsWith('cb_')) {
+      const viaKey = await resolveApiKey(token);
+      if (viaKey) return viaKey;
+    }
+    if (env.accessToken) {
+      if (token !== env.accessToken) return null;
+    }
+    const orgId = await ensureDefaultOrg();
+    return { orgId, scopes: ['*'], via: 'single' };
+  }
+
   if (!token) return null;
 
   // API key path
   if (token.startsWith('cb_')) {
-    const engine = getEngine();
-    const hash = hashApiKey(token);
-    const now = new Date();
-    const rows = await engine.db
-      .select()
-      .from(apiKeys)
-      .where(
-        and(
-          eq(apiKeys.keyHash, hash),
-          isNull(apiKeys.revokedAt),
-          or(isNull(apiKeys.expiresAt), gt(apiKeys.expiresAt, now)),
-        ),
-      )
-      .limit(1);
-    const key = rows[0];
-    if (!key) return null;
-    // Best-effort last-used stamp.
-    void engine.db.update(apiKeys).set({ lastUsedAt: now }).where(eq(apiKeys.id, key.id));
-    return {
-      orgId: key.orgId,
-      apiKeyId: key.id,
-      scopes: key.scopes ?? ['*'],
-      via: 'apiKey',
-    };
+    return resolveApiKey(token);
   }
 
   // Session JWT path
   try {
-    const env = getEnv();
     const payload = (await verify(token, env.jwtSecret, 'HS256')) as unknown as SessionClaims;
     if (!payload?.org || !payload?.sub) return null;
     return { orgId: payload.org, userId: payload.sub, scopes: ['*'], via: 'session' };
   } catch {
     return null;
   }
+}
+
+/** Look up an API key (cb_...) and return its AuthContext, or null. */
+async function resolveApiKey(token: string): Promise<AuthContext | null> {
+  const engine = getEngine();
+  const hash = hashApiKey(token);
+  const now = new Date();
+  const rows = await engine.db
+    .select()
+    .from(apiKeys)
+    .where(
+      and(
+        eq(apiKeys.keyHash, hash),
+        isNull(apiKeys.revokedAt),
+        or(isNull(apiKeys.expiresAt), gt(apiKeys.expiresAt, now)),
+      ),
+    )
+    .limit(1);
+  const key = rows[0];
+  if (!key) return null;
+  // Best-effort last-used stamp.
+  void engine.db.update(apiKeys).set({ lastUsedAt: now }).where(eq(apiKeys.id, key.id));
+  return { orgId: key.orgId, apiKeyId: key.id, scopes: key.scopes ?? ['*'], via: 'apiKey' };
 }
 
 /** Middleware that requires a valid principal. */
