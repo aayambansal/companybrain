@@ -42,8 +42,16 @@ embedding, and indexing from there.
 | GitHub              | `github`   | token         | `repo`, `token?`, `branch?`  | `[core]`    |
 | Notion              | `notion`   | token         | `token` (integration)        | `[core]`    |
 | Slack               | `slack`    | bot token     | `token`, `channel`           | `[core]`    |
+| Wispr Flow          | `wisprflow`| local path    | `path` (history export)      | `[core]`    |
+| Granola             | `granola`  | local path    | `path` (notes export)        | `[core]`    |
+| Fathom              | `fathom`   | local path    | `path` (call export)         | `[core]`    |
+| Raycast             | `raycast`  | local path    | `path` (notes folder)        | `[core]`    |
 | Google Docs / Drive | `google`   | OAuth         | (planned)                    | `[planned]` |
 | PDF (via files)     | `files`    | local path    | in the files connector       | `[core]`    |
+
+This table is a representative subset; CompanyBrain ships 44 built-in connectors in total (Notion,
+Linear, Jira, Confluence, Gmail, Discord, YouTube, Reddit, Zendesk, Intercom, HubSpot, GitLab,
+Sentry, Airtable, and more). The dashboard's Connections page lists every one with its config.
 
 ## Writing your own
 
