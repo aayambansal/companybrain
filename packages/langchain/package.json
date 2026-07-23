@@ -1,0 +1,30 @@
+{
+  "name": "@companybrain/langchain",
+  "version": "0.1.0",
+  "description": "LangChain retriever for CompanyBrain — plug your company memory into any LangChain / LangGraph chain.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "files": ["dist", "src", "README.md"],
+  "keywords": ["companybrain", "langchain", "retriever", "rag", "memory"],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@companybrain/sdk": "workspace:*"
+  },
+  "peerDependencies": {
+    "@langchain/core": ">=0.3.0"
+  },
+  "devDependencies": {
+    "@langchain/core": "^0.3.40",
+    "@types/node": "^22.7.4",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.2"
+  }
+}
