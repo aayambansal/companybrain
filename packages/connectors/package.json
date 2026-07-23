@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "@companybrain/core": "workspace:*",
-    "@companybrain/db": "workspace:*"
+    "@companybrain/db": "workspace:*",
+    "unpdf": "^0.12.1"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",

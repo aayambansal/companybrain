@@ -1,8 +1,9 @@
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { basename, extname, join, relative, resolve } from 'node:path';
 import type { Connector, SourceDocument } from '@companybrain/core';
+import { extractPdfText } from '../pdf.js';
 
-export const DEFAULT_FILE_EXTENSIONS = ['md', 'markdown', 'mdx', 'txt'];
+export const DEFAULT_FILE_EXTENSIONS = ['md', 'markdown', 'mdx', 'txt', 'pdf'];
 
 /**
  * Recursively list files under `root`, returning paths relative to `root`
@@ -67,10 +68,27 @@ export function fileToSourceDocument(root: string, rel: string): SourceDocument 
   };
 }
 
+/** Like fileToSourceDocument, but extracts text from binary formats (PDF). */
+export async function fileToSourceDocumentAsync(root: string, rel: string): Promise<SourceDocument> {
+  if (extname(rel).toLowerCase() !== '.pdf') return fileToSourceDocument(root, rel);
+  const full = join(root, rel);
+  const stat = statSync(full);
+  const content = await extractPdfText(new Uint8Array(readFileSync(full)));
+  return {
+    sourceId: rel,
+    sourceType: 'pdf',
+    title: basename(rel, extname(rel)) || rel,
+    content,
+    metadata: { path: rel },
+    sourceCreatedAt: stat.birthtime,
+    sourceUpdatedAt: stat.mtime,
+  };
+}
+
 export const filesConnector: Connector = {
   id: 'files',
   displayName: 'Local files',
-  description: 'Recursively index text and Markdown files in a folder on the host.',
+  description: 'Recursively index text, Markdown, and PDF files in a folder on the host.',
   category: 'files',
   auth: 'path',
   configSchema: [
@@ -87,8 +105,8 @@ export const filesConnector: Connector = {
       label: 'File extensions',
       type: 'string',
       required: false,
-      placeholder: 'md,txt',
-      help: 'Comma-separated extensions to include. Default: md, markdown, mdx, txt.',
+      placeholder: 'md,txt,pdf',
+      help: 'Comma-separated extensions to include. Default: md, markdown, mdx, txt, pdf.',
     },
   ],
   async *pull(ctx) {
@@ -102,7 +120,11 @@ export const filesConnector: Connector = {
 
     for (const rel of files) {
       if (ctx.signal?.aborted) return;
-      yield fileToSourceDocument(root, rel);
+      try {
+        yield await fileToSourceDocumentAsync(root, rel);
+      } catch (err) {
+        ctx.log?.('skipped file', { rel, error: String(err) });
+      }
     }
   },
 };

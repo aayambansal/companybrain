@@ -36,14 +36,14 @@ embedding, and indexing from there.
 | Raw text / API      | `api`      | none / key    | (post to /v1/memories)       | `[core]`    |
 | Web page / URL      | `web`      | none          | `url`                        | `[core]`    |
 | Sitemap crawl       | `sitemap`  | none          | `sitemapUrl`, `limit`        | `[core]`    |
-| Markdown / files    | `files`    | local path    | `path`, `extensions`         | `[core]`    |
+| Markdown / files / PDF | `files` | local path | `path`, `extensions` (md,txt,pdf) | `[core]`    |
 | Obsidian vault      | `obsidian` | local path    | `path`                       | `[core]`    |
 | RSS / Atom          | `rss`      | none          | `feedUrl`                    | `[core]`    |
 | GitHub              | `github`   | token         | `repo`, `token?`, `branch?`  | `[core]`    |
 | Notion              | `notion`   | token         | `token` (integration)        | `[core]`    |
 | Slack               | `slack`    | bot token     | `token`, `channel`           | `[core]`    |
 | Google Docs / Drive | `google`   | OAuth         | (planned)                    | `[planned]` |
-| PDF / DOCX          | `documents`| upload        | (planned)                    | `[planned]` |
+| PDF (via files)     | `files`    | local path    | in the files connector       | `[core]`    |
 
 ## Writing your own
 
