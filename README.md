@@ -151,8 +151,12 @@ Design notes: [docs/architecture.md](./docs/architecture.md).
 | OneDrive              | `onedrive` | `[core]`    |
 | Reddit                | `reddit`   | `[core]`    |
 | Telegram              | `telegram` | `[core]`    |
+| Zendesk               | `zendesk`  | `[core]`    |
+| Intercom              | `intercom` | `[core]`    |
+| Trello                | `trello`   | `[core]`    |
+| Airtable              | `airtable` | `[core]`    |
 
-Twenty connectors and counting. Configure and sync them from the dashboard under Connections. See
+Twenty-four connectors and counting. Configure and sync them from the dashboard under Connections. See
 [docs/connectors.md](./docs/connectors.md) to write your own.
 
 ## Clients
