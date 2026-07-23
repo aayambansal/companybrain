@@ -1,0 +1,23 @@
+{
+  "name": "companybrain",
+  "version": "0.1.0",
+  "description": "One-command installer and runner for CompanyBrain, the open-source memory layer for your company.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "companybrain": "./bin/companybrain.mjs"
+  },
+  "files": ["bin", "README.md"],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": ["companybrain", "memory", "rag", "self-hosted", "installer", "mcp"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aayambansal/companybrain.git",
+    "directory": "packages/launcher"
+  },
+  "scripts": {
+    "start": "node ./bin/companybrain.mjs"
+  }
+}
