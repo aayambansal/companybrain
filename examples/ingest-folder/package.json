@@ -1,0 +1,19 @@
+{
+  "name": "@companybrain/example-ingest-folder",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Ingest every .md/.txt file in a folder as memories.",
+  "scripts": {
+    "start": "tsx ingest.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@companybrain/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2"
+  }
+}
