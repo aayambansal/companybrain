@@ -16,6 +16,7 @@ import spaces from './routes/spaces.js';
 import connections from './routes/connections.js';
 import apikeys from './routes/apikeys.js';
 import providers from './routes/providers.js';
+import reindex from './routes/reindex.js';
 
 export function createApp() {
   const env = getEnv();
@@ -55,6 +56,7 @@ export function createApp() {
   v1.route('/connections', connections);
   v1.route('/api-keys', apikeys);
   v1.route('/providers', providers);
+  v1.route('/reindex', reindex);
   app.route('/v1', v1);
 
   app.notFound((c) => c.json({ error: 'not_found' }, 404));
