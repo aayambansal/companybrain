@@ -1,5 +1,5 @@
 # CompanyBrain API image. Built from the repo root context.
-FROM node:20-slim AS base
+FROM node:22-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
@@ -11,7 +11,7 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc ./
 COPY packages/db/package.json packages/db/
 COPY packages/core/package.json packages/core/
 COPY apps/api/package.json apps/api/
-RUN pnpm install --frozen-lockfile --filter @companybrain/api...
+RUN pnpm install --filter @companybrain/api...
 
 # Runtime: copy sources and run TypeScript directly with tsx.
 FROM base AS runner
