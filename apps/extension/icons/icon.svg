@@ -1,20 +1,20 @@
 <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
   <title>CompanyBrain</title>
   <rect width="128" height="128" rx="28" fill="#0a0a0b"/>
-  <g stroke="#8b5cf6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+  <g stroke="#e6ac3f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
     <!-- outer brain silhouette -->
     <path d="M64 30
              C 50 24, 36 30, 34 44
              C 24 46, 22 60, 30 66
              C 24 74, 30 88, 42 88
              C 44 98, 58 100, 64 92
-             Z" fill="#8b5cf6" fill-opacity="0.12"/>
+             Z" fill="#e6ac3f" fill-opacity="0.12"/>
     <path d="M64 30
              C 78 24, 92 30, 94 44
              C 104 46, 106 60, 98 66
              C 104 74, 98 88, 86 88
              C 84 98, 70 100, 64 92
-             Z" fill="#8b5cf6" fill-opacity="0.12"/>
+             Z" fill="#e6ac3f" fill-opacity="0.12"/>
     <!-- central divide -->
     <path d="M64 32 L64 92"/>
     <!-- left folds -->
