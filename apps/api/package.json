@@ -17,7 +17,7 @@
   "dependencies": {
     "@companybrain/core": "workspace:*",
     "@companybrain/db": "workspace:*",
-    "@hono/node-server": "^1.13.1",
+    "@hono/node-server": "^2.0.11",
     "drizzle-orm": "^0.36.4",
     "hono": "^4.6.3",
     "zod": "^3.23.8"
