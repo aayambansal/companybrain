@@ -38,6 +38,10 @@ export interface EngineConfig {
     /** How many similar prior memories to weigh as supersession candidates. */
     candidates: number;
   };
+  hyde: {
+    /** Hypothetical passages to generate and average when hyde search is requested. */
+    samples: number;
+  };
 }
 
 function env(key: string, fallback = ''): string {
@@ -83,6 +87,9 @@ export function loadConfig(overrides: Partial<EngineConfig> = {}): EngineConfig 
     temporal: {
       enabled: env('TEMPORAL_RESOLUTION', 'false') === 'true',
       candidates: intEnv('TEMPORAL_CANDIDATES', 5),
+    },
+    hyde: {
+      samples: intEnv('HYDE_SAMPLES', 1),
     },
   };
   return { ...base, ...overrides };
