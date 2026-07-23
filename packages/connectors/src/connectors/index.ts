@@ -19,6 +19,10 @@ import { googleDriveConnector } from './googledrive.js';
 import { oneDriveConnector } from './onedrive.js';
 import { redditConnector } from './reddit.js';
 import { telegramConnector } from './telegram.js';
+import { zendeskConnector } from './zendesk.js';
+import { intercomConnector } from './intercom.js';
+import { trelloConnector } from './trello.js';
+import { airtableConnector } from './airtable.js';
 
 /** Every built-in connector, in a stable order. */
 export const connectors: Connector[] = [
@@ -42,6 +46,10 @@ export const connectors: Connector[] = [
   oneDriveConnector,
   redditConnector,
   telegramConnector,
+  zendeskConnector,
+  intercomConnector,
+  trelloConnector,
+  airtableConnector,
 ];
 
 /** Look up a connector by its stable id. */
@@ -76,3 +84,7 @@ export { googleDriveConnector, driveFileToDoc } from './googledrive.js';
 export { oneDriveConnector, oneDriveItemToDoc } from './onedrive.js';
 export { redditConnector, redditPostToDoc } from './reddit.js';
 export { telegramConnector, telegramMessageDoc } from './telegram.js';
+export { zendeskConnector, zendeskArticleDoc } from './zendesk.js';
+export { intercomConnector, intercomArticleDoc } from './intercom.js';
+export { trelloConnector, trelloCardDoc } from './trello.js';
+export { airtableConnector, airtableRecordDoc } from './airtable.js';
