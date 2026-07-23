@@ -38,3 +38,7 @@ pgvector on a laptop:
 Hybrid retrieval (vector + full-text fused with RRF) recovers the right document for every probe.
 Real semantic embeddings (OpenAI / Ollama) and LLM reranking push MRR higher on paraphrased and
 harder queries. Numbers will vary with corpus size and the embedding provider.
+
+This small corpus is a smoke test, not competitive proof. For a rigorous, reproducible evaluation
+on public datasets with third-party relevance judgments (scored with `pytrec_eval`, comparable to
+the BEIR leaderboard), see [BEIR.md](./BEIR.md).
