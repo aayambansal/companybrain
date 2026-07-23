@@ -37,6 +37,7 @@ export class OpenAIEmbeddingProvider implements EmbeddingProvider {
     if (this.supportsDimensions) body.dimensions = this.dimensions;
     const res = await fetch(`${this.baseUrl}/embeddings`, {
       method: 'POST',
+      signal: AbortSignal.timeout(30_000),
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json',

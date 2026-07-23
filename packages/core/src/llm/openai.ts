@@ -67,6 +67,7 @@ export class OpenAIProvider implements LlmProvider {
       : opts.messages;
     const res = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
+      signal: AbortSignal.timeout(90_000),
       headers: { Authorization: `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: this.model,
