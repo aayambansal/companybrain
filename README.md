@@ -143,8 +143,12 @@ Design notes: [docs/architecture.md](./docs/architecture.md).
 | Linear                | `linear`   | `[core]`    |
 | Confluence            | `confluence`| `[core]`   |
 | Jira                  | `jira`     | `[core]`    |
+| Gmail                 | `gmail`    | `[core]`    |
+| Discord               | `discord`  | `[core]`    |
+| YouTube transcripts   | `youtube`  | `[core]`    |
+| Hacker News           | `hackernews`| `[core]`   |
 
-Configure and sync them from the dashboard under Connections. See
+Sixteen connectors and counting. Configure and sync them from the dashboard under Connections. See
 [docs/connectors.md](./docs/connectors.md) to write your own.
 
 ## Clients

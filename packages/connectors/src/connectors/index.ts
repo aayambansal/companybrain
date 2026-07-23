@@ -11,6 +11,10 @@ import { googleDocsConnector } from './googledocs.js';
 import { linearConnector } from './linear.js';
 import { confluenceConnector } from './confluence.js';
 import { jiraConnector } from './jira.js';
+import { gmailConnector } from './gmail.js';
+import { discordConnector } from './discord.js';
+import { youtubeConnector } from './youtube.js';
+import { hackernewsConnector } from './hackernews.js';
 
 /** Every built-in connector, in a stable order. */
 export const connectors: Connector[] = [
@@ -26,6 +30,10 @@ export const connectors: Connector[] = [
   linearConnector,
   confluenceConnector,
   jiraConnector,
+  gmailConnector,
+  discordConnector,
+  youtubeConnector,
+  hackernewsConnector,
 ];
 
 /** Look up a connector by its stable id. */
@@ -52,3 +60,7 @@ export { googleDocsConnector, extractGoogleDocId } from './googledocs.js';
 export { linearConnector, parseLinearIssues } from './linear.js';
 export { confluenceConnector, confluencePageDoc } from './confluence.js';
 export { jiraConnector, parseJiraIssues, adfToText } from './jira.js';
+export { gmailConnector, parseGmailMessage } from './gmail.js';
+export { discordConnector, discordMessageDoc } from './discord.js';
+export { youtubeConnector, extractYoutubeId, parseTimedText } from './youtube.js';
+export { hackernewsConnector, hnHitToDoc } from './hackernews.js';
