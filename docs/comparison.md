@@ -29,16 +29,16 @@ Both are MIT licensed. The goal here is a fair map, not a scoreboard.
 
 ## Recently closed
 
-- **Image ingestion**: CompanyBrain now OCRs and captions images with a vision LLM (Anthropic or
-  OpenAI), alongside PDF and YouTube transcripts.
+- **Multimodal**: CompanyBrain OCRs + captions images (vision LLM) and transcribes audio
+  (Whisper), alongside PDF and YouTube transcripts.
 - **Framework wrappers**: LangChain (retriever), Vercel AI SDK (tools), and an n8n community node.
 - **Benchmarks**: a reproducible harness in `bench/` (Recall@k / MRR / latency).
 - **Webhooks**: signed real-time events on ingest.
 
 ## Where Supermemory is still ahead (our roadmap)
 
-- **Video transcription**: CompanyBrain handles PDF, images, and YouTube transcripts; general
-  video/audio transcription is on the roadmap.
+- **Video frames**: CompanyBrain transcribes audio (Whisper) and handles PDF, images, and
+  YouTube transcripts; full video (frame extraction) is on the roadmap.
 - **More framework wrappers**: OpenAI Agents SDK, Mastra, Agno.
 - **Temporal reasoning**: contradiction resolution and expiry of stale facts are deeper in
   Supermemory today.

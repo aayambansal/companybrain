@@ -29,4 +29,8 @@ export interface LlmProvider {
   readonly supportsVision?: boolean;
   /** Extract text and a description from an image (OCR + caption). */
   describeImage?(image: ImageInput, prompt?: string): Promise<string>;
+  /** Whether this provider can transcribe audio. */
+  readonly supportsAudio?: boolean;
+  /** Transcribe audio bytes to text. */
+  transcribeAudio?(audio: ImageInput): Promise<string>;
 }

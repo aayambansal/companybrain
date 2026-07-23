@@ -393,6 +393,14 @@ export class MemoryEngine {
     return this.llm.describeImage(image, prompt);
   }
 
+  /** Transcribe audio bytes with the configured provider. Throws if none. */
+  async transcribeAudio(audio: ImageInput): Promise<string> {
+    if (!this.llm.supportsAudio || !this.llm.transcribeAudio) {
+      throw new Error('No audio-capable provider configured. Set LLM_PROVIDER to openai to transcribe audio.');
+    }
+    return this.llm.transcribeAudio(audio);
+  }
+
   /** Find memories similar to a given one (semantic "see also"), excluding itself. */
   async related(orgId: string, documentId: string, limit = 5): Promise<SearchHit[]> {
     const mem = await this.getMemory(orgId, documentId);

@@ -10,6 +10,8 @@ const addSchema = z.object({
   content: z.string().min(1).optional(),
   /** A data URL (data:image/png;base64,...) to OCR + caption with a vision LLM. */
   image: z.string().optional(),
+  /** A data URL (data:audio/mpeg;base64,...) to transcribe with a speech model. */
+  audio: z.string().optional(),
   format: z.enum(['text', 'markdown', 'html']).optional(),
   space: z.string().optional(),
   spaceId: z.string().uuid().optional(),
@@ -44,7 +46,18 @@ app.post('/', async (c) => {
       return c.json({ error: 'no_vision', message: String((e as Error).message ?? e) }, 422);
     }
   }
-  if (!content) return c.json({ error: 'invalid_request', message: 'content or image is required' }, 400);
+  if (d.audio) {
+    const clip = parseDataUrl(d.audio);
+    if (!clip) return c.json({ error: 'invalid_audio', message: 'audio must be a data URL: data:audio/mpeg;base64,...' }, 400);
+    try {
+      const transcript = await engine.transcribeAudio(clip);
+      content = [content, transcript].filter(Boolean).join('\n\n');
+      sourceType = sourceType ?? 'audio';
+    } catch (e) {
+      return c.json({ error: 'no_transcription', message: String((e as Error).message ?? e) }, 422);
+    }
+  }
+  if (!content) return c.json({ error: 'invalid_request', message: 'content, image, or audio is required' }, 400);
 
   const memory = await engine.addMemory({
     orgId: auth.orgId,
