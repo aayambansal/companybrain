@@ -2,44 +2,50 @@
 
 /*
   CompanyBrain design system.
-  Identity: amber phosphor on near-black. A precise instrument for institutional
-  memory, adjacent to a terminal. Restrained: one accent, dense, trustworthy.
+  Identity: an optical instrument in daylight. Cool paper-white ground, graphite
+  ink, an iris/cobalt primary with an amber spark for continuity. Dense and
+  scannable: summary before detail, state encoded in form, one confident accent.
 */
 
 @theme {
-  /* Surfaces (near-black, a whisper of warmth toward the amber hue) */
-  --color-bg: oklch(0.165 0.006 74);
-  --color-bg-subtle: oklch(0.195 0.006 74);
-  --color-surface: oklch(0.212 0.007 74);
-  --color-surface-2: oklch(0.245 0.008 74);
-  --color-surface-hover: oklch(0.268 0.009 74);
-  --color-border: oklch(0.30 0.008 74);
-  --color-border-strong: oklch(0.40 0.01 74);
+  /* Surfaces */
+  --color-bg: oklch(0.987 0.004 265);
+  --color-bg-subtle: oklch(0.968 0.006 265);
+  --color-surface: #ffffff;
+  --color-surface-2: oklch(0.972 0.005 265);
+  --color-surface-hover: oklch(0.955 0.007 265);
+  --color-border: oklch(0.905 0.007 266);
+  --color-border-strong: oklch(0.855 0.01 266);
 
-  /* Ink */
-  --color-ink: oklch(0.965 0.008 85);
-  --color-ink-muted: oklch(0.745 0.012 80);
-  --color-ink-faint: oklch(0.60 0.012 78);
+  /* Ink (graphite; body clears 4.5:1 on paper) */
+  --color-ink: oklch(0.215 0.021 266);
+  --color-ink-muted: oklch(0.5 0.02 266);
+  --color-ink-faint: oklch(0.605 0.018 266);
 
-  /* Brand: amber phosphor */
-  --color-primary: oklch(0.815 0.145 82);
-  --color-primary-strong: oklch(0.86 0.15 84);
-  --color-primary-ink: oklch(0.22 0.03 80);
-  --color-primary-soft: oklch(0.815 0.145 82 / 0.14);
-  --color-primary-line: oklch(0.815 0.145 82 / 0.34);
+  /* Brand: iris/cobalt primary + amber spark */
+  --color-primary: oklch(0.55 0.2 264);
+  --color-primary-strong: oklch(0.49 0.21 264);
+  --color-primary-ink: oklch(0.99 0.004 265);
+  --color-primary-soft: oklch(0.55 0.2 264 / 0.09);
+  --color-primary-line: oklch(0.55 0.2 264 / 0.22);
+  --color-spark: oklch(0.76 0.16 68);
+  --color-spark-strong: oklch(0.62 0.16 60);
+  --color-spark-soft: oklch(0.76 0.16 68 / 0.16);
 
-  /* Status */
-  --color-success: oklch(0.78 0.14 152);
-  --color-success-soft: oklch(0.78 0.14 152 / 0.15);
-  --color-warn: oklch(0.82 0.14 72);
-  --color-danger: oklch(0.70 0.18 24);
-  --color-danger-soft: oklch(0.70 0.18 24 / 0.15);
-  --color-info: oklch(0.74 0.10 232);
-  --color-info-soft: oklch(0.74 0.10 232 / 0.15);
+  /* Status (semantic, distinct from the accent, tuned for a light ground) */
+  --color-success: oklch(0.56 0.15 155);
+  --color-success-soft: oklch(0.56 0.15 155 / 0.12);
+  --color-warn: oklch(0.64 0.15 66);
+  --color-warn-soft: oklch(0.64 0.15 66 / 0.14);
+  --color-danger: oklch(0.55 0.2 25);
+  --color-danger-soft: oklch(0.55 0.2 25 / 0.1);
+  --color-info: oklch(0.54 0.13 250);
+  --color-info-soft: oklch(0.54 0.13 250 / 0.12);
 
   /* Type */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-mono-jb), ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-sans: 'Switzer', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Clash Display', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   /* Radius */
   --radius-xs: 0.25rem;
@@ -48,11 +54,11 @@
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
 
-  /* Elevation */
-  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.4);
-  --shadow-md: 0 4px 16px oklch(0 0 0 / 0.45);
-  --shadow-lg: 0 16px 48px oklch(0 0 0 / 0.55);
-  --shadow-glow: 0 0 0 1px var(--color-primary-line), 0 8px 30px oklch(0.815 0.145 82 / 0.14);
+  /* Elevation (soft, colored toward the ink hue) */
+  --shadow-sm: 0 1px 2px oklch(0.2 0.02 266 / 0.06);
+  --shadow-md: 0 6px 20px oklch(0.2 0.02 266 / 0.08);
+  --shadow-lg: 0 20px 50px oklch(0.2 0.02 266 / 0.13);
+  --shadow-glow: 0 0 0 1px var(--color-primary-line), 0 10px 30px oklch(0.55 0.2 264 / 0.14);
 
   /* Semantic z-scale */
   --z-dropdown: 40;
@@ -72,14 +78,13 @@
     border-color: var(--color-border);
   }
   html {
-    color-scheme: dark;
+    color-scheme: light;
     -webkit-text-size-adjust: 100%;
   }
   body {
     background: var(--color-bg);
     color: var(--color-ink);
     font-family: var(--font-sans);
-    font-feature-settings: 'cv11', 'ss01';
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -88,7 +93,7 @@
     color: var(--color-primary-strong);
   }
 
-  /* Focus: a single, consistent amber ring across the app. */
+  /* Focus: one consistent iris ring across the app. */
   :where(a, button, input, textarea, select, [tabindex]):focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
@@ -116,6 +121,8 @@
   }
 
   h1, h2, h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
     text-wrap: balance;
   }
   p {
@@ -124,7 +131,7 @@
 }
 
 @layer components {
-  /* Faint grid + phosphor glow used on auth and empty surfaces. */
+  /* Faint grid used on auth and empty surfaces. */
   .bg-grid {
     background-image:
       linear-gradient(var(--color-border) 1px, transparent 1px),
@@ -144,13 +151,18 @@
     background: var(--color-primary);
     color: var(--color-primary-ink);
     font-weight: 600;
-    transition: background 160ms var(--ease-out-quart), box-shadow 160ms var(--ease-out-quart);
+    transition:
+      background 160ms var(--ease-out-quart),
+      box-shadow 160ms var(--ease-out-quart),
+      transform 160ms var(--ease-out-quart);
   }
   .btn-primary:hover {
     background: var(--color-primary-strong);
+    box-shadow: 0 6px 18px oklch(0.55 0.2 264 / 0.22);
+    transform: translateY(-1px);
   }
   .btn-primary:active {
-    transform: translateY(0.5px);
+    transform: translateY(0);
   }
   .btn-primary:disabled {
     opacity: 0.5;
