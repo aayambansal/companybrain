@@ -168,7 +168,11 @@ async function cmdAsk(args: Args): Promise<void> {
     let sources: Source[] = [];
     for await (const frame of cb.chatStream({ message: question, space })) {
       if (frame.event === 'token') {
-        process.stdout.write(frame.data);
+        try {
+          process.stdout.write(JSON.parse(frame.data) as string);
+        } catch {
+          // Ignore malformed token frames.
+        }
       } else if (frame.event === 'citations') {
         try {
           sources = JSON.parse(frame.data) as Source[];

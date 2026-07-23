@@ -27,7 +27,7 @@ for await (const line of rl) {
     output.write('bot > ');
     try {
       for await (const { event, data } of cb.chatStream({ message })) {
-        if (event === 'token') output.write(data);
+        if (event === 'token') output.write(JSON.parse(data) as string);
         else if (event === 'citations') sources = JSON.parse(data) as Source[];
       }
       output.write('\n');
