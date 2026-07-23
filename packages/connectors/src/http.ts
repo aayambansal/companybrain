@@ -4,10 +4,23 @@
 
 const USER_AGENT = 'CompanyBrain-Connector/0.1 (+https://github.com/aayambansal/companybrain)';
 
+/** Default per-request timeout so a slow source cannot hang a whole sync. */
+export const DEFAULT_TIMEOUT_MS = 30_000;
+
+/**
+ * Combine an optional caller signal with a timeout, so a request aborts on
+ * either. Falls back to the timeout alone when AbortSignal.any is unavailable.
+ */
+export function requestSignal(signal: AbortSignal | undefined, timeoutMs = DEFAULT_TIMEOUT_MS): AbortSignal {
+  const timeout = AbortSignal.timeout(timeoutMs);
+  if (!signal) return timeout;
+  return typeof AbortSignal.any === 'function' ? AbortSignal.any([signal, timeout]) : signal;
+}
+
 /** GET a URL and return the response body as text. Throws on non-2xx. */
-export async function fetchText(url: string, signal?: AbortSignal): Promise<string> {
+export async function fetchText(url: string, signal?: AbortSignal, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<string> {
   const res = await fetch(url, {
-    signal,
+    signal: requestSignal(signal, timeoutMs),
     redirect: 'follow',
     headers: { 'user-agent': USER_AGENT, accept: '*/*' },
   });
@@ -22,13 +35,14 @@ export interface JsonRequest {
   headers?: Record<string, string>;
   body?: unknown;
   signal?: AbortSignal;
+  timeoutMs?: number;
 }
 
 /** Fetch JSON with optional auth headers. Throws on non-2xx. */
 export async function fetchJson<T = unknown>(url: string, opts: JsonRequest = {}): Promise<T> {
   const res = await fetch(url, {
     method: opts.method ?? 'GET',
-    signal: opts.signal,
+    signal: requestSignal(opts.signal, opts.timeoutMs ?? DEFAULT_TIMEOUT_MS),
     redirect: 'follow',
     headers: {
       'user-agent': USER_AGENT,
