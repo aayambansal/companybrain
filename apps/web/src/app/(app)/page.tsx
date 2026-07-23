@@ -19,6 +19,8 @@ export default function OverviewPage() {
   const [q, setQ] = useState('');
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
 
   async function load() {
     const [s, m, sp] = await Promise.allSettled([
@@ -52,6 +54,38 @@ export default function OverviewPage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  // Read text/markdown files in the browser and add each as a memory.
+  async function handleFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    const readable = Array.from(files).filter((f) => /\.(md|markdown|txt|text|csv|log|json|mdx|rst)$/i.test(f.name) || f.type.startsWith('text/'));
+    if (readable.length === 0) {
+      toast('error', 'Only text and markdown files can be added here.');
+      return;
+    }
+    setUploading(true);
+    let ok = 0;
+    for (const file of readable) {
+      try {
+        const content = await file.text();
+        if (!content.trim()) continue;
+        const isMd = /\.(md|markdown|mdx)$/i.test(file.name);
+        await api.post('/v1/memories', {
+          title: file.name,
+          content,
+          format: isMd ? 'markdown' : 'text',
+          sourceType: 'upload',
+          metadata: { filename: file.name, size: file.size },
+        });
+        ok += 1;
+      } catch {
+        /* keep going */
+      }
+    }
+    setUploading(false);
+    toast(ok > 0 ? 'success' : 'error', ok > 0 ? `Added ${ok} file${ok === 1 ? '' : 's'}.` : 'Could not add those files.');
+    if (ok > 0) load();
   }
 
   const counts = status?.counts;
@@ -144,7 +178,19 @@ export default function OverviewPage() {
 
         {/* Quick capture */}
         <section className="space-y-5">
-          <div className="card p-4">
+          <div
+            className={cx('card p-4 transition-colors', dragOver && 'border-[var(--color-primary-line)] bg-[var(--color-primary-soft)]')}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragOver(false);
+              handleFiles(e.dataTransfer.files);
+            }}
+          >
             <h2 className="mb-2.5 flex items-center gap-1.5 font-mono text-sm text-ink-muted">
               <IconSparkle size={15} className="text-[var(--color-primary)]" /> Quick capture
             </h2>
@@ -155,10 +201,22 @@ export default function OverviewPage() {
                 if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') capture();
               }}
               rows={5}
-              placeholder="Paste a decision, a doc, a link, a thought. It gets chunked, embedded, and made searchable."
+              placeholder="Paste a decision, a doc, a link, a thought. Or drop text and markdown files here."
             />
             <div className="mt-2.5 flex items-center justify-between">
-              <span className="font-mono text-[11px] text-ink-faint">cmd/ctrl + enter to save</span>
+              <label className="cursor-pointer font-mono text-[11px] text-ink-faint transition-colors hover:text-ink">
+                {uploading ? 'uploading…' : '+ upload files'}
+                <input
+                  type="file"
+                  multiple
+                  accept=".md,.markdown,.mdx,.txt,.text,.csv,.log,.json,.rst,text/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    handleFiles(e.target.files);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
               <Button variant="primary" size="sm" onClick={capture} loading={saving} disabled={!note.trim()}>
                 Save memory
               </Button>
