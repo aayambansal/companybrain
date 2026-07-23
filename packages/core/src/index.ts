@@ -34,3 +34,4 @@ export { llmRerank, applyRerankOrder, parseOrder } from './search/rerank.js';
 export { indexDocument, findBySource } from './ingest.js';
 export { generateAnswer, extractiveAnswer, buildContext, toCitations } from './chat.js';
 export { enrichDocument, parseEnrichment, type Enrichment } from './enrich.js';
+export { dispatchWebhooks, signWebhook, type WebhookEvent } from './webhooks.js';

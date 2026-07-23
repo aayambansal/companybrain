@@ -278,6 +278,27 @@ export const chatSessions = pgTable(
   }),
 );
 
+// ── Webhooks (outbound events) ───────────────────────────────────────────
+export const webhooks = pgTable(
+  'webhooks',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    url: text('url').notNull(),
+    secret: text('secret'),
+    events: jsonb('events').$type<string[]>().default(['memory.created']).notNull(),
+    active: boolean('active').default(true).notNull(),
+    lastStatus: integer('last_status'),
+    lastDeliveredAt: timestamp('last_delivered_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    orgIdx: index('webhooks_org_idx').on(t.orgId),
+  }),
+);
+
 export const chatMessages = pgTable(
   'chat_messages',
   {
@@ -371,3 +392,5 @@ export type ChatSession = typeof chatSessions.$inferSelect;
 export type NewChatSession = typeof chatSessions.$inferInsert;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type NewChatMessage = typeof chatMessages.$inferInsert;
+export type Webhook = typeof webhooks.$inferSelect;
+export type NewWebhook = typeof webhooks.$inferInsert;

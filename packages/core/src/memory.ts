@@ -14,6 +14,7 @@ import { hybridSearch } from './search/hybrid.js';
 import { llmRerank } from './search/rerank.js';
 import { generateAnswer } from './chat.js';
 import { enrichDocument } from './enrich.js';
+import { dispatchWebhooks } from './webhooks.js';
 import { contentHash } from './text/hash.js';
 import { normalizeText, markdownToText, htmlToText } from './text/normalize.js';
 import type {
@@ -171,6 +172,11 @@ export class MemoryEngine {
 
     await indexDocument(this.db, this.embedder, this.config, doc.id);
     await this.enrichDocumentRow(doc.id, doc.title, normalized, input.tags ?? [], input.metadata ?? {});
+    void dispatchWebhooks(this.db, {
+      event: 'memory.created',
+      orgId: input.orgId,
+      data: { id: doc.id, title: doc.title, spaceId, connector: doc.connector },
+    }).catch(() => {});
     return this.getMemory(input.orgId, doc.id) as Promise<Memory>;
   }
 
