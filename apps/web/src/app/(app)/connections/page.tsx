@@ -40,6 +40,7 @@ export default function ConnectionsPage() {
   const [selected, setSelected] = useState<ConnectorInfo | null>(null);
   const [form, setForm] = useState<Record<string, string>>({});
   const [name, setName] = useState('');
+  const [syncEvery, setSyncEvery] = useState('0');
   const [busy, setBusy] = useState(false);
 
   async function load() {
@@ -58,6 +59,7 @@ export default function ConnectionsPage() {
     setSelected(c);
     setName(c.displayName);
     setForm({});
+    setSyncEvery('0');
   }
 
   async function create(e: React.FormEvent) {
@@ -65,7 +67,8 @@ export default function ConnectionsPage() {
     if (!selected) return;
     setBusy(true);
     try {
-      await api.post('/v1/connections', { connector: selected.id, name, config: form });
+      const config = { ...form, syncIntervalMinutes: Number(syncEvery) || 0 };
+      await api.post('/v1/connections', { connector: selected.id, name, config });
       toast('success', `Connected ${selected.displayName}.`);
       setSelected(null);
       load();
@@ -140,6 +143,18 @@ export default function ConnectionsPage() {
               />
             </Field>
           ))}
+          <Field label="Auto-sync" hint="Sync automatically on this interval. 0 means manual only.">
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={0}
+                value={syncEvery}
+                onChange={(e) => setSyncEvery(e.target.value)}
+                className="w-24"
+              />
+              <span className="text-[13px] text-ink-faint">minutes</span>
+            </div>
+          </Field>
           <div className="flex justify-end">
             <Button variant="primary" size="sm" type="submit" loading={busy}>
               Connect

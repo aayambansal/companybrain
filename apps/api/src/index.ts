@@ -3,6 +3,7 @@ import { runMigrations, organizations } from '@companybrain/db';
 import { createApp } from './app.js';
 import { getEngine, getEnv, ensureDefaultOrg } from './context.js';
 import { applyProviders } from './routes/providers.js';
+import { startScheduler } from './scheduler.js';
 import { banner } from './banner.js';
 
 async function main() {
@@ -36,6 +37,9 @@ async function main() {
   }
 
   const app = createApp();
+
+  // Periodic connector syncs (opt-in per connection via syncIntervalMinutes).
+  if (process.env.DISABLE_SCHEDULER !== 'true') startScheduler();
 
   serve({ fetch: app.fetch, hostname: env.host, port: env.port }, () => {
     process.stdout.write(
