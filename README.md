@@ -33,8 +33,8 @@ Google Docs, Slack, Notion, GitHub, web pages, RSS, plain files) and it becomes 
 searchable brain that answers questions with citations. Your agents talk to it over MCP. Your
 apps talk to it over a typed SDK. Your data never leaves your Postgres.
 
-It is a from-scratch, MIT-licensed alternative to hosted memory services like Supermemory and
-memory.store. No per-seat pricing, no vendor holding your knowledge hostage.
+It is a from-scratch, MIT-licensed alternative to closed, hosted memory services. No per-seat
+pricing, no vendor holding your knowledge hostage.
 
 ## Run it
 
@@ -203,7 +203,7 @@ Postgres, and the GHCR images.
 - [Deploy](./docs/deploy.md)
 - [API reference](./docs/api.md)
 - [Connectors](./docs/connectors.md)
-- [How it compares](./docs/comparison.md)
+- [Why CompanyBrain](./docs/why-companybrain.md)
 
 ## Contributing
 
