@@ -35,3 +35,5 @@ export { indexDocument, findBySource } from './ingest.js';
 export { generateAnswer, extractiveAnswer, buildContext, toCitations } from './chat.js';
 export { enrichDocument, parseEnrichment, type Enrichment } from './enrich.js';
 export { dispatchWebhooks, signWebhook, type WebhookEvent } from './webhooks.js';
+export { parseDataUrl } from './vision.js';
+export type { ImageInput } from './llm/types.js';

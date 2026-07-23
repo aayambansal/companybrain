@@ -1,12 +1,15 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
+import { parseDataUrl } from '@companybrain/core';
 import { getEngine, type Variables } from '../context.js';
 
 const app = new Hono<{ Variables: Variables }>();
 
 const addSchema = z.object({
   title: z.string().max(500).optional(),
-  content: z.string().min(1),
+  content: z.string().min(1).optional(),
+  /** A data URL (data:image/png;base64,...) to OCR + caption with a vision LLM. */
+  image: z.string().optional(),
   format: z.enum(['text', 'markdown', 'html']).optional(),
   space: z.string().optional(),
   spaceId: z.string().uuid().optional(),
@@ -26,16 +29,33 @@ app.post('/', async (c) => {
   }
   const d = parsed.data;
   const engine = getEngine();
+
+  // Image ingestion: OCR + caption the image with a vision LLM, then store the text.
+  let content = d.content;
+  let sourceType = d.sourceType;
+  if (d.image) {
+    const img = parseDataUrl(d.image);
+    if (!img) return c.json({ error: 'invalid_image', message: 'image must be a data URL: data:image/png;base64,...' }, 400);
+    try {
+      const described = await engine.describeImage(img);
+      content = [d.content, described].filter(Boolean).join('\n\n');
+      sourceType = sourceType ?? 'image';
+    } catch (e) {
+      return c.json({ error: 'no_vision', message: String((e as Error).message ?? e) }, 422);
+    }
+  }
+  if (!content) return c.json({ error: 'invalid_request', message: 'content or image is required' }, 400);
+
   const memory = await engine.addMemory({
     orgId: auth.orgId,
     title: d.title,
-    content: d.content,
+    content,
     format: d.format,
     spaceId: d.spaceId,
     spaceSlug: d.space,
     tags: d.tags,
     sourceUrl: d.sourceUrl,
-    sourceType: d.sourceType,
+    sourceType,
     metadata: d.metadata,
     dedupe: d.dedupe,
   });
