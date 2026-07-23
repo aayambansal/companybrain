@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "companybrain"
+version = "0.1.0"
+description = "Official Python SDK for CompanyBrain, the open-source memory layer."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "CompanyBrain" }]
+keywords = ["companybrain", "memory", "rag", "vector", "search", "ai", "sdk"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Typing :: Typed",
+]
+dependencies = ["httpx>=0.27"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://github.com/aayambansal/companybrain"
+Source = "https://github.com/aayambansal/companybrain"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/companybrain"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
