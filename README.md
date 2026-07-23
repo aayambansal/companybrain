@@ -159,11 +159,18 @@ Sixteen connectors and counting. Configure and sync them from the dashboard unde
 - MCP: point Claude Desktop / Cursor at the server (`npx companybrain mcp` prints the config)
 - Chrome extension: save any page or selection to your brain
 
+## Deploy
+
+`docker compose up` or `npx companybrain` locally; or one-click to a cloud with the included
+blueprints. See [docs/deploy.md](./docs/deploy.md) for Render, Railway, Fly.io, bring-your-own
+Postgres, and the GHCR images.
+
 ## Docs
 
 - [Quickstart](./docs/quickstart.md)
 - [Architecture](./docs/architecture.md)
 - [Self-hosting](./docs/self-hosting.md)
+- [Deploy](./docs/deploy.md)
 - [API reference](./docs/api.md)
 - [Connectors](./docs/connectors.md)
 
