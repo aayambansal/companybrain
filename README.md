@@ -147,8 +147,12 @@ Design notes: [docs/architecture.md](./docs/architecture.md).
 | Discord               | `discord`  | `[core]`    |
 | YouTube transcripts   | `youtube`  | `[core]`    |
 | Hacker News           | `hackernews`| `[core]`   |
+| Google Drive          | `googledrive`| `[core]` |
+| OneDrive              | `onedrive` | `[core]`    |
+| Reddit                | `reddit`   | `[core]`    |
+| Telegram              | `telegram` | `[core]`    |
 
-Sixteen connectors and counting. Configure and sync them from the dashboard under Connections. See
+Twenty connectors and counting. Configure and sync them from the dashboard under Connections. See
 [docs/connectors.md](./docs/connectors.md) to write your own.
 
 ## Clients
