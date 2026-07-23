@@ -68,6 +68,7 @@ export class AnthropicProvider implements LlmProvider {
     this.assert();
     const res = await fetch(`${this.baseUrl}/messages`, {
       method: 'POST',
+      signal: AbortSignal.timeout(120_000),
       headers: {
         'x-api-key': this.apiKey,
         'anthropic-version': '2023-06-01',

@@ -24,6 +24,7 @@ export class OpenAIProvider implements LlmProvider {
     if (!this.available) throw new Error('OPENAI_API_KEY is not set; cannot read images.');
     const res = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
+      signal: AbortSignal.timeout(120_000),
       headers: { Authorization: `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: this.model,
@@ -52,6 +53,7 @@ export class OpenAIProvider implements LlmProvider {
     form.append('model', 'whisper-1');
     const res = await fetch(`${this.baseUrl}/audio/transcriptions`, {
       method: 'POST',
+      signal: AbortSignal.timeout(120_000),
       headers: { Authorization: `Bearer ${this.apiKey}` },
       body: form,
     });
