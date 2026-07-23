@@ -32,6 +32,7 @@ export {
   walkFiles,
   resolveExtensions,
   fileToSourceDocument,
+  fileToSourceDocumentAsync,
   DEFAULT_FILE_EXTENSIONS,
 } from './files.js';
 export { obsidianConnector, parseFrontmatter, type Frontmatter } from './obsidian.js';
