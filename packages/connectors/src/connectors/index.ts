@@ -23,6 +23,10 @@ import { zendeskConnector } from './zendesk.js';
 import { intercomConnector } from './intercom.js';
 import { trelloConnector } from './trello.js';
 import { airtableConnector } from './airtable.js';
+import { gitlabConnector } from './gitlab.js';
+import { asanaConnector } from './asana.js';
+import { readwiseConnector } from './readwise.js';
+import { raindropConnector } from './raindrop.js';
 
 /** Every built-in connector, in a stable order. */
 export const connectors: Connector[] = [
@@ -50,6 +54,10 @@ export const connectors: Connector[] = [
   intercomConnector,
   trelloConnector,
   airtableConnector,
+  gitlabConnector,
+  asanaConnector,
+  readwiseConnector,
+  raindropConnector,
 ];
 
 /** Look up a connector by its stable id. */
@@ -88,3 +96,7 @@ export { zendeskConnector, zendeskArticleDoc } from './zendesk.js';
 export { intercomConnector, intercomArticleDoc } from './intercom.js';
 export { trelloConnector, trelloCardDoc } from './trello.js';
 export { airtableConnector, airtableRecordDoc } from './airtable.js';
+export { gitlabConnector, gitlabIssueDoc } from './gitlab.js';
+export { asanaConnector, asanaTaskDoc } from './asana.js';
+export { readwiseConnector, readwiseBookDoc } from './readwise.js';
+export { raindropConnector, raindropItemToDoc } from './raindrop.js';
