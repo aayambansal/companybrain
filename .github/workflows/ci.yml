@@ -156,3 +156,19 @@ jobs:
             cat /tmp/api.log; exit 1
           fi
           echo "smoke ok: $COUNT hit(s)"
+
+          # Space isolation: a named space must be created on ingest and scope search.
+          curl -fsS -X POST "$BASE/v1/memories" \
+            -H "authorization: Bearer $TOKEN" -H 'content-type: application/json' \
+            -d '{"title":"Scoped","content":"isolated tango foxtrot in its own space","space":"scoped-space"}' \
+            > /dev/null
+          SCOPED=$(curl -fsS -X POST "$BASE/v1/search" \
+            -H "authorization: Bearer $TOKEN" -H 'content-type: application/json' \
+            -d '{"q":"tango foxtrot zulu verification","space":"scoped-space","mode":"hybrid"}')
+          SC_COUNT=$(printf '%s' "$SCOPED" | jq '.hits | length')
+          # Must find the scoped doc but NOT the earlier default-space "zulu" doc.
+          if [ "${SC_COUNT:-0}" -ne 1 ]; then
+            echo "::error::space scoping failed, expected exactly 1 hit, got ${SC_COUNT}: $SCOPED"
+            cat /tmp/api.log; exit 1
+          fi
+          echo "space isolation ok: $SC_COUNT hit"
