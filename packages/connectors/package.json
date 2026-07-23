@@ -1,0 +1,28 @@
+{
+  "name": "@companybrain/connectors",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CompanyBrain connectors: pull documents from web pages, sitemaps, local files, Obsidian vaults, and RSS/Atom feeds, plus the sync runner and registry.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@companybrain/core": "workspace:*",
+    "@companybrain/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.2"
+  }
+}
