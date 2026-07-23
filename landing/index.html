@@ -3,311 +3,353 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CompanyBrain — the open-source memory layer for your company</title>
+    <title>CompanyBrain — the memory layer for your company</title>
     <meta
       name="description"
-      content="Self-hosted semantic memory for your team. Index everything, recall anything, own all of it. Open source, one command to run."
+      content="Self-hosted semantic memory for your team. Index everything, recall anything, own all of it. 40+ connectors, hybrid search, MCP, SDKs, one-command self-host."
     />
+    <link rel="preconnect" href="https://api.fontshare.com" />
+    <link
+      href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=switzer@400,500,600,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <style>
       :root {
-        --bg: #0f0d0a;
-        --bg-2: #14110c;
-        --surface: #1a150e;
-        --surface-2: #221b11;
-        --line: #2e2718;
-        --line-strong: #40361f;
-        --ink: #f3eee3;
-        --muted: #a89e8b;
-        --faint: #7c7362;
-        --amber: #e6ac3f;
-        --amber-bright: #f4c65c;
-        --amber-soft: rgba(230, 172, 63, 0.12);
-        --amber-line: rgba(230, 172, 63, 0.32);
-        --green: #7bd88f;
-        --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
-        --mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, Consolas, monospace;
-        --maxw: 1080px;
+        --bg: oklch(0.987 0.004 265);
+        --bg-2: oklch(0.968 0.006 265);
+        --surface: #ffffff;
+        --ink: oklch(0.215 0.021 266);
+        --ink-2: oklch(0.36 0.02 266);
+        --muted: oklch(0.505 0.02 266);
+        --line: oklch(0.905 0.007 266);
+        --line-2: oklch(0.86 0.01 266);
+        --iris: oklch(0.55 0.2 264);
+        --iris-strong: oklch(0.49 0.21 264);
+        --iris-soft: oklch(0.55 0.2 264 / 0.1);
+        --iris-line: oklch(0.55 0.2 264 / 0.24);
+        --spark: oklch(0.76 0.16 68);
+        --spark-strong: oklch(0.66 0.16 60);
+        --display: "Clash Display", ui-sans-serif, system-ui, sans-serif;
+        --sans: "Switzer", ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
+        --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+        --maxw: 1120px;
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
       }
       * { box-sizing: border-box; }
-      html { scroll-behavior: smooth; }
+      html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
       body {
         margin: 0;
         background: var(--bg);
         color: var(--ink);
         font-family: var(--sans);
+        font-size: 17px;
         line-height: 1.6;
         -webkit-font-smoothing: antialiased;
         overflow-x: hidden;
       }
-      a { color: var(--amber); text-decoration: none; }
-      a:hover { color: var(--amber-bright); }
-      ::selection { background: var(--amber-soft); color: var(--amber-bright); }
-      :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 4px; }
-
+      a { color: var(--iris-strong); text-decoration: none; }
+      a:hover { color: var(--iris); }
+      ::selection { background: var(--iris-soft); color: var(--iris-strong); }
+      :focus-visible { outline: 2px solid var(--iris); outline-offset: 3px; border-radius: 6px; }
       .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+      h1, h2, h3 { font-family: var(--display); font-weight: 600; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+      p { text-wrap: pretty; }
       .mono { font-family: var(--mono); }
 
-      /* Ambient background */
-      .bg {
-        position: fixed; inset: 0; z-index: -1; pointer-events: none;
-        background:
-          radial-gradient(60% 45% at 50% 0%, rgba(230, 172, 63, 0.14), transparent 70%),
-          var(--bg);
-      }
-      .bg::before {
-        content: ""; position: absolute; inset: 0;
-        background-image:
-          linear-gradient(var(--line) 1px, transparent 1px),
-          linear-gradient(90deg, var(--line) 1px, transparent 1px);
-        background-size: 46px 46px;
-        mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, #000 10%, transparent 70%);
-        opacity: 0.5;
-      }
-
-      /* Nav */
+      /* ── Nav ── */
       nav {
-        position: sticky; top: 0; z-index: 20;
-        backdrop-filter: blur(10px);
-        background: color-mix(in oklab, var(--bg) 78%, transparent);
-        border-bottom: 1px solid var(--line);
+        position: sticky; top: 0; z-index: 50;
+        background: color-mix(in oklab, var(--bg) 82%, transparent);
+        backdrop-filter: saturate(1.4) blur(12px);
+        border-bottom: 1px solid transparent;
+        transition: border-color 0.3s;
       }
-      nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
-      .brand { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-weight: 600; font-size: 15px; letter-spacing: -0.02em; }
-      .brand svg { color: var(--amber); }
-      .brand b { color: var(--amber); font-weight: 600; }
-      .nav-links { display: flex; align-items: center; gap: 24px; font-size: 14px; }
-      .nav-links a.muted { color: var(--muted); }
-      .nav-links a.muted:hover { color: var(--ink); }
-      .gh {
+      nav.scrolled { border-color: var(--line); }
+      nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+      .brand { display: flex; align-items: center; gap: 11px; font-family: var(--display); font-weight: 600; font-size: 19px; letter-spacing: -0.02em; }
+      .brand .mark { width: 30px; height: 30px; }
+      .nav-links { display: flex; align-items: center; gap: 28px; font-size: 15px; font-weight: 500; }
+      .nav-links a.q { color: var(--ink-2); }
+      .nav-links a.q:hover { color: var(--ink); }
+      .btn {
         display: inline-flex; align-items: center; gap: 8px;
-        border: 1px solid var(--line-strong); border-radius: 8px;
-        padding: 7px 12px; color: var(--ink); font-size: 13px;
+        font-family: var(--sans); font-weight: 600; font-size: 15px;
+        border-radius: 11px; padding: 11px 18px; cursor: pointer; border: 0;
+        transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease), background 0.2s;
       }
-      .gh:hover { background: var(--surface-2); color: var(--ink); }
-      @media (max-width: 640px) { .nav-links a.muted { display: none; } }
+      .btn-primary { background: var(--ink); color: var(--bg); box-shadow: 0 1px 2px oklch(0.2 0.02 266 / 0.2); }
+      .btn-primary:hover { color: var(--bg); transform: translateY(-1px); box-shadow: 0 8px 22px oklch(0.2 0.02 266 / 0.22); }
+      .btn-iris { background: var(--iris); color: #fff; box-shadow: 0 6px 20px oklch(0.55 0.2 264 / 0.32); }
+      .btn-iris:hover { background: var(--iris-strong); color: #fff; transform: translateY(-1px); }
+      .btn-ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line-2); }
+      .btn-ghost:hover { border-color: var(--iris-line); color: var(--ink); }
+      @media (max-width: 720px) { .nav-links a.q { display: none; } }
 
-      /* Hero */
-      header { padding: 84px 0 64px; text-align: center; }
-      .ascii {
-        font-family: var(--mono); color: var(--amber);
-        font-size: clamp(6px, 1.55vw, 13px); line-height: 1.15;
-        white-space: pre; margin: 0 auto 28px; display: inline-block; text-align: left;
-        text-shadow: 0 0 24px rgba(230, 172, 63, 0.35);
+      /* ── Hero ── */
+      header { position: relative; padding: clamp(56px, 10vw, 120px) 0 clamp(48px, 8vw, 96px); overflow: hidden; }
+      #constellation { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.9; }
+      header .veil {
+        position: absolute; inset: 0; z-index: 1; pointer-events: none;
+        background: radial-gradient(70% 60% at 50% 42%, transparent 30%, var(--bg) 82%);
       }
-      h1 {
-        font-size: clamp(2.1rem, 5.4vw, 3.6rem); line-height: 1.05; letter-spacing: -0.03em;
-        margin: 0 auto 18px; max-width: 16ch; text-wrap: balance; font-weight: 640;
+      header .wrap { position: relative; z-index: 2; text-align: center; }
+      .pill {
+        display: inline-flex; align-items: center; gap: 9px;
+        background: var(--surface); border: 1px solid var(--line-2); border-radius: 999px;
+        padding: 6px 8px 6px 14px; font-size: 13.5px; font-weight: 500; color: var(--ink-2);
+        box-shadow: 0 2px 10px oklch(0.2 0.02 266 / 0.05);
       }
-      h1 .hl { color: var(--amber); }
-      .sub { font-size: clamp(1rem, 2.2vw, 1.22rem); color: var(--muted); max-width: 60ch; margin: 0 auto 34px; text-wrap: pretty; }
-
+      .pill b { color: var(--iris-strong); }
+      .pill .tag { font-family: var(--mono); font-size: 11px; background: var(--iris-soft); color: var(--iris-strong); padding: 3px 8px; border-radius: 999px; }
+      h1 { font-size: clamp(2.6rem, 7vw, 5.5rem); line-height: 1.02; margin: 26px auto 0; max-width: 15ch; font-weight: 600; }
+      h1 .g { color: var(--iris); position: relative; }
+      .lede { font-size: clamp(1.1rem, 2.3vw, 1.4rem); color: var(--ink-2); max-width: 60ch; margin: 22px auto 0; line-height: 1.5; }
+      .cmd-row { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 36px; }
       .cmd {
-        display: inline-flex; align-items: center; gap: 14px;
-        background: var(--surface); border: 1px solid var(--amber-line); border-radius: 12px;
-        padding: 14px 16px; font-family: var(--mono); font-size: 15px;
-        box-shadow: 0 10px 40px rgba(230, 172, 63, 0.08);
+        display: inline-flex; align-items: center; gap: 12px;
+        background: var(--surface); border: 1px solid var(--line-2); border-radius: 13px;
+        padding: 12px 12px 12px 18px; font-family: var(--mono); font-size: 15.5px;
+        box-shadow: 0 4px 20px oklch(0.2 0.02 266 / 0.06);
       }
-      .cmd .dollar { color: var(--faint); }
-      .cmd code { color: var(--ink); }
-      .cmd .k { color: var(--amber); }
-      .copy {
-        border: 1px solid var(--line-strong); background: var(--surface-2); color: var(--muted);
-        border-radius: 7px; padding: 5px 9px; font-family: var(--mono); font-size: 12px; cursor: pointer;
-        transition: all 0.15s;
+      .cmd .p { color: var(--muted); }
+      .cmd .k { color: var(--iris-strong); }
+      .cmd .copy {
+        border: 1px solid var(--line-2); background: var(--bg-2); color: var(--muted);
+        border-radius: 8px; padding: 5px 10px; font-family: var(--mono); font-size: 12px; cursor: pointer; transition: all 0.15s;
       }
-      .copy:hover { color: var(--ink); border-color: var(--amber-line); }
-      .hero-meta { margin-top: 20px; color: var(--faint); font-size: 13px; font-family: var(--mono); }
-      .hero-meta b { color: var(--muted); font-weight: 500; }
+      .cmd .copy:hover { color: var(--iris-strong); border-color: var(--iris-line); }
+      .trust { margin-top: 24px; font-size: 13.5px; color: var(--muted); font-family: var(--mono); }
+      .trust b { color: var(--ink-2); font-weight: 500; }
 
-      /* Sections */
-      section { padding: 64px 0; }
-      .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--amber); margin: 0 0 10px; }
-      h2 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); letter-spacing: -0.02em; margin: 0 0 12px; font-weight: 620; text-wrap: balance; }
-      .lead { color: var(--muted); max-width: 62ch; margin: 0 0 40px; }
+      /* ── Sections ── */
+      section { padding: clamp(64px, 9vw, 108px) 0; }
+      .kicker { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.02em; color: var(--iris-strong); font-weight: 500; }
+      h2 { font-size: clamp(1.8rem, 4vw, 2.9rem); line-height: 1.06; margin-top: 12px; }
+      .section-lede { color: var(--ink-2); max-width: 60ch; margin: 16px 0 0; font-size: 1.12rem; }
 
-      /* Feature grid */
-      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-      .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; transition: border-color 0.2s, transform 0.2s; }
-      .card:hover { border-color: var(--line-strong); transform: translateY(-2px); }
-      .card .ic { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; background: var(--amber-soft); color: var(--amber); margin-bottom: 14px; }
-      .card h3 { margin: 0 0 6px; font-size: 1.06rem; font-weight: 600; }
-      .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+      /* Feature bento */
+      .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-top: 44px; }
+      .tile { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px; transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s; }
+      .tile:hover { transform: translateY(-3px); box-shadow: 0 16px 40px oklch(0.2 0.02 266 / 0.08); border-color: var(--line-2); }
+      .tile h3 { font-size: 1.28rem; margin-top: 16px; }
+      .tile p { color: var(--ink-2); margin: 8px 0 0; font-size: 1rem; }
+      .tile .ic { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: var(--iris-soft); color: var(--iris-strong); }
+      .tile.span3 { grid-column: span 3; }
+      .tile.span2 { grid-column: span 2; }
+      .tile.wide { grid-column: span 6; display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; align-items: center; }
+      .tile.wide .pipe { font-family: var(--mono); font-size: clamp(11px, 1.5vw, 13.5px); color: var(--ink-2); line-height: 1.9; overflow-x: auto; background: var(--bg-2); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+      .tile.wide .pipe .k { color: var(--iris-strong); }
+      .tile.wide .pipe .s { color: var(--spark-strong); }
+      @media (max-width: 900px) { .bento { grid-template-columns: repeat(2, 1fr); } .tile.span3, .tile.span2 { grid-column: span 2; } .tile.wide { grid-column: span 2; grid-template-columns: 1fr; } }
+      @media (max-width: 560px) { .bento { grid-template-columns: 1fr; } .tile.span3, .tile.span2, .tile.wide { grid-column: span 1; } }
 
-      /* Pipeline */
-      .pipe { background: var(--bg-2); border: 1px solid var(--line); border-radius: 16px; padding: 28px; font-family: var(--mono); overflow-x: auto; }
-      .pipe pre { margin: 0; color: var(--muted); font-size: clamp(11px, 1.6vw, 14px); line-height: 1.7; }
-      .pipe .hl { color: var(--amber); }
-
-      /* Connectors */
-      .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+      /* Connector marquee */
+      .marquee { position: relative; margin-top: 40px; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+      .row { display: flex; gap: 12px; width: max-content; }
+      .row + .row { margin-top: 12px; }
+      .track1 { animation: drift 46s linear infinite; }
+      .track2 { animation: drift 60s linear infinite reverse; }
+      .marquee:hover .row { animation-play-state: paused; }
+      @keyframes drift { to { transform: translateX(-50%); } }
       .chip {
-        display: inline-flex; align-items: center; gap: 8px;
-        border: 1px solid var(--line-strong); border-radius: 999px; padding: 8px 15px;
-        font-family: var(--mono); font-size: 13px; color: var(--muted); background: var(--surface);
+        display: inline-flex; align-items: center; gap: 9px; white-space: nowrap;
+        background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
+        padding: 10px 17px; font-size: 14.5px; font-weight: 500; color: var(--ink);
       }
-      .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+      .chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--iris); }
+      .chip:nth-child(3n) .dot { background: var(--spark); }
 
-      /* Split (clients) */
-      .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-      .mini { border: 1px solid var(--line); border-radius: 12px; padding: 18px; background: var(--surface); }
-      .mini .t { font-family: var(--mono); color: var(--amber); font-size: 13px; margin-bottom: 6px; }
-      .mini p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+      /* Clients grid */
+      .clients { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-top: 40px; }
+      .client { border: 1px solid var(--line); border-radius: 15px; padding: 20px 22px; background: var(--surface); transition: border-color 0.2s, transform 0.2s var(--ease); }
+      .client:hover { border-color: var(--iris-line); transform: translateY(-2px); }
+      .client .t { font-family: var(--display); font-weight: 600; font-size: 1.05rem; }
+      .client p { color: var(--muted); margin: 4px 0 0; font-size: 0.92rem; font-family: var(--mono); }
+
+      /* Benchmark strip */
+      .bench { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 40px; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--surface); }
+      .stat { padding: 30px 26px; border-right: 1px solid var(--line); }
+      .stat:last-child { border-right: 0; }
+      .stat .n { font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 4vw, 2.9rem); line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+      .stat .l { color: var(--muted); font-size: 0.9rem; margin-top: 8px; }
+      @media (max-width: 720px) { .bench { grid-template-columns: repeat(2, 1fr); } .stat:nth-child(2) { border-right: 0; } .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--line); } }
 
       /* CTA */
-      .cta { text-align: center; border: 1px solid var(--amber-line); border-radius: 20px; padding: 56px 24px; background: radial-gradient(80% 120% at 50% 0%, var(--amber-soft), transparent 70%); }
-      .btn {
-        display: inline-flex; align-items: center; gap: 9px;
-        background: var(--amber); color: #241a06; font-weight: 640; font-size: 15px;
-        border-radius: 10px; padding: 12px 20px; font-family: var(--sans);
-      }
-      .btn:hover { background: var(--amber-bright); color: #241a06; }
-      .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line-strong); }
-      .btn.ghost:hover { border-color: var(--amber-line); background: var(--surface-2); }
-      .cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+      .cta { position: relative; margin-top: 20px; border-radius: 26px; padding: clamp(48px, 7vw, 88px) 28px; text-align: center; overflow: hidden; background: var(--ink); color: var(--bg); }
+      .cta::before { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 120% at 50% 0%, oklch(0.55 0.2 264 / 0.5), transparent 60%); }
+      .cta > * { position: relative; z-index: 1; }
+      .cta h2 { color: #fff; }
+      .cta p { color: oklch(0.86 0.02 266); max-width: 52ch; margin: 14px auto 0; }
+      .cta .cmd-row { margin-top: 32px; }
+      .cta .cmd { background: oklch(0.28 0.02 266); border-color: oklch(0.4 0.02 266); color: #fff; }
+      .cta .cmd .p { color: oklch(0.7 0.02 266); }
+      .cta .cmd .k { color: var(--spark); }
+      .cta .cmd .copy { background: oklch(0.34 0.02 266); border-color: oklch(0.45 0.02 266); color: oklch(0.8 0.02 266); }
 
-      footer { border-top: 1px solid var(--line); padding: 34px 0; color: var(--faint); font-size: 13px; }
-      footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+      footer { padding: 44px 0; border-top: 1px solid var(--line); }
+      footer .wrap { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; color: var(--muted); font-size: 14px; }
 
-      .reveal { opacity: 0; transform: translateY(14px); animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      .reveal { opacity: 0; transform: translateY(16px); animation: rise 0.8s var(--ease) forwards; }
+      .d1 { animation-delay: 0.05s; } .d2 { animation-delay: 0.13s; } .d3 { animation-delay: 0.21s; } .d4 { animation-delay: 0.29s; }
       @keyframes rise { to { opacity: 1; transform: none; } }
-      @media (prefers-reduced-motion: reduce) { .reveal { animation: none; opacity: 1; transform: none; } html { scroll-behavior: auto; } }
+      @media (prefers-reduced-motion: reduce) {
+        .reveal { animation: none; opacity: 1; transform: none; }
+        .row { animation: none !important; }
+        html { scroll-behavior: auto; }
+      }
     </style>
   </head>
   <body>
-    <div class="bg" aria-hidden="true"></div>
-
-    <nav>
+    <nav id="nav">
       <div class="wrap">
-        <div class="brand">
-          <svg width="20" height="20" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+        <a class="brand" href="#top" aria-label="CompanyBrain home">
+          <svg class="mark" viewBox="0 0 32 32" fill="none" stroke="var(--iris)" stroke-width="1.5" aria-hidden="true">
             <path d="M12 5.5C9.2 5.5 7 7.6 7 10.2c0 .5.1 1 .2 1.5C5.9 12.5 5 13.9 5 15.5c0 1.3.6 2.5 1.6 3.3-.2.5-.3 1-.3 1.6 0 2.4 2 4.3 4.6 4.3.7 0 1.4-.2 2-.5.5 1.1 1.7 1.8 3.1 1.8V5.9c-1-.3-2.6-.4-4-.4Z" stroke-linejoin="round" />
             <path d="M20 5.5c2.8 0 5 2.1 5 4.7 0 .5-.1 1-.2 1.5 1.3.8 2.2 2.2 2.2 3.8 0 1.3-.6 2.5-1.6 3.3.2.5.3 1 .3 1.6 0 2.4-2 4.3-4.6 4.3-.7 0-1.4-.2-2-.5-.5 1.1-1.7 1.8-3.1 1.8" stroke-linejoin="round" />
-            <path d="M16 6v20" stroke-linecap="round" opacity="0.6" />
+            <path d="M16 6v20" stroke-linecap="round" opacity="0.55" stroke="var(--spark)" />
           </svg>
-          company<b>brain</b>
-        </div>
+          companybrain
+        </a>
         <div class="nav-links">
-          <a class="muted" href="#features">Features</a>
-          <a class="muted" href="#connectors">Connectors</a>
-          <a class="muted" href="#run">Run it</a>
-          <a class="gh" href="https://github.com/aayambansal/companybrain">
-            <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
-            GitHub
-          </a>
+          <a class="q" href="#features">Features</a>
+          <a class="q" href="#connectors">Connectors</a>
+          <a class="q" href="#run">Run it</a>
+          <a class="btn btn-ghost" href="https://github.com/aayambansal/companybrain">GitHub</a>
         </div>
       </div>
     </nav>
 
-    <header class="wrap reveal">
-      <pre class="ascii" aria-label="CompanyBrain">       _---~~(~~-_.
-     _{        )   )
-   ,   ) -~~- ( ,-' )_
-  (  `-,_..`., )-- '_,)
- ( ` _)  (  -~( -_ `,  }
- (_-  _  ~_-~~~~`,  ,' )
-   `~ -^(    __;-,((()))
-         ~~~~ {_ -_(())</pre>
-      <h1>The open-source <span class="hl">memory layer</span> for your company</h1>
-      <p class="sub">
-        Point it at your knowledge — Obsidian, Google Docs, Slack, Notion, GitHub, PDFs, the web —
-        and get one private, searchable brain that answers with citations. Your agents read it over MCP.
-        Your data never leaves your Postgres.
-      </p>
-      <div class="cmd">
-        <span class="dollar">$</span>
-        <code><span class="k">npx</span> companybrain</code>
-        <button class="copy" id="copyBtn" aria-label="Copy command">copy</button>
-      </div>
-      <div class="hero-meta">
-        MIT licensed &middot; <b>no sign-in</b> &middot; bring your own keys &middot; <b>32 connectors</b>
+    <header id="top">
+      <canvas id="constellation" aria-hidden="true"></canvas>
+      <div class="veil"></div>
+      <div class="wrap">
+        <span class="pill reveal d1"><span class="tag">MIT</span> open source, self-hosted, <b>no sign-in</b></span>
+        <h1 class="reveal d2">The memory layer for your <span class="g">company</span></h1>
+        <p class="lede reveal d3">
+          Point it at everything your team knows, from Obsidian and Google Docs to Slack, GitHub, PDFs, images, and
+          audio. Get one private brain that answers with citations, over an API, an SDK, or MCP.
+        </p>
+        <div class="cmd-row reveal d3">
+          <div class="cmd">
+            <span class="p">$</span><code><span class="k">npx</span> companybrain</code>
+            <button class="copy" id="copyBtn" aria-label="Copy command">copy</button>
+          </div>
+          <a class="btn btn-iris" href="https://github.com/aayambansal/companybrain">Get started</a>
+        </div>
+        <p class="trust reveal d4"><b>40+ connectors</b> &middot; hybrid search + rerank &middot; bring your own keys &middot; your Postgres</p>
       </div>
     </header>
 
-    <section id="features" class="wrap">
-      <p class="eyebrow">What it does</p>
-      <h2>A real memory backend, not a wrapper</h2>
-      <p class="lead">Everything you drop in is chunked, embedded, and indexed with a vector and a full-text signal side by side. Retrieval fuses both, so you get meaning and exact keywords.</p>
-      <div class="grid">
-        <div class="card"><div class="ic">◈</div><h3>Hybrid search</h3><p>pgvector similarity plus Postgres full-text, fused with reciprocal rank fusion, and optional LLM reranking.</p></div>
-        <div class="card"><div class="ic">❝</div><h3>Answers with receipts</h3><p>RAG chat streams answers grounded in your knowledge, with citations that point back at the source passage.</p></div>
-        <div class="card"><div class="ic">⌘</div><h3>Agent-native</h3><p>A built-in MCP server lets Claude, Cursor, or any agent read and write the brain as a tool. Keyless locally.</p></div>
-        <div class="card"><div class="ic">⚿</div><h3>Bring your own keys</h3><p>Runs zero-config on a local model. Paste an OpenAI, Anthropic, Google, or Ollama key to upgrade, live.</p></div>
-        <div class="card"><div class="ic">◱</div><h3>Yours to run</h3><p>One command with Docker. Bring your own Postgres. No hosted control plane, nothing phones home.</p></div>
-        <div class="card"><div class="ic">↻</div><h3>Stays fresh</h3><p>Connectors sync on a schedule. Change the embedding model and re-index everything from the dashboard.</p></div>
+    <section id="features">
+      <div class="wrap">
+        <span class="kicker">A real memory backend</span>
+        <h2>Not a wrapper. A store you own.</h2>
+        <p class="section-lede">Everything you drop in is chunked, embedded, and indexed with a vector and a full-text signal side by side. Retrieval fuses both, so you get meaning and exact keywords.</p>
+        <div class="bento">
+          <div class="tile span3">
+            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg></div>
+            <h3>Hybrid search, ranked well</h3>
+            <p>pgvector similarity and Postgres full-text, fused with reciprocal rank fusion, then optionally reordered by an LLM.</p>
+          </div>
+          <div class="tile span3">
+            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5h16v11H9l-4 3.5V16H4z"/><path d="M8 9h8M8 12h5"/></svg></div>
+            <h3>Answers with receipts</h3>
+            <p>RAG chat streams answers grounded in your knowledge, each citation pointing back at the exact source passage.</p>
+          </div>
+          <div class="tile span2">
+            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></div>
+            <h3>Reads more than text</h3>
+            <p>OCRs images, transcribes audio, extracts PDFs, pulls video transcripts.</p>
+          </div>
+          <div class="tile span2">
+            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></div>
+            <h3>Stays organized</h3>
+            <p>Auto-summaries, tags, and facts on ingest. Dedup, version history, signed webhooks.</p>
+          </div>
+          <div class="tile span2">
+            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 3v6M15 3v6"/><path d="M7 9h10v3a5 5 0 0 1-10 0z"/><path d="M12 17v4"/></svg></div>
+            <h3>Agent-native</h3>
+            <p>A built-in MCP server. Claude, Cursor, and any agent read and write the brain as a tool.</p>
+          </div>
+          <div class="tile wide">
+            <div>
+              <h3>Ingest, embed, retrieve, cite</h3>
+              <p style="color: var(--ink-2); margin-top: 10px;">One pipeline from any source to a cited answer. Bring your own Postgres; nothing phones home.</p>
+            </div>
+            <div class="pipe">
+<span class="k">connectors</span> &rarr; ingest &rarr; chunk &rarr; embed &rarr; index &rarr; <span class="k">search</span> &rarr; cite
+                                        &darr;
+   obsidian &middot; slack &middot; gdocs &middot; github    <span class="s">postgres + pgvector</span>
+   pdf &middot; image &middot; audio &middot; 40 sources     <span class="s">(your database)</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="wrap">
-      <p class="eyebrow">How it works</p>
-      <h2>Ingest, embed, retrieve, cite</h2>
-      <div class="pipe">
-<pre>  <span class="hl">connectors</span> ──►  ingest ──►  chunk ──►  embed ──►  index ──►  <span class="hl">search</span> ──►  cite
-                                                    │
-   obsidian · gdocs · slack · notion · github       ▼
-   web · rss · pdf · linear · confluence · jira   postgres + pgvector  (your database)</pre>
+    <section id="connectors" style="background: var(--bg-2); border-block: 1px solid var(--line);">
+      <div class="wrap">
+        <span class="kicker">Index everything</span>
+        <h2>Forty connectors, one store.</h2>
+        <p class="section-lede">Configure and sync any source from the dashboard. It all lands in the same place, so search and chat work across every source at once.</p>
+      </div>
+      <div class="marquee" aria-label="Connectors">
+        <div class="row track1" id="row1"></div>
+        <div class="row track2" id="row2"></div>
       </div>
     </section>
 
-    <section id="connectors" class="wrap">
-      <p class="eyebrow">Index everything</p>
-      <h2>Thirty-two connectors, and counting</h2>
-      <p class="lead">Configure and sync any source from the dashboard. Everything lands in the same store, so search and chat work across all of it without caring where it came from. New memories can be auto-summarized, tagged, and deduped, and fire a signed webhook.</p>
-      <div class="chips">
-        <span class="chip"><span class="dot"></span>Web &amp; sitemaps</span>
-        <span class="chip"><span class="dot"></span>Files &amp; PDF</span>
-        <span class="chip"><span class="dot"></span>Obsidian</span>
-        <span class="chip"><span class="dot"></span>Google Docs</span>
-        <span class="chip"><span class="dot"></span>Google Drive</span>
-        <span class="chip"><span class="dot"></span>OneDrive</span>
-        <span class="chip"><span class="dot"></span>Dropbox</span>
-        <span class="chip"><span class="dot"></span>Box</span>
-        <span class="chip"><span class="dot"></span>Notion</span>
-        <span class="chip"><span class="dot"></span>Confluence</span>
-        <span class="chip"><span class="dot"></span>Slack</span>
-        <span class="chip"><span class="dot"></span>Discord</span>
-        <span class="chip"><span class="dot"></span>Gmail</span>
-        <span class="chip"><span class="dot"></span>GitHub</span>
-        <span class="chip"><span class="dot"></span>GitLab</span>
-        <span class="chip"><span class="dot"></span>Linear</span>
-        <span class="chip"><span class="dot"></span>Jira</span>
-        <span class="chip"><span class="dot"></span>Asana</span>
-        <span class="chip"><span class="dot"></span>ClickUp</span>
-        <span class="chip"><span class="dot"></span>Trello</span>
-        <span class="chip"><span class="dot"></span>Airtable</span>
-        <span class="chip"><span class="dot"></span>Zendesk</span>
-        <span class="chip"><span class="dot"></span>Intercom</span>
-        <span class="chip"><span class="dot"></span>YouTube</span>
-        <span class="chip"><span class="dot"></span>Readwise</span>
-        <span class="chip"><span class="dot"></span>+ more</span>
+    <section>
+      <div class="wrap">
+        <span class="kicker">Talk to it your way</span>
+        <h2>Clients for every surface.</h2>
+        <div class="clients">
+          <div class="client"><div class="t">TypeScript SDK</div><p>@companybrain/sdk</p></div>
+          <div class="client"><div class="t">Python SDK</div><p>pip install companybrain</p></div>
+          <div class="client"><div class="t">CLI</div><p>companybrain add &middot; search &middot; ask</p></div>
+          <div class="client"><div class="t">MCP server</div><p>Claude Desktop, Cursor</p></div>
+          <div class="client"><div class="t">Chrome extension</div><p>save any page</p></div>
+          <div class="client"><div class="t">Slack bot</div><p>/brain in Slack</p></div>
+          <div class="client"><div class="t">LangChain</div><p>drop-in retriever</p></div>
+          <div class="client"><div class="t">Vercel AI SDK</div><p>search / ask / add tools</p></div>
+          <div class="client"><div class="t">OpenAI tools</div><p>function calling</p></div>
+          <div class="client"><div class="t">n8n</div><p>no-code node</p></div>
+          <div class="client"><div class="t">Webhooks</div><p>signed events on ingest</p></div>
+          <div class="client"><div class="t">REST + OpenAPI</div><p>docs at /docs</p></div>
+        </div>
       </div>
     </section>
 
-    <section class="wrap">
-      <p class="eyebrow">Talk to it your way</p>
-      <h2>Clients for every surface</h2>
-      <div class="split">
-        <div class="mini"><div class="t">TypeScript SDK</div><p>npm install @companybrain/sdk</p></div>
-        <div class="mini"><div class="t">Python SDK</div><p>pip install companybrain</p></div>
-        <div class="mini"><div class="t">CLI</div><p>companybrain add · search · ask</p></div>
-        <div class="mini"><div class="t">MCP server</div><p>Claude Desktop, Cursor, any agent</p></div>
-        <div class="mini"><div class="t">Dashboard</div><p>Browse, search, chat, connect sources</p></div>
-        <div class="mini"><div class="t">Chrome extension</div><p>Save any page or selection</p></div>
-        <div class="mini"><div class="t">Slack bot</div><p>Ask /brain right in Slack</p></div>
-        <div class="mini"><div class="t">LangChain</div><p>Drop-in retriever</p></div>
-        <div class="mini"><div class="t">Vercel AI SDK</div><p>search / ask / add tools</p></div>
-        <div class="mini"><div class="t">n8n</div><p>No-code workflow node</p></div>
-        <div class="mini"><div class="t">Webhooks</div><p>Signed events on ingest</p></div>
+    <section style="background: var(--bg-2); border-block: 1px solid var(--line);">
+      <div class="wrap">
+        <span class="kicker">Fast, and measured</span>
+        <h2>Retrieval you can benchmark.</h2>
+        <p class="section-lede">A reproducible harness ships in the repo. On the sample corpus with the zero-config local embedder, Postgres + pgvector on a laptop:</p>
+        <div class="bench">
+          <div class="stat"><div class="n">100%</div><div class="l">Recall@5, hybrid</div></div>
+          <div class="stat"><div class="n">0.958</div><div class="l">Mean reciprocal rank</div></div>
+          <div class="stat"><div class="n">1.6ms</div><div class="l">Search p50 latency</div></div>
+          <div class="stat"><div class="n">40+</div><div class="l">Built-in connectors</div></div>
+        </div>
       </div>
     </section>
 
-    <section id="run" class="wrap">
-      <div class="cta">
-        <p class="eyebrow" style="margin-bottom:14px">Run it in a minute</p>
-        <h2 style="margin-bottom:8px">Your company's memory, on your metal</h2>
-        <p class="lead" style="margin:0 auto;text-align:center">One command clones, sets up, and starts everything. No account, no sign-in, no per-seat pricing.</p>
-        <div class="cta-row">
-          <a class="btn" href="https://github.com/aayambansal/companybrain">Get started</a>
-          <a class="btn ghost" href="https://github.com/aayambansal/companybrain#run-it">Read the docs</a>
+    <section id="run">
+      <div class="wrap">
+        <div class="cta">
+          <span class="kicker" style="color: var(--spark);">Run it in a minute</span>
+          <h2>Your company's memory, on your metal.</h2>
+          <p>One command clones, sets up, and starts everything. No account, no sign-in, no per-seat pricing. Deploy to Render, Railway, or Fly when you are ready.</p>
+          <div class="cmd-row">
+            <div class="cmd">
+              <span class="p">$</span><code><span class="k">npx</span> companybrain</code>
+              <button class="copy" id="copyBtn2" aria-label="Copy command">copy</button>
+            </div>
+            <a class="btn btn-iris" href="https://github.com/aayambansal/companybrain">Read the docs</a>
+          </div>
         </div>
       </div>
     </section>
@@ -315,21 +357,111 @@
     <footer>
       <div class="wrap">
         <span>CompanyBrain &middot; MIT licensed</span>
-        <span class="mono"><a href="https://github.com/aayambansal/companybrain">github.com/aayambansal/companybrain</a></span>
+        <a class="mono" href="https://github.com/aayambansal/companybrain">github.com/aayambansal/companybrain</a>
       </div>
     </footer>
 
     <script>
-      const btn = document.getElementById('copyBtn');
-      btn.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText('npx companybrain');
-          btn.textContent = 'copied';
-          setTimeout(() => (btn.textContent = 'copy'), 1600);
-        } catch (e) {
-          btn.textContent = 'npx companybrain';
+      // Copy buttons
+      for (const id of ['copyBtn', 'copyBtn2']) {
+        const b = document.getElementById(id);
+        if (b) b.addEventListener('click', async () => {
+          try { await navigator.clipboard.writeText('npx companybrain'); b.textContent = 'copied'; setTimeout(() => (b.textContent = 'copy'), 1500); }
+          catch (e) { b.textContent = 'npx companybrain'; }
+        });
+      }
+
+      // Nav border on scroll
+      const nav = document.getElementById('nav');
+      const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 8);
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+
+      // Connector marquee
+      const CONNECTORS = ['Web','Sitemap','Files & PDF','Obsidian','RSS','Google Docs','Google Drive','OneDrive','Dropbox','Box','Notion','Confluence','GitBook','Coda','Slack','Discord','Telegram','Gmail','GitHub','GitLab','Bitbucket','Sentry','Linear','Jira','Asana','ClickUp','Trello','Todoist','Airtable','Zendesk','Intercom','Freshdesk','Front','HubSpot','Pipedrive','YouTube','Hacker News','Reddit','Readwise','Raindrop','Wispr Flow'];
+      function fill(rowId, list) {
+        const row = document.getElementById(rowId);
+        const html = list.map((c) => `<span class="chip"><span class="dot"></span>${c}</span>`).join('');
+        row.innerHTML = html + html; // duplicate for seamless loop
+      }
+      const half = Math.ceil(CONNECTORS.length / 2);
+      fill('row1', CONNECTORS.slice(0, half));
+      fill('row2', CONNECTORS.slice(half));
+
+      // Hero memory constellation
+      (function () {
+        const canvas = document.getElementById('constellation');
+        const ctx = canvas.getContext('2d');
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let w, h, dpr, nodes, pulses, raf;
+        const IRIS = 'oklch(0.55 0.2 264)';
+        const SPARK = 'oklch(0.76 0.16 68)';
+        function rand(a, b) { return a + (b - a) * (Math.sin(seed++ * 12.9898) * 43758.5453 % 1 + 1) / 2 % 1; }
+        let seed = 7;
+        function resize() {
+          const header = canvas.parentElement;
+          dpr = Math.min(window.devicePixelRatio || 1, 2);
+          w = header.clientWidth; h = header.clientHeight;
+          canvas.width = w * dpr; canvas.height = h * dpr;
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          const count = Math.max(24, Math.min(56, Math.floor((w * h) / 26000)));
+          nodes = Array.from({ length: count }, () => ({
+            x: Math.random() * w, y: Math.random() * h,
+            vx: (Math.random() - 0.5) * 0.22, vy: (Math.random() - 0.5) * 0.22,
+            r: 1.4 + Math.random() * 1.8,
+          }));
+          pulses = [];
         }
-      });
+        function step() {
+          ctx.clearRect(0, 0, w, h);
+          const R = 150;
+          for (const n of nodes) {
+            n.x += n.vx; n.y += n.vy;
+            if (n.x < 0 || n.x > w) n.vx *= -1;
+            if (n.y < 0 || n.y > h) n.vy *= -1;
+          }
+          // links
+          for (let i = 0; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+              const a = nodes[i], b = nodes[j];
+              const dx = a.x - b.x, dy = a.y - b.y;
+              const d = Math.hypot(dx, dy);
+              if (d < R) {
+                const alpha = (1 - d / R) * 0.18;
+                ctx.strokeStyle = `oklch(0.55 0.2 264 / ${alpha})`;
+                ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+              }
+            }
+          }
+          // nodes
+          for (const n of nodes) {
+            ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'oklch(0.55 0.2 264 / 0.55)'; ctx.fill();
+          }
+          // occasional retrieval pulse along an edge
+          if (!reduce && Math.random() < 0.03 && nodes.length > 2) {
+            const a = nodes[(Math.random() * nodes.length) | 0];
+            let b = nodes[(Math.random() * nodes.length) | 0];
+            if (a !== b && Math.hypot(a.x - b.x, a.y - b.y) < R) pulses.push({ a, b, t: 0 });
+          }
+          for (let k = pulses.length - 1; k >= 0; k--) {
+            const p = pulses[k]; p.t += 0.035;
+            if (p.t >= 1) { pulses.splice(k, 1); continue; }
+            const x = p.a.x + (p.b.x - p.a.x) * p.t, y = p.a.y + (p.b.y - p.a.y) * p.t;
+            ctx.beginPath(); ctx.arc(x, y, 2.6, 0, Math.PI * 2);
+            ctx.fillStyle = SPARK; ctx.shadowColor = SPARK; ctx.shadowBlur = 10; ctx.fill(); ctx.shadowBlur = 0;
+          }
+          raf = requestAnimationFrame(step);
+        }
+        resize();
+        window.addEventListener('resize', () => { cancelAnimationFrame(raf); resize(); if (!reduce) step(); else drawStatic(); });
+        function drawStatic() {
+          ctx.clearRect(0, 0, w, h);
+          for (const n of nodes) { ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fillStyle = 'oklch(0.55 0.2 264 / 0.4)'; ctx.fill(); }
+        }
+        if (reduce) drawStatic(); else step();
+      })();
     </script>
   </body>
 </html>
