@@ -60,6 +60,12 @@ export interface SearchQuery {
   /** Reorder the top results with the configured LLM (no-op if none). */
   rerank?: boolean;
   /**
+   * How the LLM reranker orders results: `listwise` (order them all at once) or
+   * `pointwise` (score each independently, then sort). Pointwise sharpens rank-1
+   * precision with a strong model. Default listwise.
+   */
+  rerankMode?: 'listwise' | 'pointwise';
+  /**
    * Hypothetical Document Embeddings: generate a hypothetical answer with the
    * LLM, embed it, and blend it with the query vector before searching. Improves
    * dense recall on short or specialized queries. No-op without an LLM.
