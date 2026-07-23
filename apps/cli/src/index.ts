@@ -300,6 +300,12 @@ async function cmdPlaybook(args: Args): Promise<void> {
   );
 }
 
+async function cmdDigest(args: Args): Promise<void> {
+  const cb = await getClient();
+  const { digest } = await cb.digest({ space: strFlag(args, 'space') });
+  out(digest.summary);
+}
+
 async function cmdTopics(args: Args): Promise<void> {
   const cb = await getClient();
   const { topics } = await cb.topics({ space: strFlag(args, 'space'), minCount: 1 });
@@ -329,6 +335,8 @@ function printHelp(): void {
   out('  playbook <topic>      Draft a cited playbook from your memories.');
   out(ui.dim('    --space <s>'));
   out('  topics                Show the topics your memories cluster into.');
+  out('  digest                Summarize what recently landed in the brain.');
+  out(ui.dim('    --space <s>'));
   out('  spaces                List spaces with document counts.');
   out('  status                Show API status (providers, counts).');
   out('  config                Show resolved configuration.');
@@ -362,6 +370,9 @@ async function main(): Promise<void> {
       break;
     case 'topics':
       await cmdTopics(args);
+      break;
+    case 'digest':
+      await cmdDigest(args);
       break;
     case 'spaces':
       await cmdSpaces();

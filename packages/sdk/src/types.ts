@@ -109,6 +109,12 @@ export interface TopicGroup {
   sample: { id: string; title: string | null }[];
 }
 
+export interface DigestResponse {
+  summary: string;
+  memories: { id: string; title: string | null; createdAt: string }[];
+  count: number;
+}
+
 export interface Space {
   id: string;
   name: string;
