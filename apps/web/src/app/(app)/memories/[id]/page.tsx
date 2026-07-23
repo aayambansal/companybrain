@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { api, type Memory } from '@/lib/api';
+import { api, type Memory, type SearchHit } from '@/lib/api';
 import { Badge, StatusDot, Button, Skeleton, EmptyState } from '@/components/ui';
 import { useToast } from '@/components/toast';
 import { timeAgo, hostname } from '@/lib/format';
@@ -14,6 +14,7 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
   const router = useRouter();
   const toast = useToast();
   const [memory, setMemory] = useState<Memory | null | 'missing'>(null);
+  const [related, setRelated] = useState<SearchHit[]>([]);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -21,6 +22,10 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
       .get<{ memory: Memory }>(`/v1/memories/${id}`)
       .then((r) => setMemory(r.memory))
       .catch(() => setMemory('missing'));
+    api
+      .get<{ related: SearchHit[] }>(`/v1/memories/${id}/related?limit=5`)
+      .then((r) => setRelated(r.related))
+      .catch(() => setRelated([]));
   }, [id]);
 
   async function remove() {
@@ -105,6 +110,25 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
               {memory.content}
             </div>
           </div>
+
+          {related.length > 0 && (
+            <div className="mt-6">
+              <h2 className="mb-2 font-mono text-[12px] uppercase tracking-wide text-ink-faint">Related</h2>
+              <ul className="space-y-2">
+                {related.map((h) => (
+                  <li key={h.documentId}>
+                    <Link
+                      href={`/memories/${h.documentId}`}
+                      className="block rounded-lg border border-border bg-surface px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-hover"
+                    >
+                      <p className="truncate text-[14px] font-medium text-ink">{h.document.title ?? 'Untitled'}</p>
+                      <p className="mt-1 line-clamp-1 text-[13px] text-ink-muted">{h.content.slice(0, 160)}</p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </article>
       )}
     </div>

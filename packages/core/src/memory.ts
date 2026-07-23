@@ -21,6 +21,7 @@ import type {
   Memory,
   SearchQuery,
   SearchResponse,
+  SearchHit,
   ChatResponse,
   SourceDocument,
 } from './types.js';
@@ -379,6 +380,31 @@ export class MemoryEngine {
       hits = await llmRerank(this.llm, query.q, hits);
     }
     return { query: query.q, mode, hits, tookMs: Date.now() - started };
+  }
+
+  /** Find memories similar to a given one (semantic "see also"), excluding itself. */
+  async related(orgId: string, documentId: string, limit = 5): Promise<SearchHit[]> {
+    const mem = await this.getMemory(orgId, documentId);
+    if (!mem?.content) return [];
+    const seed = mem.content.slice(0, 2000);
+    const queryEmbedding = await this.embedder.embedQuery(seed);
+    const hits = await hybridSearch(this.client.sql, {
+      orgId,
+      spaceId: mem.spaceId,
+      q: seed.slice(0, 500),
+      queryEmbedding,
+      mode: 'semantic',
+      limit: limit * 4,
+    });
+    const seen = new Set<string>([documentId]);
+    const out: SearchHit[] = [];
+    for (const h of hits) {
+      if (seen.has(h.documentId)) continue;
+      seen.add(h.documentId);
+      out.push(h);
+      if (out.length >= limit) break;
+    }
+    return out;
   }
 
   async chat(
