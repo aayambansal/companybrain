@@ -24,19 +24,25 @@ function SearchInner() {
   const [mode, setMode] = useState<Mode>('hybrid');
   const [res, setRes] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const run = useCallback(async (query: string, m: Mode) => {
     if (!query.trim()) {
       setRes(null);
+      setFailed(false);
       return;
     }
     setLoading(true);
+    setFailed(false);
     try {
       const r = await api.post<SearchResponse>('/v1/search', { q: query, mode: m, limit: 20 });
       setRes(r);
     } catch {
-      setRes({ query, mode: m, hits: [], tookMs: 0 });
+      // Distinguish a failed request from a genuinely empty result, so we never
+      // tell someone "nothing matched" when the search never actually ran.
+      setRes(null);
+      setFailed(true);
     } finally {
       setLoading(false);
     }
@@ -104,6 +110,8 @@ function SearchInner() {
               <Skeleton key={i} className="h-24 w-full" />
             ))}
           </div>
+        ) : failed ? (
+          <EmptyState title="search failed" description="Something went wrong reaching the index. Check the connection and try again." icon={<IconSearch size={28} />} />
         ) : !res ? (
           <EmptyState title="type a query" description="Try a question, a phrase, or a keyword." icon={<IconSearch size={28} />} />
         ) : res.hits.length === 0 ? (
