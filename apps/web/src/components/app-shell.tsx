@@ -63,6 +63,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     };
   }, [router]);
 
+  // Press "/" from anywhere (outside a text field) to jump to search.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = e.target as HTMLElement | null;
+      const tag = el?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || el?.isContentEditable) return;
+      e.preventDefault();
+      router.push('/search');
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [router]);
+
   if (state !== 'ready' || !me) {
     return (
       <div className="grid min-h-dvh place-items-center bg-bg">
