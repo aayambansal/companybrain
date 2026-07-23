@@ -16,12 +16,14 @@ import {
   IconSettings,
   IconLogout,
   IconLayers,
+  IconBook,
 } from './icons';
 
 const NAV = [
   { href: '/', label: 'Overview', icon: IconHome, exact: true },
   { href: '/search', label: 'Search', icon: IconSearch },
   { href: '/chat', label: 'Ask', icon: IconChat },
+  { href: '/playbooks', label: 'Playbooks', icon: IconBook },
   { href: '/memories', label: 'Memories', icon: IconMemory },
   { href: '/spaces', label: 'Spaces', icon: IconSpaces },
   { href: '/connections', label: 'Connections', icon: IconPlug },

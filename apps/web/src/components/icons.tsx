@@ -24,6 +24,13 @@ export const IconHome = (p: P) => (
     <path d="M9.5 20v-6h5v6" />
   </S>
 );
+export const IconBook = (p: P) => (
+  <S {...p}>
+    <path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H12v16H5.5A1.5 1.5 0 0 0 4 20.5Z" />
+    <path d="M20 4.5A1.5 1.5 0 0 0 18.5 3H12v16h6.5a1.5 1.5 0 0 1 1.5 1.5Z" />
+    <path d="M12 3v16" opacity="0.5" />
+  </S>
+);
 export const IconSearch = (p: P) => (
   <S {...p}>
     <circle cx="11" cy="11" r="7" />
