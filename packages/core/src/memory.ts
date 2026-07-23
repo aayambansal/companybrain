@@ -18,6 +18,7 @@ import { llmRerank, llmRerankPointwise } from './search/rerank.js';
 import { hypotheticalDocuments, blendVectors } from './search/hyde.js';
 import { generateAnswer } from './chat.js';
 import { generatePlaybook, type PlaybookResult } from './playbook.js';
+import { buildTopics, type Topic, type TopicRow } from './topics.js';
 import { enrichDocument } from './enrich.js';
 import { judgeSupersession, type SupersedeCandidate } from './temporal.js';
 import { dispatchWebhooks } from './webhooks.js';
@@ -609,6 +610,35 @@ export class MemoryEngine {
       if (out.length >= limit) break;
     }
     return out;
+  }
+
+  /**
+   * Background organization: group memories by their tags (topical tags from
+   * enrichment, plus people from meeting/chat connectors) to surface the
+   * projects, people, and themes running through the brain. Nothing to file.
+   */
+  async topics(
+    orgId: string,
+    opts: { spaceId?: string; spaceSlug?: string; limit?: number; minCount?: number } = {},
+  ): Promise<Topic[]> {
+    const sql = this.client.sql;
+    const spaceId =
+      opts.spaceId ?? (opts.spaceSlug ? await this.getOrCreateSpaceBySlug(orgId, opts.spaceSlug) : null);
+    const limit = Math.min(opts.limit ?? 24, 100);
+    const rows = await sql<TopicRow[]>`
+      SELECT tag,
+             count(*)::int AS count,
+             (array_agg(d.id::text ORDER BY d.created_at DESC))[1:3] AS sample_ids,
+             (array_agg(coalesce(d.title, '') ORDER BY d.created_at DESC))[1:3] AS sample_titles
+      FROM documents d, jsonb_array_elements_text(d.tags) AS tag
+      WHERE d.org_id = ${orgId}
+        AND d.superseded_by IS NULL
+        ${spaceId ? sql`AND d.space_id = ${spaceId}` : sql``}
+      GROUP BY tag
+      ORDER BY count DESC, tag ASC
+      LIMIT ${limit}
+    `;
+    return buildTopics(rows, { minCount: opts.minCount ?? 2 });
   }
 
   async chat(
