@@ -1,6 +1,9 @@
 export function timeAgo(iso: string): string {
   const then = new Date(iso).getTime();
-  const s = Math.max(1, Math.round((Date.now() - then) / 1000));
+  if (Number.isNaN(then)) return 'unknown';
+  const s = Math.round((Date.now() - then) / 1000);
+  // Future timestamps (clock skew) and sub-second deltas read as "just now".
+  if (s < 1) return 'just now';
   if (s < 60) return `${s}s ago`;
   const m = Math.round(s / 60);
   if (m < 60) return `${m}m ago`;
