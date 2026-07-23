@@ -155,8 +155,12 @@ Design notes: [docs/architecture.md](./docs/architecture.md).
 | Intercom              | `intercom` | `[core]`    |
 | Trello                | `trello`   | `[core]`    |
 | Airtable              | `airtable` | `[core]`    |
+| GitLab                | `gitlab`   | `[core]`    |
+| Asana                 | `asana`    | `[core]`    |
+| Readwise              | `readwise` | `[core]`    |
+| Raindrop.io           | `raindrop` | `[core]`    |
 
-Twenty-four connectors and counting. Configure and sync them from the dashboard under Connections. See
+Twenty-eight connectors and counting. Configure and sync them from the dashboard under Connections. See
 [docs/connectors.md](./docs/connectors.md) to write your own.
 
 ## Clients
