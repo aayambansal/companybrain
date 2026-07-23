@@ -61,6 +61,15 @@ app.get('/:id', async (c) => {
   return c.json({ memory });
 });
 
+// Similar memories ("see also").
+app.get('/:id/related', async (c) => {
+  const auth = c.get('auth');
+  const engine = getEngine();
+  const limit = Math.min(Number.parseInt(c.req.query('limit') ?? '5', 10) || 5, 20);
+  const related = await engine.related(auth.orgId, c.req.param('id'), limit);
+  return c.json({ related });
+});
+
 const patchSchema = z.object({
   title: z.string().max(500).optional(),
   content: z.string().optional(),
