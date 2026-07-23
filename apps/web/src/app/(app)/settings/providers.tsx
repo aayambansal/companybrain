@@ -21,6 +21,7 @@ interface ProvidersResponse {
 export function ProvidersSection() {
   const toast = useToast();
   const [data, setData] = useState<ProvidersResponse | null>(null);
+  const [reindexing, setReindexing] = useState(false);
 
   async function load() {
     try {
@@ -32,6 +33,19 @@ export function ProvidersSection() {
   useEffect(() => {
     load();
   }, []);
+
+  async function reindex() {
+    if (!confirm('Re-embed every memory with the current embedding provider? This runs in the background.')) return;
+    setReindexing(true);
+    try {
+      const r = await api.post<{ documents: number }>('/v1/reindex');
+      toast('success', `Re-indexing ${r.documents} memories in the background.`);
+    } catch {
+      toast('error', 'Could not start re-indexing.');
+    } finally {
+      setReindexing(false);
+    }
+  }
 
   return (
     <section>
@@ -62,6 +76,12 @@ export function ProvidersSection() {
             toast={toast}
             warn="Changing this does not re-embed existing memories. Re-index for comparable scores."
           />
+          <div className="flex items-center justify-between rounded-lg border border-dashed border-border px-4 py-3">
+            <p className="text-[13px] text-ink-muted">Re-embed every memory with the current embedding provider.</p>
+            <Button variant="secondary" size="sm" onClick={reindex} loading={reindexing}>
+              Re-index all
+            </Button>
+          </div>
         </div>
       )}
     </section>

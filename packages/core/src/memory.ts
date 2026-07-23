@@ -279,6 +279,32 @@ export class MemoryEngine {
     return res.length > 0;
   }
 
+  /**
+   * Re-chunk and re-embed every document (optionally in one space). Needed after
+   * switching the embedding provider so all vectors are comparable. Runs
+   * sequentially; a single failing document does not abort the rest.
+   */
+  async reindexAll(
+    orgId: string,
+    opts: { spaceId?: string; onProgress?: (done: number, total: number) => void } = {},
+  ): Promise<{ documents: number; failed: number }> {
+    const conds = [eq(documents.orgId, orgId)];
+    if (opts.spaceId) conds.push(eq(documents.spaceId, opts.spaceId));
+    const rows = await this.db.select({ id: documents.id }).from(documents).where(and(...conds));
+    let failed = 0;
+    let done = 0;
+    for (const r of rows) {
+      try {
+        await indexDocument(this.db, this.embedder, this.config, r.id);
+      } catch {
+        failed += 1;
+      }
+      done += 1;
+      opts.onProgress?.(done, rows.length);
+    }
+    return { documents: rows.length, failed };
+  }
+
   // ── Search & chat ─────────────────────────────────────────────────────────
 
   async search(orgId: string, query: SearchQuery): Promise<SearchResponse> {
