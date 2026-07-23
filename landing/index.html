@@ -138,6 +138,8 @@
       .console-bar .title { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
       .console-bar .live { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11.5px; color: var(--iris-strong); }
       .console-bar .live .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--iris); box-shadow: 0 0 0 4px var(--iris-soft); animation: breathe 2.4s var(--ease) infinite; }
+      .console-bar .live.done { color: var(--spark-ink); }
+      .console-bar .live.done .dot { background: var(--spark); box-shadow: 0 0 0 4px oklch(0.77 0.16 66 / 0.18); animation: none; }
       @keyframes breathe { 50% { box-shadow: 0 0 0 7px transparent; } }
 
       .console-body { display: grid; grid-template-columns: 1fr 1fr; }
@@ -375,7 +377,7 @@
           <div class="console-bar">
             <span class="dots"><i></i><i></i><i></i></span>
             <span class="title">companybrain / ask</span>
-            <span class="live"><span class="dot"></span> retrieving</span>
+            <span class="live" id="liveStatus"><span class="dot"></span> <span class="txt">retrieving</span></span>
           </div>
           <div class="console-body">
             <div class="console-left">
@@ -680,7 +682,14 @@
         var citesEl = document.getElementById('cites');
         var answerEl = document.getElementById('answer');
         var chipsEl = document.getElementById('chips');
+        var liveEl = document.getElementById('liveStatus');
         if (!graph) return;
+
+        function setStatus(state) {
+          if (!liveEl) return;
+          liveEl.classList.toggle('done', state === 'answered');
+          liveEl.querySelector('.txt').textContent = state;
+        }
 
         // Build edges then nodes
         var nodeEls = {};
@@ -780,6 +789,7 @@
           citesEl.classList.remove('show');
           citesEl.innerHTML = '';
           answerEl.classList.add('thinking');
+          setStatus('retrieving');
 
           if (reduce) {
             // Static resolved state, no animation
@@ -788,6 +798,7 @@
             aText.innerHTML = item.answer;
             renderCites(item);
             answerEl.classList.remove('thinking');
+            setStatus('answered');
             return;
           }
 
@@ -813,6 +824,7 @@
                 if (myGen !== gen) return;
                 answerEl.classList.remove('thinking');
                 renderCites(item);
+                setStatus('answered');
               });
             }, 220 * item.nodes.length + 320);
           });
