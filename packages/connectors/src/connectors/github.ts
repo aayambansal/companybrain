@@ -99,6 +99,11 @@ export const githubConnector: Connector = {
       `https://api.github.com/repos/${repo}/git/trees/${encodeURIComponent(branch)}?recursive=1`,
       { headers, signal: ctx.signal },
     );
+    if (tree.truncated) {
+      // GitHub caps a single recursive tree call (~100k entries / 7MB). Surface
+      // it so a partial index of a very large repo is not mistaken for a full one.
+      ctx.log?.('repo tree truncated by GitHub; some files were not indexed', { repo, branch });
+    }
     const paths = selectIndexablePaths(tree.tree, exts);
     ctx.log?.('indexing files', { count: paths.length });
 
