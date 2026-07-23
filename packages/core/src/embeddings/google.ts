@@ -19,6 +19,7 @@ export class GoogleEmbeddingProvider implements EmbeddingProvider {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:embedContent?key=${this.apiKey}`;
       const res = await fetch(url, {
         method: 'POST',
+        signal: AbortSignal.timeout(30_000),
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: `models/${this.model}`,
