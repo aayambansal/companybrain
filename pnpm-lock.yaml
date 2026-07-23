@@ -20,6 +20,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@companybrain/connectors':
+        specifier: workspace:*
+        version: link:../../packages/connectors
       '@companybrain/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -231,6 +234,8 @@ importers:
       typescript:
         specifier: ^5.6.2
         version: 5.9.3
+
+  packages/launcher: {}
 
   packages/sdk:
     devDependencies:
