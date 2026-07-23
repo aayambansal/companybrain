@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { freshdeskTicketDoc } from './freshdesk.js';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { freshdeskTicketDoc, freshdeskConnector } from './freshdesk.js';
 
 describe('freshdeskTicketDoc', () => {
   const ticket = {
@@ -35,5 +35,33 @@ describe('freshdeskTicketDoc', () => {
     expect(doc.content).toBe('');
     expect(doc.sourceUrl).toBe('https://acme.freshdesk.com/a/tickets/9');
     expect(doc.sourceCreatedAt).toBeUndefined();
+  });
+});
+
+describe('freshdeskConnector pull pagination', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('walks pages until an empty page and yields every ticket', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        const page = Number(String(url).match(/[?&]page=(\d+)/)?.[1] ?? '1');
+        const body =
+          page === 1
+            ? [
+                { id: 1, subject: 'A' },
+                { id: 2, subject: 'B' },
+              ]
+            : [];
+        return { ok: true, json: async () => body } as Response;
+      }),
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ctx = { config: { domain: 'acme', apiKey: 'k' }, log: () => {} } as any;
+    const ids: string[] = [];
+    for await (const d of freshdeskConnector.pull(ctx)) ids.push(d.sourceId!);
+
+    expect(ids).toEqual(['1', '2']);
   });
 });
