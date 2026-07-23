@@ -145,9 +145,9 @@ class AsyncCompanyBrain:
             buffer = _c.SSEBuffer()
             async for chunk in response.aiter_text():
                 for frame in buffer.push(chunk):
-                    yield frame
+                    yield _c.decode_stream_frame(frame)
             for frame in buffer.flush():
-                yield frame
+                yield _c.decode_stream_frame(frame)
 
     async def status(self) -> Dict[str, Any]:
         return await self.request("GET", "/v1/status")

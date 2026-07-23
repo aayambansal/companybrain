@@ -7,6 +7,7 @@ behaviour.
 
 from __future__ import annotations
 
+import json
 import os
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -241,3 +242,21 @@ class SSEBuffer:
             return []
         parsed = parse_sse_frame(remainder)
         return [parsed] if parsed is not None else []
+
+
+def decode_stream_frame(frame: Tuple[str, str]) -> Tuple[str, str]:
+    """Decode a ``token`` frame's JSON-encoded payload back to text.
+
+    The server JSON-encodes token data so significant whitespace and newlines
+    survive SSE line framing. Citations stay a JSON string for the caller to
+    parse. Falls back to the raw value for older servers or malformed frames.
+    """
+    event, data = frame
+    if event == "token":
+        try:
+            decoded = json.loads(data)
+        except ValueError:
+            return frame
+        if isinstance(decoded, str):
+            return (event, decoded)
+    return frame
