@@ -163,6 +163,13 @@ Twenty connectors and counting. Configure and sync them from the dashboard under
 - MCP: point Claude Desktop / Cursor at the server (`npx companybrain mcp` prints the config)
 - Chrome extension: save any page or selection to your brain
 
+## Framework integrations
+
+Drop your company memory into the tools you already use:
+
+- LangChain / LangGraph: `@companybrain/langchain` — a `CompanyBrainRetriever`
+- Vercel AI SDK: `@companybrain/ai-sdk` — `searchMemory` / `askMemory` / `addMemory` tools
+
 ## Deploy
 
 `docker compose up` or `npx companybrain` locally; or one-click to a cloud with the included
