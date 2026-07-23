@@ -14,6 +14,7 @@ const addSchema = z.object({
   sourceUrl: z.string().url().optional(),
   sourceType: z.string().optional(),
   metadata: z.record(z.unknown()).optional(),
+  dedupe: z.boolean().optional(),
 });
 
 app.post('/', async (c) => {
@@ -36,6 +37,7 @@ app.post('/', async (c) => {
     sourceUrl: d.sourceUrl,
     sourceType: d.sourceType,
     metadata: d.metadata,
+    dedupe: d.dedupe,
   });
   return c.json({ memory }, 201);
 });

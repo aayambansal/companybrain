@@ -13,6 +13,7 @@ import { indexDocument, findBySource } from './ingest.js';
 import { hybridSearch } from './search/hybrid.js';
 import { llmRerank } from './search/rerank.js';
 import { generateAnswer } from './chat.js';
+import { enrichDocument } from './enrich.js';
 import { contentHash } from './text/hash.js';
 import { normalizeText, markdownToText, htmlToText } from './text/normalize.js';
 import type {
@@ -38,6 +39,8 @@ export interface AddMemoryInput {
   connectionId?: string;
   tags?: string[];
   metadata?: Record<string, unknown>;
+  /** Skip creating a new memory if an identical one already exists in the space. */
+  dedupe?: boolean;
 }
 
 export interface ListMemoriesInput {
@@ -133,6 +136,19 @@ export class MemoryEngine {
       spaceSlug: input.spaceSlug,
     });
     const normalized = this.normalizeContent(input.content, input.format);
+    const hash = contentHash(normalized);
+
+    // Optional dedupe: return an existing identical memory in the same space
+    // instead of storing a duplicate.
+    if (input.dedupe) {
+      const [dupe] = await this.db
+        .select({ id: documents.id })
+        .from(documents)
+        .where(and(eq(documents.orgId, input.orgId), eq(documents.spaceId, spaceId), eq(documents.contentHash, hash)))
+        .limit(1);
+      if (dupe) return this.getMemory(input.orgId, dupe.id) as Promise<Memory>;
+    }
+
     const [doc] = await this.db
       .insert(documents)
       .values({
@@ -145,7 +161,7 @@ export class MemoryEngine {
         sourceUrl: input.sourceUrl ?? null,
         title: input.title ?? deriveTitle(normalized),
         content: normalized,
-        contentHash: contentHash(normalized),
+        contentHash: hash,
         tags: input.tags ?? [],
         metadata: input.metadata ?? {},
         status: 'pending',
@@ -154,7 +170,34 @@ export class MemoryEngine {
     if (!doc) throw new Error('failed to insert document');
 
     await indexDocument(this.db, this.embedder, this.config, doc.id);
+    await this.enrichDocumentRow(doc.id, doc.title, normalized, input.tags ?? [], input.metadata ?? {});
     return this.getMemory(input.orgId, doc.id) as Promise<Memory>;
+  }
+
+  /**
+   * Best-effort LLM enrichment of a stored document: writes a summary, merges
+   * auto-tags, and stashes extracted facts in metadata. No-op without an LLM.
+   */
+  private async enrichDocumentRow(
+    documentId: string,
+    title: string | null,
+    content: string,
+    existingTags: string[],
+    existingMeta: Record<string, unknown>,
+  ): Promise<void> {
+    if (!this.config.enrich.enabled || !this.llm.available) return;
+    const enrichment = await enrichDocument(this.llm, { title, content });
+    if (!enrichment.summary && !enrichment.tags && !enrichment.facts) return;
+    const mergedTags = Array.from(new Set([...existingTags, ...(enrichment.tags ?? [])])).slice(0, 20);
+    await this.db
+      .update(documents)
+      .set({
+        summary: enrichment.summary ?? undefined,
+        tags: mergedTags,
+        metadata: { ...existingMeta, ...(enrichment.facts ? { facts: enrichment.facts } : {}) },
+        updatedAt: new Date(),
+      })
+      .where(eq(documents.id, documentId));
   }
 
   /** Insert-or-update a connector document by (connectionId, sourceId). */
@@ -186,6 +229,7 @@ export class MemoryEngine {
         })
         .where(eq(documents.id, existing.id));
       await indexDocument(this.db, this.embedder, this.config, existing.id);
+      await this.enrichDocumentRow(existing.id, src.title ?? null, normalized, src.tags ?? [], src.metadata ?? {});
       return { documentId: existing.id, action: 'updated' };
     }
 
@@ -211,6 +255,7 @@ export class MemoryEngine {
       .returning();
     if (!doc) throw new Error('failed to insert connector document');
     await indexDocument(this.db, this.embedder, this.config, doc.id);
+    await this.enrichDocumentRow(doc.id, src.title ?? null, normalized, src.tags ?? [], src.metadata ?? {});
     return { documentId: doc.id, action: 'created' };
   }
 

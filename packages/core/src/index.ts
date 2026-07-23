@@ -30,6 +30,7 @@ export { hybridSearch } from './search/hybrid.js';
 export { reciprocalRankFusion } from './search/rrf.js';
 export { llmRerank, applyRerankOrder, parseOrder } from './search/rerank.js';
 
-// Ingest & chat
+// Ingest, chat & enrichment
 export { indexDocument, findBySource } from './ingest.js';
 export { generateAnswer, extractiveAnswer, buildContext, toCitations } from './chat.js';
+export { enrichDocument, parseEnrichment, type Enrichment } from './enrich.js';
