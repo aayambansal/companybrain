@@ -1,0 +1,14 @@
+**/node_modules
+**/.next
+**/dist
+**/build
+**/.turbo
+**/*.tsbuildinfo
+.git
+.github
+tmp
+.docker-data
+pgdata
+**/.venv
+**/__pycache__
+*.log
