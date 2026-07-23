@@ -80,6 +80,36 @@ export function openapiDocument(version: string): Record<string, unknown> {
         },
       },
       '/v1/chat/stream': { post: { summary: 'RAG answer, streamed over SSE', responses: { 200: { description: 'text/event-stream' } } } },
+      '/v1/playbooks': {
+        post: {
+          summary: 'Synthesize a cited playbook from memories on a topic',
+          requestBody: {
+            content: json({
+              type: 'object',
+              required: ['topic'],
+              properties: {
+                topic: { type: 'string' },
+                space: { type: 'string' },
+                spaceId: { type: 'string' },
+                limit: { type: 'integer' },
+                save: { type: 'boolean' },
+              },
+            }),
+          },
+          responses: { 201: { description: 'playbook' } },
+        },
+      },
+      '/v1/topics': {
+        get: {
+          summary: 'Group memories by tag into topics',
+          parameters: [
+            { name: 'space', in: 'query', schema: { type: 'string' } },
+            { name: 'limit', in: 'query', schema: { type: 'integer' } },
+            { name: 'minCount', in: 'query', schema: { type: 'integer' } },
+          ],
+          responses: { 200: { description: 'topics' } },
+        },
+      },
       '/v1/spaces': {
         get: { summary: 'List spaces', responses: { 200: { description: 'ok' } } },
         post: { summary: 'Create a space', responses: { 201: { description: 'created' } } },
