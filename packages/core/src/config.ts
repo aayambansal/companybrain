@@ -42,6 +42,12 @@ export interface EngineConfig {
     /** Hypothetical passages to generate and average when hyde search is requested. */
     samples: number;
   };
+  rrf: {
+    /** RRF weight on the vector arm in hybrid fusion (>=1 favors semantic matches). */
+    vectorWeight: number;
+    /** RRF weight on the keyword arm in hybrid fusion. */
+    keywordWeight: number;
+  };
 }
 
 function env(key: string, fallback = ''): string {
@@ -90,6 +96,10 @@ export function loadConfig(overrides: Partial<EngineConfig> = {}): EngineConfig 
     },
     hyde: {
       samples: intEnv('HYDE_SAMPLES', 1),
+    },
+    rrf: {
+      vectorWeight: intEnv('RRF_VECTOR_WEIGHT', 2),
+      keywordWeight: intEnv('RRF_KEYWORD_WEIGHT', 1),
     },
   };
   return { ...base, ...overrides };
