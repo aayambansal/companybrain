@@ -32,17 +32,53 @@ export default function PlaybooksPage() {
     setTopic(q);
     setBusy(true);
     setError(null);
+    setPlaybook({ title: q, content: '', citations: [] });
     try {
-      const res = await fetch(`${API_URL}/v1/playbooks`, {
+      const res = await fetch(`${API_URL}/v1/playbooks/stream`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic: q, limit: 12 }),
       });
-      if (!res.ok) throw new Error('failed');
-      const data = (await res.json()) as { playbook: Playbook };
-      setPlaybook(data.playbook);
+      if (!res.ok || !res.body) throw new Error('failed');
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let content = '';
+      let citations: Citation[] = [];
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const frames = buffer.split('\n\n');
+        buffer = frames.pop() ?? '';
+        for (const frame of frames) {
+          let event = 'message';
+          let data = '';
+          for (const line of frame.split('\n')) {
+            if (line.startsWith('event:')) event = line.slice(6).trim();
+            else if (line.startsWith('data:')) data += line.slice(5).trim();
+          }
+          if (event === 'citations') {
+            try {
+              citations = JSON.parse(data) as Citation[];
+            } catch {
+              /* ignore */
+            }
+          } else if (event === 'token') {
+            try {
+              content += JSON.parse(data) as string;
+            } catch {
+              content += data;
+            }
+            const snapshot = content;
+            setPlaybook({ title: q, content: snapshot, citations });
+          }
+        }
+      }
+      setPlaybook({ title: q, content, citations });
     } catch {
+      setPlaybook(null);
       setError('Could not generate a playbook. Is the API reachable and an LLM configured?');
     } finally {
       setBusy(false);

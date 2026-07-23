@@ -17,7 +17,7 @@ export interface PlaybookResult {
   usedHits: SearchHit[];
 }
 
-const SYSTEM = `You write internal playbooks for a team from its own knowledge base.
+export const PLAYBOOK_SYSTEM = `You write internal playbooks for a team from its own knowledge base.
 
 Produce a clear, well-structured Markdown document that a teammate could read on Monday and act on. Use these sections when the context supports them, and omit any you cannot ground in the context:
 
@@ -66,7 +66,7 @@ export async function generatePlaybook(
     };
   }
   const content = await llm.complete({
-    system: SYSTEM,
+    system: PLAYBOOK_SYSTEM,
     temperature: 0.3,
     maxTokens: 1600,
     messages: [{ role: 'user', content: buildPlaybookPrompt(topic, buildContext(hits)) }],
