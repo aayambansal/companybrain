@@ -12,6 +12,7 @@ interface BoxItem {
 
 interface BoxItems {
   entries?: BoxItem[];
+  total_count?: number;
 }
 
 /** Pure: turn a Box item plus its text into a SourceDocument. Unit-testable. */
@@ -85,23 +86,38 @@ export const boxConnector: Connector = {
     while (queue.length) {
       if (ctx.signal?.aborted) return;
       const folderId = queue.shift()!;
-      const params = new URLSearchParams({ fields: 'id,name,type,modified_at', limit: '1000' });
-      const page = await fetchJson<BoxItems>(`${API_BASE}/folders/${folderId}/items?${params}`, {
-        headers,
-        signal: ctx.signal,
-      });
-      for (const item of page.entries ?? []) {
+      // Box returns at most `limit` items per call; page with `offset` so folders
+      // with more than 1000 direct children are listed in full.
+      const LIMIT = 1000;
+      let offset = 0;
+      for (;;) {
         if (ctx.signal?.aborted) return;
-        if (item.type === 'folder' && item.id) {
-          queue.push(item.id);
-        } else if (isTextItem(item)) {
-          try {
-            const text = await downloadText(item, headers, ctx.signal);
-            yield boxItemToDoc(item, text);
-          } catch (err) {
-            ctx.log?.('skipped box file', { id: item.id, error: String(err) });
+        const params = new URLSearchParams({
+          fields: 'id,name,type,modified_at',
+          limit: String(LIMIT),
+          offset: String(offset),
+        });
+        const page = await fetchJson<BoxItems>(`${API_BASE}/folders/${folderId}/items?${params}`, {
+          headers,
+          signal: ctx.signal,
+        });
+        const entries = page.entries ?? [];
+        for (const item of entries) {
+          if (ctx.signal?.aborted) return;
+          if (item.type === 'folder' && item.id) {
+            queue.push(item.id);
+          } else if (isTextItem(item)) {
+            try {
+              const text = await downloadText(item, headers, ctx.signal);
+              yield boxItemToDoc(item, text);
+            } catch (err) {
+              ctx.log?.('skipped box file', { id: item.id, error: String(err) });
+            }
           }
         }
+        offset += entries.length;
+        if (entries.length < LIMIT || (page.total_count != null && offset >= page.total_count))
+          break;
       }
     }
   },
