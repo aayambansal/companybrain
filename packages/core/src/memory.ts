@@ -15,7 +15,7 @@ import { describeVideo, type VideoOptions, type VideoResult } from './video.js';
 import { indexDocument, findBySource } from './ingest.js';
 import { hybridSearch } from './search/hybrid.js';
 import { llmRerank } from './search/rerank.js';
-import { hypotheticalDocument, blendVectors } from './search/hyde.js';
+import { hypotheticalDocuments, blendVectors } from './search/hyde.js';
 import { generateAnswer } from './chat.js';
 import { enrichDocument } from './enrich.js';
 import { judgeSupersession, type SupersedeCandidate } from './temporal.js';
@@ -519,12 +519,12 @@ export class MemoryEngine {
     const mode = query.mode ?? 'hybrid';
     const needsVector = mode === 'hybrid' || mode === 'semantic';
     let queryEmbedding = needsVector ? await this.embedder.embedQuery(query.q) : [];
-    // HyDE: blend the query vector with the embedding of a hypothetical answer.
+    // HyDE: blend the query vector with the embedding(s) of hypothetical answers.
     if (query.hyde && needsVector && this.llm.available) {
-      const hypo = await hypotheticalDocument(this.llm, query.q);
-      if (hypo) {
-        const hydeEmbedding = await this.embedder.embedQuery(hypo);
-        queryEmbedding = blendVectors([queryEmbedding, hydeEmbedding]);
+      const hypos = await hypotheticalDocuments(this.llm, query.q, this.config.hyde.samples);
+      if (hypos.length > 0) {
+        const hydeEmbeddings = await Promise.all(hypos.map((h) => this.embedder.embedQuery(h)));
+        queryEmbedding = blendVectors([queryEmbedding, ...hydeEmbeddings]);
       }
     }
     let hits = await hybridSearch(this.client.sql, {
