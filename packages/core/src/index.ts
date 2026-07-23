@@ -28,6 +28,7 @@ export type { LlmProvider, LlmMessage, CompleteOptions } from './llm/index.js';
 // Search
 export { hybridSearch } from './search/hybrid.js';
 export { reciprocalRankFusion } from './search/rrf.js';
+export { llmRerank, applyRerankOrder, parseOrder } from './search/rerank.js';
 
 // Ingest & chat
 export { indexDocument, findBySource } from './ingest.js';

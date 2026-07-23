@@ -11,6 +11,7 @@ import { createEmbeddingProvider, type EmbeddingProvider } from './embeddings/in
 import { createLlmProvider, type LlmProvider } from './llm/index.js';
 import { indexDocument, findBySource } from './ingest.js';
 import { hybridSearch } from './search/hybrid.js';
+import { llmRerank } from './search/rerank.js';
 import { generateAnswer } from './chat.js';
 import { contentHash } from './text/hash.js';
 import { normalizeText, markdownToText, htmlToText } from './text/normalize.js';
@@ -313,7 +314,7 @@ export class MemoryEngine {
     const mode = query.mode ?? 'hybrid';
     const needsVector = mode === 'hybrid' || mode === 'semantic';
     const queryEmbedding = needsVector ? await this.embedder.embedQuery(query.q) : [];
-    const hits = await hybridSearch(this.client.sql, {
+    let hits = await hybridSearch(this.client.sql, {
       orgId,
       spaceId,
       q: query.q,
@@ -323,6 +324,9 @@ export class MemoryEngine {
       tags: query.tags,
       minScore: query.minScore,
     });
+    if (query.rerank && this.llm.available) {
+      hits = await llmRerank(this.llm, query.q, hits);
+    }
     return { query: query.q, mode, hits, tookMs: Date.now() - started };
   }
 
