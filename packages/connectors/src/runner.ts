@@ -14,6 +14,16 @@ interface SyncStats {
 }
 
 /**
+ * Pure: decide a sync run's final status. A fatal (stream) error or per-document
+ * failures downgrade to `partial` when anything still synced, else `error`; a
+ * clean run is `success`. `synced` = documents added + skipped (already current).
+ */
+export function resolveSyncStatus(opts: { fatal: boolean; failed: number; synced: number }): SyncStatus {
+  if (opts.fatal || opts.failed > 0) return opts.synced > 0 ? 'partial' : 'error';
+  return 'success';
+}
+
+/**
  * Run one connector sync for a configured connection and record the outcome.
  *
  * Resolves the connector by `connection.connector`, resolves the target space,
@@ -82,10 +92,7 @@ export async function runConnectorSync(
   }
 
   const synced = stats.documents + stats.skipped;
-  let status: SyncStatus;
-  if (fatal) status = synced > 0 ? 'partial' : 'error';
-  else if (stats.failed > 0) status = synced > 0 ? 'partial' : 'error';
-  else status = 'success';
+  const status = resolveSyncStatus({ fatal: fatal !== null, failed: stats.failed, synced });
 
   const errorLines = fatal ? [fatal, ...errors] : errors;
   await finishRun(engine, syncRun.id, connection.id, status, stats, errorLines);
