@@ -25,6 +25,29 @@ export default function PlaybooksPage() {
   const [busy, setBusy] = useState(false);
   const [playbook, setPlaybook] = useState<Playbook | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function copyMarkdown() {
+    if (!playbook) return;
+    try {
+      await navigator.clipboard.writeText(playbook.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* clipboard blocked */
+    }
+  }
+
+  function downloadMarkdown() {
+    if (!playbook) return;
+    const slug = (playbook.title || 'playbook').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'playbook';
+    const url = URL.createObjectURL(new Blob([playbook.content], { type: 'text/markdown' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${slug}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   async function generate(t?: string) {
     const q = (t ?? topic).trim();
@@ -152,9 +175,17 @@ export default function PlaybooksPage() {
             <Badge tone="primary" mono>
               playbook
             </Badge>
-            <button onClick={() => generate()} className="text-[13px] text-ink-faint hover:text-ink">
-              Regenerate
-            </button>
+            <div className="flex items-center gap-4">
+              <button onClick={copyMarkdown} className="text-[13px] text-ink-faint hover:text-ink">
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+              <button onClick={downloadMarkdown} className="text-[13px] text-ink-faint hover:text-ink">
+                Download .md
+              </button>
+              <button onClick={() => generate()} className="text-[13px] text-ink-faint hover:text-ink">
+                Regenerate
+              </button>
+            </div>
           </div>
           <div className="px-6 py-6 sm:px-8">
             <Markdown source={playbook.content} />
