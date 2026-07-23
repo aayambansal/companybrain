@@ -138,7 +138,7 @@ Design notes: [docs/architecture.md](./docs/architecture.md).
 | Notion                | `notion`   | `[core]`    |
 | Slack                 | `slack`    | `[core]`    |
 | GitHub                | `github`   | `[core]`    |
-| Google Docs / Drive   | `google`   | `[planned]` |
+| Google Docs (shared)  | `googledocs`| `[core]`    |
 
 Configure and sync them from the dashboard under Connections. See
 [docs/connectors.md](./docs/connectors.md) to write your own.

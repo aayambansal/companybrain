@@ -7,6 +7,7 @@ import { rssConnector } from './rss.js';
 import { githubConnector } from './github.js';
 import { notionConnector } from './notion.js';
 import { slackConnector } from './slack.js';
+import { googleDocsConnector } from './googledocs.js';
 
 /** Every built-in connector, in a stable order. */
 export const connectors: Connector[] = [
@@ -18,6 +19,7 @@ export const connectors: Connector[] = [
   githubConnector,
   notionConnector,
   slackConnector,
+  googleDocsConnector,
 ];
 
 /** Look up a connector by its stable id. */
@@ -40,3 +42,4 @@ export { rssConnector, parseRss } from './rss.js';
 export { githubConnector, selectIndexablePaths } from './github.js';
 export { notionConnector, blocksToText, notionPageTitle } from './notion.js';
 export { slackConnector, slackMessageDoc } from './slack.js';
+export { googleDocsConnector, extractGoogleDocId } from './googledocs.js';
