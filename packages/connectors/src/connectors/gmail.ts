@@ -112,20 +112,31 @@ export const gmailConnector: Connector = {
     const max = Number(ctx.config.max ?? 0);
     const headers = { authorization: `Bearer ${token}` };
 
-    const params = new URLSearchParams({ q: query });
-    if (max > 0) params.set('maxResults', String(max));
-    const list = await fetchJson<{ messages?: { id: string }[] }>(
-      `https://gmail.googleapis.com/gmail/v1/users/me/messages?${params}`,
-      { headers, signal: ctx.signal },
-    );
-
-    for (const m of list.messages ?? []) {
+    // Gmail returns at most 500 message ids per page and a nextPageToken for the
+    // rest; follow it so large mailboxes are fully indexed (max=0 means no cap).
+    let fetched = 0;
+    let pageToken: string | undefined;
+    do {
       if (ctx.signal?.aborted) return;
-      const full = await fetchJson<GmailMessage>(
-        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}?format=full`,
+      const params = new URLSearchParams({ q: query });
+      params.set('maxResults', String(max > 0 ? Math.min(500, max - fetched) : 500));
+      if (pageToken) params.set('pageToken', pageToken);
+      const list = await fetchJson<{ messages?: { id: string }[]; nextPageToken?: string }>(
+        `https://gmail.googleapis.com/gmail/v1/users/me/messages?${params}`,
         { headers, signal: ctx.signal },
       );
-      yield parseGmailMessage(full);
-    }
+
+      for (const m of list.messages ?? []) {
+        if (ctx.signal?.aborted) return;
+        const full = await fetchJson<GmailMessage>(
+          `https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}?format=full`,
+          { headers, signal: ctx.signal },
+        );
+        yield parseGmailMessage(full);
+        fetched += 1;
+        if (max > 0 && fetched >= max) return;
+      }
+      pageToken = list.nextPageToken;
+    } while (pageToken);
   },
 };
