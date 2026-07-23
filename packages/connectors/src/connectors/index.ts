@@ -40,6 +40,9 @@ import { freshdeskConnector } from './freshdesk.js';
 import { pipedriveConnector } from './pipedrive.js';
 import { raindropConnector } from './raindrop.js';
 import { wisprFlowConnector } from './wisprflow.js';
+import { granolaConnector } from './granola.js';
+import { fathomConnector } from './fathom.js';
+import { raycastConnector } from './raycast.js';
 
 /** Every built-in connector, in a stable order. */
 export const connectors: Connector[] = [
@@ -84,6 +87,9 @@ export const connectors: Connector[] = [
   freshdeskConnector,
   pipedriveConnector,
   wisprFlowConnector,
+  granolaConnector,
+  fathomConnector,
+  raycastConnector,
 ];
 
 /** Look up a connector by its stable id. */
@@ -139,3 +145,6 @@ export { sentryConnector, sentryIssueDoc } from './sentry.js';
 export { freshdeskConnector, freshdeskTicketDoc } from './freshdesk.js';
 export { pipedriveConnector, pipedriveNoteDoc } from './pipedrive.js';
 export { wisprFlowConnector, wisprFlowEntryDoc, parseWisprFlowExport } from './wisprflow.js';
+export { granolaConnector, granolaMeetingDoc, parseGranolaExport } from './granola.js';
+export { fathomConnector, fathomCallDoc, parseFathomExport } from './fathom.js';
+export { raycastConnector, raycastNote } from './raycast.js';

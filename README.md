@@ -167,7 +167,8 @@ Configure and sync any of these from the dashboard under Connections.
 | YouTube | Hacker News | Readwise | Raindrop.io |
 | Zendesk | Intercom | Freshdesk | Front |
 | HubSpot | Pipedrive | GitLab | Bitbucket |
-| Sentry | Wispr Flow | | |
+| Sentry | Wispr Flow | Granola | Fathom |
+| Raycast | | | |
 
 Forty-plus connectors and counting. See [docs/connectors.md](./docs/connectors.md) to write your own.
 
