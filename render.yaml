@@ -1,0 +1,84 @@
+# ─────────────────────────────────────────────────────────────
+#  CompanyBrain — Render Blueprint (one-click deploy)
+#
+#  Deploy this repo:
+#    https://render.com/deploy?repo=https://github.com/aayambansal/companybrain
+#  or push render.yaml and create a Blueprint from the Render dashboard.
+#
+#  Brings up: managed Postgres (pgvector), the API (:3333), the dashboard (:3000).
+#  Migrations run on API boot (AUTO_MIGRATE defaults to true); the migration
+#  creates the `vector` extension, so nothing else is required.
+#
+#  Spec: https://render.com/docs/blueprint-spec
+# ─────────────────────────────────────────────────────────────
+
+databases:
+  # Managed Postgres. pgvector ships on all Render Postgres instances; the API
+  # migration enables the `vector` (and `pgcrypto`) extension on first boot.
+  - name: companybrain-db
+    databaseName: companybrain
+    user: companybrain
+    postgresMajorVersion: "16"
+    plan: basic-256mb # smallest paid tier; bump for real workloads
+
+services:
+  # ── API ────────────────────────────────────────────────────
+  # Public web service so the dashboard, SDKs, and agents can reach it.
+  - type: web
+    name: companybrain-api
+    runtime: docker
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # No sign-in: single-user mode, one default workspace.
+      - key: AUTH_MODE
+        value: single
+      # Connection string comes straight from the managed database above.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: companybrain-db
+          property: connectionString
+      # Signs auth JWTs (only used in multi mode). Generated once, then stored.
+      - key: JWT_SECRET
+        generateValue: true
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: API_PORT
+        value: "3333"
+      # Runs locally with no keys. Switch to openai/ollama/google in the
+      # dashboard (Settings > Providers) and add the key below.
+      - key: EMBEDDING_PROVIDER
+        value: local
+      - key: LLM_PROVIDER
+        value: none
+      # Paste real keys in the Render dashboard only if you switch providers.
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # Lock this to your dashboard origin (e.g. https://companybrain-web.onrender.com).
+      - key: CORS_ORIGINS
+        sync: false
+
+  # ── Dashboard ──────────────────────────────────────────────
+  - type: web
+    name: companybrain-web
+    runtime: docker
+    dockerfilePath: ./apps/web/Dockerfile
+    dockerContext: .
+    plan: starter
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Point the browser app at the API service. Render serves web services
+      # over HTTPS; `host` resolves to e.g. companybrain-api.onrender.com — if
+      # your client needs a scheme, set NEXT_PUBLIC_API_URL to https://<host>.
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: companybrain-api
+          property: host

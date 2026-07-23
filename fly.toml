@@ -1,0 +1,43 @@
+# ─────────────────────────────────────────────────────────────
+#  CompanyBrain API — Fly.io app config
+#
+#  Postgres is provisioned separately, then wired in as secrets:
+#    fly launch --no-deploy                 # imports this fly.toml
+#    fly postgres create --name companybrain-db
+#    fly postgres attach companybrain-db    # sets DATABASE_URL secret
+#    fly postgres connect -a companybrain-db -c "CREATE EXTENSION IF NOT EXISTS vector;"
+#    fly secrets set JWT_SECRET=$(openssl rand -hex 32)
+#    fly deploy
+#
+#  The API migration also runs CREATE EXTENSION on boot (AUTO_MIGRATE defaults
+#  to true); the manual step above just guarantees pgvector is present first.
+#  Deploy the dashboard (apps/web/Dockerfile) as its own Fly app and set its
+#  NEXT_PUBLIC_API_URL to this app's URL (https://companybrain-api.fly.dev).
+# ─────────────────────────────────────────────────────────────
+
+app = "companybrain-api"
+primary_region = "iad"
+
+[build]
+  dockerfile = "apps/api/Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  # No sign-in: single-user mode, one default workspace.
+  AUTH_MODE = "single"
+  API_HOST = "0.0.0.0"
+  API_PORT = "3333"
+  EMBEDDING_PROVIDER = "local"
+  LLM_PROVIDER = "none"
+  # DATABASE_URL and JWT_SECRET come from `fly secrets`, not here.
+
+[http_service]
+  internal_port = 3333
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"
