@@ -132,6 +132,8 @@
 
       /* Feature bento */
       .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-top: 44px; }
+      .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 44px; }
+      @media (max-width: 760px) { .duo { grid-template-columns: 1fr; } }
       .tile { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px; transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s; }
       .tile:hover { transform: translateY(-3px); box-shadow: 0 16px 40px oklch(0.2 0.02 266 / 0.08); border-color: var(--line-2); }
       .tile h3 { font-size: 1.28rem; margin-top: 16px; }
@@ -300,6 +302,36 @@
       <div class="marquee" aria-label="Connectors">
         <div class="row track1" id="row1"></div>
         <div class="row track2" id="row2"></div>
+      </div>
+    </section>
+
+    <section id="teams">
+      <div class="wrap">
+        <span class="kicker">One brain, one team</span>
+        <h2>Built for you. Ready for your whole team.</h2>
+        <p class="section-lede">Start as one person with no login wall. Turn on shared workspaces when the team shows up. The memory, the connectors, and the agents all come along.</p>
+        <div class="duo">
+          <div class="tile">
+            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.3 3-5.5 7-5.5s7 2.2 7 5.5"/></svg></div>
+            <h3>For you</h3>
+            <p>Single-user mode is the default: no sign-in, one workspace, everything you index is yours. Capture notes, connect your own tools, ask questions, and draft playbooks from your own work. Delete anything, any time.</p>
+          </div>
+          <div class="tile">
+            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9.5" r="2.5"/><path d="M2.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M15 14.2c2.6.2 4.5 2 4.5 4.8"/></svg></div>
+            <h3>For your team</h3>
+            <p>Flip on multi-workspace auth and the same brain scales: shared spaces, API keys, roles, and the decision behind every doc. Everyone searches one source of truth, and the why is tagged to the thread it came from.</p>
+          </div>
+        </div>
+        <div class="tile wide" style="margin-top: 14px;">
+          <div>
+            <h3>Record in one agent, recall in another</h3>
+            <p style="color: var(--ink-2); margin-top: 10px;">The built-in Model Context Protocol server means Claude, Cursor, and your own tools read and write the same memory. Context stops living in one chat window and starts following the work.</p>
+          </div>
+          <div class="pipe">
+<span class="k">claude</span> &rarr; record &rarr; <span class="s">companybrain</span> &rarr; recall &rarr; <span class="k">cursor</span>
+   any MCP client writes once, every client reads it back
+          </div>
+        </div>
       </div>
     </section>
 
