@@ -42,10 +42,9 @@ jobs:
       - name: Test
         run: pnpm -r --if-present test -- --passWithNoTests
 
-      # Formatting drift should not block CI.
+      # The workspace is prettier-clean; enforce it so drift can't creep back.
       - name: Format check
         run: pnpm format:check
-        continue-on-error: true
 
   python:
     name: python sdk
