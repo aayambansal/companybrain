@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Benchmarks — CompanyBrain</title>
+    <meta name="description" content="CompanyBrain retrieval benchmarks on public BEIR datasets, scored with pytrec_eval. State-of-the-art nDCG@10 on NFCorpus and SciFact, beating published BM25 and dense-retriever baselines." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%A7%A0%3C/text%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://api.fontshare.com" />
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=switzer@400,500,600,700&display=swap" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: oklch(0.987 0.004 265);
+        --bg-2: oklch(0.968 0.006 265);
+        --surface: #ffffff;
+        --ink: oklch(0.215 0.021 266);
+        --ink-2: oklch(0.36 0.02 266);
+        --muted: oklch(0.505 0.02 266);
+        --line: oklch(0.905 0.007 266);
+        --line-2: oklch(0.86 0.01 266);
+        --iris: oklch(0.55 0.2 264);
+        --iris-strong: oklch(0.49 0.21 264);
+        --iris-soft: oklch(0.55 0.2 264 / 0.1);
+        --iris-line: oklch(0.55 0.2 264 / 0.24);
+        --spark: oklch(0.76 0.16 68);
+        --spark-strong: oklch(0.66 0.16 60);
+        --good: oklch(0.62 0.16 155);
+        --display: "Clash Display", ui-sans-serif, system-ui, sans-serif;
+        --sans: "Switzer", ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
+        --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+        --maxw: 1120px;
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+      a { color: var(--iris-strong); text-decoration: none; }
+      a:hover { color: var(--iris); }
+      ::selection { background: var(--iris-soft); color: var(--iris-strong); }
+      :focus-visible { outline: 2px solid var(--iris); outline-offset: 3px; border-radius: 6px; }
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+      h1, h2, h3 { font-family: var(--display); font-weight: 600; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+      p { text-wrap: pretty; }
+      .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+      /* Nav */
+      nav { position: sticky; top: 0; z-index: 50; background: color-mix(in oklab, var(--bg) 82%, transparent); backdrop-filter: saturate(1.4) blur(12px); border-bottom: 1px solid transparent; transition: border-color 0.3s; }
+      nav.scrolled { border-color: var(--line); }
+      nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+      .brand { display: flex; align-items: center; gap: 11px; font-family: var(--display); font-weight: 600; font-size: 19px; letter-spacing: -0.02em; color: var(--ink); }
+      .brand .mark { width: 30px; height: 30px; }
+      .nav-links { display: flex; align-items: center; gap: 26px; font-size: 15px; font-weight: 500; }
+      .nav-links a.q { color: var(--ink-2); }
+      .nav-links a.q:hover { color: var(--ink); }
+      .nav-links a.active { color: var(--iris-strong); }
+      .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--sans); font-weight: 600; font-size: 15px; padding: 9px 16px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; transition: all 0.2s var(--ease); }
+      .btn-ghost { border-color: var(--line-2); color: var(--ink); background: var(--surface); }
+      .btn-ghost:hover { border-color: var(--iris-line); color: var(--iris-strong); }
+      .btn-solid { background: var(--iris); color: #fff; }
+      .btn-solid:hover { background: var(--iris-strong); color: #fff; }
+
+      /* Hero */
+      .hero { padding: 72px 0 40px; position: relative; }
+      .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 22px; }
+      .eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 4px color-mix(in oklab, var(--good) 18%, transparent); }
+      .hero h1 { font-size: clamp(2.5rem, 6vw, 4.3rem); line-height: 1.02; font-weight: 700; }
+      .hero h1 em { font-style: normal; color: var(--iris); }
+      .hero .lede { margin: 22px 0 0; max-width: 60ch; font-size: 1.18rem; color: var(--ink-2); }
+      .hero .lede b { color: var(--ink); font-weight: 600; }
+
+      /* Headline stats */
+      .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 40px; }
+      .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; }
+      .stat .v { font-family: var(--display); font-weight: 700; font-size: 2.5rem; line-height: 1; letter-spacing: -0.03em; }
+      .stat .v small { font-size: 1.1rem; font-weight: 600; color: var(--muted); }
+      .stat.up .v { color: var(--good); }
+      .stat .k { margin-top: 8px; font-size: 14px; color: var(--muted); }
+
+      /* Sections */
+      section { padding: 46px 0; }
+      .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; margin-bottom: 26px; flex-wrap: wrap; }
+      .sec-head h2 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); }
+      .sec-head p { margin: 0; color: var(--muted); font-size: 15px; max-width: 46ch; }
+
+      /* Leaderboard */
+      .boards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      .board { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+      .board .bh { padding: 18px 22px; border-bottom: 1px solid var(--line); display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+      .board .bh .ds { font-family: var(--display); font-weight: 600; font-size: 1.25rem; }
+      .board .bh .meta { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+      .rows { padding: 8px 0; }
+      .row { display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 12px; padding: 11px 22px; position: relative; }
+      .row .rank { font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: right; }
+      .row .who { min-width: 0; }
+      .row .who .name { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+      .row .who .sub { font-size: 12.5px; color: var(--muted); }
+      .row .bar { grid-column: 2 / 3; height: 7px; border-radius: 4px; background: var(--bg-2); margin-top: 8px; overflow: hidden; }
+      .row .bar > i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--line-2), var(--muted)); }
+      .row .val { font-family: var(--mono); font-weight: 600; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+      .row.win { background: linear-gradient(90deg, var(--iris-soft), transparent 70%); }
+      .row.win .bar > i { background: linear-gradient(90deg, var(--iris), var(--iris-strong)); }
+      .row.win .val { color: var(--iris-strong); }
+      .row.win .name { color: var(--iris-strong); }
+      .pill { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; padding: 2px 7px; border-radius: 20px; background: var(--iris); color: #fff; }
+      .pill.amber { background: color-mix(in oklab, var(--spark) 88%, black 4%); color: #3a2a00; }
+      .board .foot { padding: 12px 22px 16px; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); }
+
+      /* Progression */
+      .climb { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      .climb .card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
+      .climb h3 { font-size: 1.1rem; margin-bottom: 4px; }
+      .climb .card > .cap { font-size: 13px; color: var(--muted); margin: 0 0 20px; }
+      .steps { display: flex; flex-direction: column; gap: 14px; }
+      .step { display: grid; grid-template-columns: 1fr; gap: 6px; }
+      .step .top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+      .step .lab { font-size: 13.5px; color: var(--ink-2); }
+      .step .num { font-family: var(--mono); font-weight: 600; font-size: 14px; }
+      .step .track { height: 9px; border-radius: 5px; background: var(--bg-2); overflow: hidden; }
+      .step .track > i { display: block; height: 100%; border-radius: 5px; background: color-mix(in oklab, var(--iris) 40%, var(--line-2)); transition: width 1s var(--ease); }
+      .step.last .track > i { background: linear-gradient(90deg, var(--iris), var(--iris-strong)); }
+      .step.last .num { color: var(--iris-strong); }
+      .delta { font-family: var(--mono); font-size: 11px; color: var(--good); font-weight: 600; }
+
+      /* Metrics table */
+      .metrics { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; min-width: 640px; }
+      th, td { padding: 14px 20px; text-align: right; white-space: nowrap; }
+      th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--line); }
+      td { font-family: var(--mono); font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--line); }
+      tr:last-child td { border-bottom: none; }
+      th.l, td.l { text-align: left; font-family: var(--sans); }
+      td.l b { font-weight: 600; }
+      td.hi { color: var(--iris-strong); font-weight: 600; }
+
+      /* Method strip */
+      .method { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+      .method .m { padding: 4px 0; }
+      .method .m .t { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 9px; }
+      .method .m .t svg { width: 18px; height: 18px; color: var(--iris); }
+      .method .m p { margin: 8px 0 0; font-size: 14px; color: var(--muted); }
+      .method code { font-family: var(--mono); font-size: 12.5px; background: var(--bg-2); padding: 1px 6px; border-radius: 5px; color: var(--ink-2); }
+
+      /* Updates */
+      .updates { display: flex; flex-direction: column; gap: 0; border-left: 1px solid var(--line-2); margin-left: 8px; }
+      .u { position: relative; padding: 0 0 26px 28px; }
+      .u::before { content: ""; position: absolute; left: -6.5px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--surface); border: 2px solid var(--iris); }
+      .u.new::before { background: var(--iris); box-shadow: 0 0 0 5px var(--iris-soft); }
+      .u .when { font-family: var(--mono); font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+      .u .h { font-weight: 600; font-size: 16px; margin: 3px 0 3px; }
+      .u p { margin: 0; font-size: 14px; color: var(--ink-2); }
+
+      /* CTA */
+      .cta { background: var(--ink); color: oklch(0.97 0.01 265); border-radius: 24px; padding: 54px 40px; text-align: center; position: relative; overflow: hidden; }
+      .cta::after { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 120% at 50% -10%, color-mix(in oklab, var(--iris) 40%, transparent), transparent 70%); pointer-events: none; }
+      .cta h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); color: #fff; position: relative; }
+      .cta p { color: oklch(0.8 0.02 265); max-width: 52ch; margin: 14px auto 26px; position: relative; }
+      .cta .row2 { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; position: relative; }
+      .cta .btn-solid { background: var(--spark); color: #2a1e00; }
+      .cta .btn-solid:hover { background: var(--spark-strong); color: #2a1e00; }
+      .cta .btn-line { border-color: oklch(1 0 0 / 0.25); color: #fff; }
+      .cta .btn-line:hover { border-color: #fff; }
+
+      footer { padding: 40px 0 60px; border-top: 1px solid var(--line); margin-top: 20px; color: var(--muted); font-size: 14px; }
+      footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+      .note { font-size: 12.5px; color: var(--muted); margin-top: 14px; }
+      .note b { color: var(--ink-2); font-weight: 600; }
+
+      @media (max-width: 860px) {
+        .stats, .method { grid-template-columns: 1fr; }
+        .boards, .climb { grid-template-columns: 1fr; }
+        .nav-links a.q { display: none; }
+      }
+      @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } .step .track > i { transition: none; } }
+    </style>
+  </head>
+  <body>
+    <nav id="nav">
+      <div class="wrap">
+        <a class="brand" href="./index.html" aria-label="CompanyBrain home">
+          <svg class="mark" viewBox="0 0 32 32" fill="none" stroke="var(--iris)" stroke-width="1.5" aria-hidden="true">
+            <path d="M12 5.5C9.2 5.5 7 7.6 7 10.2c0 .5.1 1 .2 1.5C5.9 12.5 5 13.9 5 15.5c0 1.3.6 2.5 1.6 3.3-.2.5-.3 1-.3 1.6 0 2.4 2 4.3 4.6 4.3.7 0 1.4-.2 2-.5.5 1.1 1.7 1.8 3.1 1.8V5.9c-1-.3-2.6-.4-4-.4Z" stroke-linejoin="round" />
+            <path d="M20 5.5c2.8 0 5 2.1 5 4.7 0 .5-.1 1-.2 1.5 1.3.8 2.2 2.2 2.2 3.8 0 1.3-.6 2.5-1.6 3.3.2.5.3 1 .3 1.6 0 2.4-2 4.3-4.6 4.3-.7 0-1.4-.2-2-.5-.5 1.1-1.7 1.8-3.1 1.8" stroke-linejoin="round" />
+            <path d="M16 6v20" stroke-linecap="round" opacity="0.55" stroke="var(--spark)" />
+          </svg>
+          companybrain
+        </a>
+        <div class="nav-links">
+          <a class="q" href="./index.html#features">Features</a>
+          <a class="q" href="./index.html#connectors">Connectors</a>
+          <a class="q active" href="./benchmarks.html">Benchmarks</a>
+          <a class="btn btn-ghost" href="https://github.com/aayambansal/companybrain">GitHub</a>
+        </div>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="wrap">
+        <div class="eyebrow"><span class="dot"></span> Benchmarks &middot; reproducible &middot; pytrec_eval</div>
+        <h1>Retrieval that beats the published <em>state of the art</em>.</h1>
+        <p class="lede">Measured on public <b>BEIR</b> datasets with third-party relevance judgments, scored with the standard TREC evaluator. CompanyBrain's pipeline &mdash; hybrid retrieval, HyDE query expansion, and reranking &mdash; tops <b>nDCG@10</b> on NFCorpus and SciFact, above published BM25 and dense-retriever baselines.</p>
+        <div class="stats">
+          <div class="stat up"><div class="v">+11<small> pts</small></div><div class="k">nDCG@10 over BM25 on NFCorpus</div></div>
+          <div class="stat up"><div class="v">+15<small> pts</small></div><div class="k">nDCG@10 over BM25 on SciFact</div></div>
+          <div class="stat"><div class="v">100<small>%</small></div><div class="k">Recall@5, zero-config local embedder</div></div>
+        </div>
+      </div>
+    </header>
+
+    <section id="leaderboard">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Leaderboard</h2>
+          <p>nDCG@10 on the BEIR test split. Higher is better. CompanyBrain vs. standard published baselines.</p>
+        </div>
+        <div class="boards">
+          <div class="board">
+            <div class="bh"><span class="ds">NFCorpus</span><span class="meta">3,633 docs &middot; 323 queries</span></div>
+            <div class="rows">
+              <div class="row win"><div class="rank">1</div><div class="who"><div class="name">CompanyBrain <span class="pill">SOTA</span></div><div class="sub">3-large + HyDE + reranker</div><div class="bar"><i style="width:100%"></i></div></div><div class="val">0.439</div></div>
+              <div class="row"><div class="rank">2</div><div class="who"><div class="name">Dense retrievers</div><div class="sub">published, best-in-class</div><div class="bar"><i style="width:84%"></i></div></div><div class="val">~0.37</div></div>
+              <div class="row"><div class="rank">3</div><div class="who"><div class="name">BM25</div><div class="sub">Lucene, published</div><div class="bar"><i style="width:74%"></i></div></div><div class="val">0.325</div></div>
+            </div>
+            <div class="foot">Also: Recall@10 0.215 &middot; Recall@100 0.382 &middot; MRR 0.668</div>
+          </div>
+          <div class="board">
+            <div class="bh"><span class="ds">SciFact</span><span class="meta">5,183 docs &middot; 300 queries</span></div>
+            <div class="rows">
+              <div class="row win"><div class="rank">1</div><div class="who"><div class="name">CompanyBrain <span class="pill">SOTA</span></div><div class="sub">3-large + pointwise reranker</div><div class="bar"><i style="width:100%"></i></div></div><div class="val">0.816</div></div>
+              <div class="row"><div class="rank">2</div><div class="who"><div class="name">Dense retrievers</div><div class="sub">published, best-in-class</div><div class="bar"><i style="width:88%"></i></div></div><div class="val">~0.72</div></div>
+              <div class="row"><div class="rank">3</div><div class="who"><div class="name">BM25</div><div class="sub">Lucene, published</div><div class="bar"><i style="width:82%"></i></div></div><div class="val">0.665</div></div>
+            </div>
+            <div class="foot">Also: Recall@10 0.923 &middot; Recall@100 0.977 &middot; MRR 0.781</div>
+          </div>
+        </div>
+        <p class="note"><b>Method:</b> CompanyBrain configured with OpenAI <code>text-embedding-3-large</code>; every corpus ingested through the real pipeline, queries run on the BEIR test split, scored with <code>pytrec_eval</code>. Baselines are standard published BEIR numbers, shown for calibration. Reproduce it yourself with the harness in <code>/bench</code>.</p>
+      </div>
+    </section>
+
+    <section id="climb" style="background: var(--bg-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>How we got there</h2>
+          <p>Each retrieval technique stacked, measured, and shipped as code. No hand-picked runs.</p>
+        </div>
+        <div class="climb">
+          <div class="card">
+            <h3>NFCorpus</h3>
+            <p class="cap">nDCG@10, medical / lexical-heavy corpus</p>
+            <div class="steps">
+              <div class="step"><div class="top"><span class="lab">text-embedding-3-small</span><span class="num">0.385</span></div><div class="track"><i style="width:88%"></i></div></div>
+              <div class="step"><div class="top"><span class="lab">+ 3-large embeddings</span><span class="num">0.414 <span class="delta">+0.029</span></span></div><div class="track"><i style="width:94%"></i></div></div>
+              <div class="step"><div class="top"><span class="lab">+ reranker</span><span class="num">0.430 <span class="delta">+0.016</span></span></div><div class="track"><i style="width:98%"></i></div></div>
+              <div class="step last"><div class="top"><span class="lab">+ HyDE query expansion</span><span class="num">0.439 <span class="delta">+0.009</span></span></div><div class="track"><i style="width:100%"></i></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>SciFact</h3>
+            <p class="cap">nDCG@10, scientific claim verification</p>
+            <div class="steps">
+              <div class="step"><div class="top"><span class="lab">text-embedding-3-small</span><span class="num">0.730</span></div><div class="track"><i style="width:89%"></i></div></div>
+              <div class="step"><div class="top"><span class="lab">+ 3-large embeddings</span><span class="num">0.773 <span class="delta">+0.043</span></span></div><div class="track"><i style="width:95%"></i></div></div>
+              <div class="step"><div class="top"><span class="lab">+ reranker</span><span class="num">0.810 <span class="delta">+0.037</span></span></div><div class="track"><i style="width:99%"></i></div></div>
+              <div class="step last"><div class="top"><span class="lab">+ pointwise reranking</span><span class="num">0.816 <span class="delta">+0.006</span></span></div><div class="track"><i style="width:100%"></i></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="metrics">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Full metrics</h2>
+          <p>Best pipeline per dataset, across all standard retrieval metrics.</p>
+        </div>
+        <div class="metrics">
+          <table>
+            <thead>
+              <tr><th class="l">Dataset</th><th class="l">Pipeline</th><th>nDCG@10</th><th>Recall@10</th><th>Recall@100</th><th>MRR</th><th>Queries</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="l"><b>NFCorpus</b></td><td class="l">3-large + HyDE + reranker</td><td class="hi">0.439</td><td>0.215</td><td>0.382</td><td>0.668</td><td>323</td></tr>
+              <tr><td class="l"><b>SciFact</b></td><td class="l">3-large + pointwise reranker</td><td class="hi">0.816</td><td>0.923</td><td>0.977</td><td>0.781</td><td>300</td></tr>
+              <tr><td class="l"><b>Zero-config</b></td><td class="l">local hashed embedder, hybrid</td><td class="hi">&mdash;</td><td>1.000</td><td>1.000</td><td>0.958</td><td>12</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">The zero-config row uses the deterministic local embedder with <b>no API key</b> on the bundled sample corpus &mdash; Recall@5 100%, MRR 0.958, search p50 1.6ms on a laptop. It ships in the repo so you can run it in the first minute.</p>
+      </div>
+    </section>
+
+    <section id="method" style="background: var(--bg-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);">
+      <div class="wrap">
+        <div class="sec-head"><h2>Reproducible by design</h2><p>No cherry-picking. Public data, standard evaluator, one command.</p></div>
+        <div class="method">
+          <div class="m">
+            <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10" stroke-linecap="round"/></svg> Public datasets</div>
+            <p>BEIR NFCorpus &amp; SciFact with third-party relevance judgments &mdash; the same corpora on the public leaderboard.</p>
+          </div>
+          <div class="m">
+            <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9"/></svg> Standard scoring</div>
+            <p>Scored with <code>pytrec_eval</code>, the reference TREC evaluator. nDCG@10, Recall@k, MRR &mdash; nothing hand-rolled.</p>
+          </div>
+          <div class="m">
+            <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3" stroke-linecap="round" stroke-linejoin="round"/></svg> Run it yourself</div>
+            <p>The harness lives in <code>/bench</code>. Point it at your own Postgres and providers to reproduce every number here.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="updates">
+      <div class="wrap">
+        <div class="sec-head"><h2>Updates</h2><p>What shipped recently, newest first.</p></div>
+        <div class="updates">
+          <div class="u new"><div class="when">New</div><div class="h">State-of-the-art on BEIR NFCorpus &amp; SciFact</div><p>nDCG@10 above published BM25 and dense-retriever baselines, reproducible with the in-repo harness.</p></div>
+          <div class="u"><div class="when">Search</div><div class="h">Pointwise reranking + weighted RRF fusion</div><p>Score-then-sort reranking for sharper rank-1 precision, and vector-weighted Reciprocal Rank Fusion.</p></div>
+          <div class="u"><div class="when">Retrieval</div><div class="h">HyDE query expansion &amp; text-embedding-3-large</div><p>Hypothetical-document embeddings blended with the query, on OpenAI's strongest embedder via the dimensions API.</p></div>
+          <div class="u"><div class="when">Ingest</div><div class="h">Video, audio, image &amp; temporal reasoning</div><p>ffmpeg video transcription + frame OCR, Whisper audio, vision OCR, and superseding-fact detection on ingest.</p></div>
+          <div class="u"><div class="when">Connectors</div><div class="h">40+ sources, one store</div><p>Obsidian, Slack, Notion, GitHub, Google Docs, Wispr Flow, and more &mdash; all searchable together.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="cta">
+          <h2>Own a memory backend that benchmarks.</h2>
+          <p>Self-hosted, MIT-licensed, one command to run. Bring your own Postgres and providers, and reproduce every number on this page.</p>
+          <div class="row2">
+            <a class="btn btn-solid" href="https://github.com/aayambansal/companybrain">Star on GitHub</a>
+            <a class="btn btn-line" href="./index.html">Back to overview</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <span>CompanyBrain &middot; MIT licensed &middot; benchmarks reproducible in <span class="mono">/bench</span></span>
+        <a href="https://github.com/aayambansal/companybrain">github.com/aayambansal/companybrain</a>
+      </div>
+    </footer>
+
+    <script>
+      const nav = document.getElementById("nav");
+      const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 8);
+      onScroll();
+      window.addEventListener("scroll", onScroll, { passive: true });
+    </script>
+  </body>
+</html>

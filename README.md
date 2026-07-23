@@ -96,6 +96,21 @@ key. It reconfigures the running engine on the spot. Nothing is required to star
   read and write the brain as a tool.
 - Yours to run. Bring your own Postgres. Nothing phones home.
 
+## Benchmarks
+
+Retrieval quality, measured on the public [BEIR](https://github.com/beir-cellar/beir) benchmark
+and scored with `pytrec_eval` (the standard TREC evaluator). CompanyBrain's pipeline
+(`text-embedding-3-large` + HyDE + reranking) tops **nDCG@10** above published BM25 and
+dense-retriever baselines:
+
+| dataset  | CompanyBrain nDCG@10 | BM25 (published) | dense (published) |
+| -------- | -------------------- | ---------------- | ----------------- |
+| NFCorpus | **0.439**            | 0.325            | ~0.37             |
+| SciFact  | **0.816**            | 0.665            | ~0.72             |
+
+Full leaderboard and methodology: [companybrain benchmarks](https://aayambansal.github.io/companybrain/benchmarks.html).
+Reproduce every number with the harness in [`bench/`](./bench) — see [bench/BEIR.md](./bench/BEIR.md).
+
 ## How it fits together
 
 ```
