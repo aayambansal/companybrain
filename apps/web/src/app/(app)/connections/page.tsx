@@ -68,7 +68,9 @@ export default function ConnectionsPage() {
     setBusy(true);
     try {
       const config = { ...form, syncIntervalMinutes: Number(syncEvery) || 0 };
-      await api.post('/v1/connections', { connector: selected.id, name, config });
+      // The server requires a non-empty name; fall back to the connector's label
+      // if the field was cleared, rather than failing with a generic error.
+      await api.post('/v1/connections', { connector: selected.id, name: name.trim() || selected.displayName, config });
       toast('success', `Connected ${selected.displayName}.`);
       setSelected(null);
       load();
