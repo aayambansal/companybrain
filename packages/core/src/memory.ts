@@ -722,7 +722,8 @@ function toMemory(doc: typeof documents.$inferSelect): Memory {
   };
 }
 
-function deriveTitle(content: string): string {
+/** Pure: derive a memory title from the first non-empty line, capped at 120 chars. */
+export function deriveTitle(content: string): string {
   const firstLine = content.split('\n').map((l) => l.trim()).find((l) => l.length > 0) ?? '';
   return firstLine.slice(0, 120) || 'Untitled';
 }
