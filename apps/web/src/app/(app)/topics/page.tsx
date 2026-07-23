@@ -18,7 +18,7 @@ export default function TopicsPage() {
 
   useEffect(() => {
     api
-      .get<{ topics: Topic[] }>('/v1/topics?limit=36')
+      .get<{ topics: Topic[] }>('/v1/topics?limit=48&minCount=1')
       .then((r) => setTopics(r.topics))
       .catch(() => setTopics([]));
   }, []);
