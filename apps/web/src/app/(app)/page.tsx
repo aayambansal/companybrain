@@ -22,6 +22,21 @@ export default function OverviewPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [digest, setDigest] = useState<string | null>(null);
+  const [digestBusy, setDigestBusy] = useState(false);
+
+  async function loadDigest() {
+    if (digestBusy) return;
+    setDigestBusy(true);
+    try {
+      const r = await api.get<{ digest: { summary: string } }>('/v1/digest?limit=15');
+      setDigest(r.digest.summary);
+    } catch {
+      setDigest('Could not build a digest right now.');
+    } finally {
+      setDigestBusy(false);
+    }
+  }
 
   async function load() {
     const [s, m, sp, tp] = await Promise.allSettled([
@@ -243,6 +258,32 @@ export default function OverviewPage() {
                 Save memory
               </Button>
             </div>
+          </div>
+
+          <div className="card p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="font-mono text-sm text-ink-muted">What&apos;s new</h2>
+              <button onClick={loadDigest} disabled={digestBusy} className="text-[12px] text-ink-faint hover:text-ink disabled:opacity-50">
+                {digestBusy ? 'Summarizing…' : digest ? 'Refresh' : 'Summarize recent'}
+              </button>
+            </div>
+            {digest === null ? (
+              <p className="text-[13px] text-ink-faint">A quick brief of what recently landed in your brain.</p>
+            ) : (
+              <div className="space-y-1.5 text-[13px] leading-relaxed text-ink">
+                {digest.split(/\r?\n/).map((line, i) => {
+                  const t = line.trim();
+                  if (!t) return null;
+                  const bullet = /^[-*]\s+/.test(t);
+                  return (
+                    <div key={i} className={bullet ? 'flex gap-2' : 'font-medium text-ink-muted'}>
+                      {bullet && <span className="mt-1.5 size-1 shrink-0 rounded-full bg-[var(--color-primary)]" />}
+                      <span>{t.replace(/^[-*]\s+|^#+\s+/, '')}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="card p-4">
