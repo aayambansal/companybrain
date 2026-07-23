@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CompanyBrain — the open-source memory layer for your company</title>
+    <meta
+      name="description"
+      content="Self-hosted semantic memory for your team. Index everything, recall anything, own all of it. Open source, one command to run."
+    />
+    <style>
+      :root {
+        --bg: #0f0d0a;
+        --bg-2: #14110c;
+        --surface: #1a150e;
+        --surface-2: #221b11;
+        --line: #2e2718;
+        --line-strong: #40361f;
+        --ink: #f3eee3;
+        --muted: #a89e8b;
+        --faint: #7c7362;
+        --amber: #e6ac3f;
+        --amber-bright: #f4c65c;
+        --amber-soft: rgba(230, 172, 63, 0.12);
+        --amber-line: rgba(230, 172, 63, 0.32);
+        --green: #7bd88f;
+        --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+        --mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, Consolas, monospace;
+        --maxw: 1080px;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+      a { color: var(--amber); text-decoration: none; }
+      a:hover { color: var(--amber-bright); }
+      ::selection { background: var(--amber-soft); color: var(--amber-bright); }
+      :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 4px; }
+
+      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+      .mono { font-family: var(--mono); }
+
+      /* Ambient background */
+      .bg {
+        position: fixed; inset: 0; z-index: -1; pointer-events: none;
+        background:
+          radial-gradient(60% 45% at 50% 0%, rgba(230, 172, 63, 0.14), transparent 70%),
+          var(--bg);
+      }
+      .bg::before {
+        content: ""; position: absolute; inset: 0;
+        background-image:
+          linear-gradient(var(--line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--line) 1px, transparent 1px);
+        background-size: 46px 46px;
+        mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, #000 10%, transparent 70%);
+        opacity: 0.5;
+      }
+
+      /* Nav */
+      nav {
+        position: sticky; top: 0; z-index: 20;
+        backdrop-filter: blur(10px);
+        background: color-mix(in oklab, var(--bg) 78%, transparent);
+        border-bottom: 1px solid var(--line);
+      }
+      nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+      .brand { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-weight: 600; font-size: 15px; letter-spacing: -0.02em; }
+      .brand svg { color: var(--amber); }
+      .brand b { color: var(--amber); font-weight: 600; }
+      .nav-links { display: flex; align-items: center; gap: 24px; font-size: 14px; }
+      .nav-links a.muted { color: var(--muted); }
+      .nav-links a.muted:hover { color: var(--ink); }
+      .gh {
+        display: inline-flex; align-items: center; gap: 8px;
+        border: 1px solid var(--line-strong); border-radius: 8px;
+        padding: 7px 12px; color: var(--ink); font-size: 13px;
+      }
+      .gh:hover { background: var(--surface-2); color: var(--ink); }
+      @media (max-width: 640px) { .nav-links a.muted { display: none; } }
+
+      /* Hero */
+      header { padding: 84px 0 64px; text-align: center; }
+      .ascii {
+        font-family: var(--mono); color: var(--amber);
+        font-size: clamp(6px, 1.55vw, 13px); line-height: 1.15;
+        white-space: pre; margin: 0 auto 28px; display: inline-block; text-align: left;
+        text-shadow: 0 0 24px rgba(230, 172, 63, 0.35);
+      }
+      h1 {
+        font-size: clamp(2.1rem, 5.4vw, 3.6rem); line-height: 1.05; letter-spacing: -0.03em;
+        margin: 0 auto 18px; max-width: 16ch; text-wrap: balance; font-weight: 640;
+      }
+      h1 .hl { color: var(--amber); }
+      .sub { font-size: clamp(1rem, 2.2vw, 1.22rem); color: var(--muted); max-width: 60ch; margin: 0 auto 34px; text-wrap: pretty; }
+
+      .cmd {
+        display: inline-flex; align-items: center; gap: 14px;
+        background: var(--surface); border: 1px solid var(--amber-line); border-radius: 12px;
+        padding: 14px 16px; font-family: var(--mono); font-size: 15px;
+        box-shadow: 0 10px 40px rgba(230, 172, 63, 0.08);
+      }
+      .cmd .dollar { color: var(--faint); }
+      .cmd code { color: var(--ink); }
+      .cmd .k { color: var(--amber); }
+      .copy {
+        border: 1px solid var(--line-strong); background: var(--surface-2); color: var(--muted);
+        border-radius: 7px; padding: 5px 9px; font-family: var(--mono); font-size: 12px; cursor: pointer;
+        transition: all 0.15s;
+      }
+      .copy:hover { color: var(--ink); border-color: var(--amber-line); }
+      .hero-meta { margin-top: 20px; color: var(--faint); font-size: 13px; font-family: var(--mono); }
+      .hero-meta b { color: var(--muted); font-weight: 500; }
+
+      /* Sections */
+      section { padding: 64px 0; }
+      .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--amber); margin: 0 0 10px; }
+      h2 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); letter-spacing: -0.02em; margin: 0 0 12px; font-weight: 620; text-wrap: balance; }
+      .lead { color: var(--muted); max-width: 62ch; margin: 0 0 40px; }
+
+      /* Feature grid */
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+      .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; transition: border-color 0.2s, transform 0.2s; }
+      .card:hover { border-color: var(--line-strong); transform: translateY(-2px); }
+      .card .ic { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; background: var(--amber-soft); color: var(--amber); margin-bottom: 14px; }
+      .card h3 { margin: 0 0 6px; font-size: 1.06rem; font-weight: 600; }
+      .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+      /* Pipeline */
+      .pipe { background: var(--bg-2); border: 1px solid var(--line); border-radius: 16px; padding: 28px; font-family: var(--mono); overflow-x: auto; }
+      .pipe pre { margin: 0; color: var(--muted); font-size: clamp(11px, 1.6vw, 14px); line-height: 1.7; }
+      .pipe .hl { color: var(--amber); }
+
+      /* Connectors */
+      .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+      .chip {
+        display: inline-flex; align-items: center; gap: 8px;
+        border: 1px solid var(--line-strong); border-radius: 999px; padding: 8px 15px;
+        font-family: var(--mono); font-size: 13px; color: var(--muted); background: var(--surface);
+      }
+      .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+      /* Split (clients) */
+      .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+      .mini { border: 1px solid var(--line); border-radius: 12px; padding: 18px; background: var(--surface); }
+      .mini .t { font-family: var(--mono); color: var(--amber); font-size: 13px; margin-bottom: 6px; }
+      .mini p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+
+      /* CTA */
+      .cta { text-align: center; border: 1px solid var(--amber-line); border-radius: 20px; padding: 56px 24px; background: radial-gradient(80% 120% at 50% 0%, var(--amber-soft), transparent 70%); }
+      .btn {
+        display: inline-flex; align-items: center; gap: 9px;
+        background: var(--amber); color: #241a06; font-weight: 640; font-size: 15px;
+        border-radius: 10px; padding: 12px 20px; font-family: var(--sans);
+      }
+      .btn:hover { background: var(--amber-bright); color: #241a06; }
+      .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line-strong); }
+      .btn.ghost:hover { border-color: var(--amber-line); background: var(--surface-2); }
+      .cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+
+      footer { border-top: 1px solid var(--line); padding: 34px 0; color: var(--faint); font-size: 13px; }
+      footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+
+      .reveal { opacity: 0; transform: translateY(14px); animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      @keyframes rise { to { opacity: 1; transform: none; } }
+      @media (prefers-reduced-motion: reduce) { .reveal { animation: none; opacity: 1; transform: none; } html { scroll-behavior: auto; } }
+    </style>
+  </head>
+  <body>
+    <div class="bg" aria-hidden="true"></div>
+
+    <nav>
+      <div class="wrap">
+        <div class="brand">
+          <svg width="20" height="20" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <path d="M12 5.5C9.2 5.5 7 7.6 7 10.2c0 .5.1 1 .2 1.5C5.9 12.5 5 13.9 5 15.5c0 1.3.6 2.5 1.6 3.3-.2.5-.3 1-.3 1.6 0 2.4 2 4.3 4.6 4.3.7 0 1.4-.2 2-.5.5 1.1 1.7 1.8 3.1 1.8V5.9c-1-.3-2.6-.4-4-.4Z" stroke-linejoin="round" />
+            <path d="M20 5.5c2.8 0 5 2.1 5 4.7 0 .5-.1 1-.2 1.5 1.3.8 2.2 2.2 2.2 3.8 0 1.3-.6 2.5-1.6 3.3.2.5.3 1 .3 1.6 0 2.4-2 4.3-4.6 4.3-.7 0-1.4-.2-2-.5-.5 1.1-1.7 1.8-3.1 1.8" stroke-linejoin="round" />
+            <path d="M16 6v20" stroke-linecap="round" opacity="0.6" />
+          </svg>
+          company<b>brain</b>
+        </div>
+        <div class="nav-links">
+          <a class="muted" href="#features">Features</a>
+          <a class="muted" href="#connectors">Connectors</a>
+          <a class="muted" href="#run">Run it</a>
+          <a class="gh" href="https://github.com/aayambansal/companybrain">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <header class="wrap reveal">
+      <pre class="ascii" aria-label="CompanyBrain">       _---~~(~~-_.
+     _{        )   )
+   ,   ) -~~- ( ,-' )_
+  (  `-,_..`., )-- '_,)
+ ( ` _)  (  -~( -_ `,  }
+ (_-  _  ~_-~~~~`,  ,' )
+   `~ -^(    __;-,((()))
+         ~~~~ {_ -_(())</pre>
+      <h1>The open-source <span class="hl">memory layer</span> for your company</h1>
+      <p class="sub">
+        Point it at your knowledge — Obsidian, Google Docs, Slack, Notion, GitHub, PDFs, the web —
+        and get one private, searchable brain that answers with citations. Your agents read it over MCP.
+        Your data never leaves your Postgres.
+      </p>
+      <div class="cmd">
+        <span class="dollar">$</span>
+        <code><span class="k">npx</span> companybrain</code>
+        <button class="copy" id="copyBtn" aria-label="Copy command">copy</button>
+      </div>
+      <div class="hero-meta">
+        MIT licensed &middot; <b>no sign-in</b> &middot; bring your own keys &middot; <b>12 connectors</b>
+      </div>
+    </header>
+
+    <section id="features" class="wrap">
+      <p class="eyebrow">What it does</p>
+      <h2>A real memory backend, not a wrapper</h2>
+      <p class="lead">Everything you drop in is chunked, embedded, and indexed with a vector and a full-text signal side by side. Retrieval fuses both, so you get meaning and exact keywords.</p>
+      <div class="grid">
+        <div class="card"><div class="ic">◈</div><h3>Hybrid search</h3><p>pgvector similarity plus Postgres full-text, fused with reciprocal rank fusion, and optional LLM reranking.</p></div>
+        <div class="card"><div class="ic">❝</div><h3>Answers with receipts</h3><p>RAG chat streams answers grounded in your knowledge, with citations that point back at the source passage.</p></div>
+        <div class="card"><div class="ic">⌘</div><h3>Agent-native</h3><p>A built-in MCP server lets Claude, Cursor, or any agent read and write the brain as a tool. Keyless locally.</p></div>
+        <div class="card"><div class="ic">⚿</div><h3>Bring your own keys</h3><p>Runs zero-config on a local model. Paste an OpenAI, Anthropic, Google, or Ollama key to upgrade, live.</p></div>
+        <div class="card"><div class="ic">◱</div><h3>Yours to run</h3><p>One command with Docker. Bring your own Postgres. No hosted control plane, nothing phones home.</p></div>
+        <div class="card"><div class="ic">↻</div><h3>Stays fresh</h3><p>Connectors sync on a schedule. Change the embedding model and re-index everything from the dashboard.</p></div>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <p class="eyebrow">How it works</p>
+      <h2>Ingest, embed, retrieve, cite</h2>
+      <div class="pipe">
+<pre>  <span class="hl">connectors</span> ──►  ingest ──►  chunk ──►  embed ──►  index ──►  <span class="hl">search</span> ──►  cite
+                                                    │
+   obsidian · gdocs · slack · notion · github       ▼
+   web · rss · pdf · linear · confluence · jira   postgres + pgvector  (your database)</pre>
+      </div>
+    </section>
+
+    <section id="connectors" class="wrap">
+      <p class="eyebrow">Index everything</p>
+      <h2>Twelve connectors, and counting</h2>
+      <p class="lead">Configure and sync any source from the dashboard. Everything lands in the same store, so search and chat work across all of it without caring where it came from.</p>
+      <div class="chips">
+        <span class="chip"><span class="dot"></span>Web pages</span>
+        <span class="chip"><span class="dot"></span>Sitemaps</span>
+        <span class="chip"><span class="dot"></span>Local files</span>
+        <span class="chip"><span class="dot"></span>PDF</span>
+        <span class="chip"><span class="dot"></span>Obsidian</span>
+        <span class="chip"><span class="dot"></span>RSS / Atom</span>
+        <span class="chip"><span class="dot"></span>GitHub</span>
+        <span class="chip"><span class="dot"></span>Notion</span>
+        <span class="chip"><span class="dot"></span>Slack</span>
+        <span class="chip"><span class="dot"></span>Google Docs</span>
+        <span class="chip"><span class="dot"></span>Linear</span>
+        <span class="chip"><span class="dot"></span>Confluence</span>
+        <span class="chip"><span class="dot"></span>Jira</span>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <p class="eyebrow">Talk to it your way</p>
+      <h2>Clients for every surface</h2>
+      <div class="split">
+        <div class="mini"><div class="t">TypeScript SDK</div><p>npm install @companybrain/sdk</p></div>
+        <div class="mini"><div class="t">Python SDK</div><p>pip install companybrain</p></div>
+        <div class="mini"><div class="t">CLI</div><p>companybrain add · search · ask</p></div>
+        <div class="mini"><div class="t">MCP server</div><p>Claude Desktop, Cursor, any agent</p></div>
+        <div class="mini"><div class="t">Dashboard</div><p>Browse, search, chat, connect sources</p></div>
+        <div class="mini"><div class="t">Chrome extension</div><p>Save any page or selection</p></div>
+      </div>
+    </section>
+
+    <section id="run" class="wrap">
+      <div class="cta">
+        <p class="eyebrow" style="margin-bottom:14px">Run it in a minute</p>
+        <h2 style="margin-bottom:8px">Your company's memory, on your metal</h2>
+        <p class="lead" style="margin:0 auto;text-align:center">One command clones, sets up, and starts everything. No account, no sign-in, no per-seat pricing.</p>
+        <div class="cta-row">
+          <a class="btn" href="https://github.com/aayambansal/companybrain">Get started</a>
+          <a class="btn ghost" href="https://github.com/aayambansal/companybrain#run-it">Read the docs</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <span>CompanyBrain &middot; MIT licensed</span>
+        <span class="mono"><a href="https://github.com/aayambansal/companybrain">github.com/aayambansal/companybrain</a></span>
+      </div>
+    </footer>
+
+    <script>
+      const btn = document.getElementById('copyBtn');
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText('npx companybrain');
+          btn.textContent = 'copied';
+          setTimeout(() => (btn.textContent = 'copy'), 1600);
+        } catch (e) {
+          btn.textContent = 'npx companybrain';
+        }
+      });
+    </script>
+  </body>
+</html>
