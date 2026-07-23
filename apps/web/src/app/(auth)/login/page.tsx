@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { api, ApiError } from '@/lib/api';
+import { api, ApiError, type Me } from '@/lib/api';
 import { Button, Field, Input } from '@/components/ui';
 import { BrainMark } from '@/components/logo';
 
@@ -13,6 +13,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // If sign-in is off (single-user mode) or a session already exists, skip login.
+  useEffect(() => {
+    api
+      .get<Me>('/v1/auth/me')
+      .then((m) => {
+        if (m.org) router.replace('/');
+      })
+      .catch(() => {});
+  }, [router]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();

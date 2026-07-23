@@ -116,13 +116,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <p className="truncate text-[13px] text-ink">{me.user?.name ?? me.user?.email}</p>
               <p className="truncate text-[11px] text-ink-faint">{me.org?.name}</p>
             </div>
-            <button
-              onClick={logout}
-              title="Sign out"
-              className="rounded-md p-1.5 text-ink-faint transition-colors hover:bg-surface-2 hover:text-ink"
-            >
-              <IconLogout size={16} />
-            </button>
+            {me.authMode !== 'single' && (
+              <button
+                onClick={logout}
+                title="Sign out"
+                className="rounded-md p-1.5 text-ink-faint transition-colors hover:bg-surface-2 hover:text-ink"
+              >
+                <IconLogout size={16} />
+              </button>
+            )}
           </div>
         </div>
       </aside>
@@ -136,9 +138,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <span className="font-mono text-sm font-semibold">companybrain</span>
             </div>
           </Link>
-          <button onClick={logout} className="text-ink-faint">
-            <IconLogout size={18} />
-          </button>
+          {me.authMode !== 'single' && (
+            <button onClick={logout} className="text-ink-faint">
+              <IconLogout size={18} />
+            </button>
+          )}
         </header>
 
         {/* Mobile nav */}

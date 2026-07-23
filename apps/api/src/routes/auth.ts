@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { setCookie, deleteCookie } from 'hono/cookie';
 import { and, eq } from 'drizzle-orm';
 import { organizations, users, spaces } from '@companybrain/db';
-import { getEngine, type Variables } from '../context.js';
+import { getEngine, getEnv, type Variables } from '../context.js';
 import { hashPassword, verifyPassword, slugify } from '../crypto.js';
 import { signSession, resolveAuth, SESSION_COOKIE } from '../auth.js';
 
@@ -81,8 +81,16 @@ app.get('/me', async (c) => {
       .where(and(eq(users.id, auth.userId), eq(users.orgId, auth.orgId)))
       .limit(1);
     user = u ? publicUser(u) : null;
+  } else if (auth.via === 'single') {
+    // No sign-in: present a friendly local operator so the dashboard has a name.
+    user = { id: 'local', email: null, name: 'Local', role: 'owner', avatarUrl: null };
   }
-  return c.json({ org: org ? { id: org.id, name: org.name, slug: org.slug } : null, user, via: auth.via });
+  return c.json({
+    org: org ? { id: org.id, name: org.name, slug: org.slug } : null,
+    user,
+    via: auth.via,
+    authMode: getEnv().authMode,
+  });
 });
 
 function publicUser(u: typeof users.$inferSelect) {

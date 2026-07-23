@@ -52,8 +52,9 @@ export const api = {
 // ── Types (mirror the API) ─────────────────────────────────────────────────
 export interface Me {
   org: { id: string; name: string; slug: string } | null;
-  user: { id: string; email: string; name: string | null; role: string; avatarUrl: string | null } | null;
+  user: { id: string; email: string | null; name: string | null; role: string; avatarUrl: string | null } | null;
   via: string;
+  authMode?: 'single' | 'multi';
 }
 export interface Memory {
   id: string;

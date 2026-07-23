@@ -9,7 +9,7 @@ export interface AuthContext {
   userId?: string;
   apiKeyId?: string;
   scopes: string[];
-  via: 'apiKey' | 'session';
+  via: 'apiKey' | 'session' | 'single';
 }
 
 /** Hono variables available on `c.var`. */
