@@ -98,7 +98,7 @@ export default function ChatPage() {
   return (
     <div className="mx-auto flex h-[calc(100dvh-3.5rem)] w-full max-w-3xl flex-col px-5 md:h-dvh md:px-8">
       <div className="flex items-center justify-between py-5">
-        <h1 className="font-mono text-xl font-semibold tracking-tight">Ask</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-[-0.02em]">Ask</h1>
         {turns.length > 0 && (
           <button onClick={() => setTurns([])} className="text-[13px] text-ink-faint hover:text-ink">
             New thread
@@ -172,7 +172,7 @@ function Message({ turn }: { turn: Turn }) {
         <IconSparkle size={15} className="text-[var(--color-primary)]" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="prose-invert whitespace-pre-wrap text-[15px] leading-relaxed text-ink">
+        <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink">
           {turn.content}
           {turn.streaming && <span className="ml-0.5 inline-block h-4 w-1.5 translate-y-0.5 animate-pulse bg-[var(--color-primary)]" />}
         </div>
