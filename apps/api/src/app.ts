@@ -19,6 +19,7 @@ import providers from './routes/providers.js';
 import reindex from './routes/reindex.js';
 import analytics from './routes/analytics.js';
 import backup from './routes/backup.js';
+import slack from './routes/slack.js';
 
 export function createApp() {
   const env = getEnv();
@@ -47,6 +48,8 @@ export function createApp() {
   app.get('/v1/openapi.json', (c) => c.json(openapiDocument(env.version)));
   app.route('/v1/status', status);
   app.route('/v1/auth', auth);
+  // Slack slash command: public, authenticated by the Slack signing secret.
+  app.route('/v1/integrations/slack', slack);
 
   // Authenticated
   const v1 = new Hono<{ Variables: Variables }>();
