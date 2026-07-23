@@ -1,23 +1,38 @@
 version: 2
 updates:
-  # Root npm/pnpm workspace manifests.
+  # Root npm/pnpm workspace manifests. Grouped + monthly so PRs stay reviewable,
+  # and major bumps are held back (they need manual verification against the build).
   - package-ecosystem: npm
     directory: "/"
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 10
+      interval: monthly
+    open-pull-requests-limit: 5
     labels:
       - dependencies
     commit-message:
       prefix: chore(deps)
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
 
-  # GitHub Actions used by the workflows in this repo.
+  # GitHub Actions, grouped + monthly.
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: weekly
+      interval: monthly
+    open-pull-requests-limit: 3
     labels:
       - dependencies
       - ci
     commit-message:
       prefix: chore(ci)
+    groups:
+      actions:
+        patterns:
+          - "*"
