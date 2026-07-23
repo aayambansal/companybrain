@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import {
   createDb,
   documents,
@@ -11,11 +11,13 @@ import { loadConfig, type EngineConfig } from './config.js';
 import { createEmbeddingProvider, type EmbeddingProvider } from './embeddings/index.js';
 import { createLlmProvider, type LlmProvider } from './llm/index.js';
 import type { ImageInput } from './llm/types.js';
+import { describeVideo, type VideoOptions, type VideoResult } from './video.js';
 import { indexDocument, findBySource } from './ingest.js';
 import { hybridSearch } from './search/hybrid.js';
 import { llmRerank } from './search/rerank.js';
 import { generateAnswer } from './chat.js';
 import { enrichDocument } from './enrich.js';
+import { judgeSupersession, type SupersedeCandidate } from './temporal.js';
 import { dispatchWebhooks } from './webhooks.js';
 import { contentHash } from './text/hash.js';
 import { normalizeText, markdownToText, htmlToText } from './text/normalize.js';
@@ -175,12 +177,107 @@ export class MemoryEngine {
 
     await indexDocument(this.db, this.embedder, this.config, doc.id);
     await this.enrichDocumentRow(doc.id, doc.title, normalized, input.tags ?? [], input.metadata ?? {});
+    if (this.config.temporal.enabled) {
+      await this.resolveTemporal(input.orgId, spaceId, doc.id, doc.title, normalized).catch(() => {});
+    }
     void dispatchWebhooks(this.db, {
       event: 'memory.created',
       orgId: input.orgId,
       data: { id: doc.id, title: doc.title, spaceId, connector: doc.connector },
     }).catch(() => {});
     return this.getMemory(input.orgId, doc.id) as Promise<Memory>;
+  }
+
+  /**
+   * Temporal reasoning on ingest: find prior memories in the same space that are
+   * most similar to the new one, ask the LLM which (if any) it supersedes, and
+   * mark those older documents superseded (snapshotting their content as a
+   * version). Superseded documents are excluded from recall by default, so a
+   * search returns the current truth while the history stays queryable. Opt-in
+   * via `TEMPORAL_RESOLUTION=true`; a no-op without an LLM. Never throws.
+   */
+  async resolveTemporal(
+    orgId: string,
+    spaceId: string,
+    newDocId: string,
+    newTitle: string | null,
+    newContent: string,
+  ): Promise<{ superseded: { id: string; reason: string }[] }> {
+    if (!this.llm.available) return { superseded: [] };
+
+    // Pull the most similar prior memories (excluding already-superseded ones).
+    const seed = newContent.slice(0, 2000);
+    const queryEmbedding = await this.embedder.embedQuery(seed);
+    const hits = await hybridSearch(this.client.sql, {
+      orgId,
+      spaceId,
+      q: seed.slice(0, 500),
+      queryEmbedding,
+      mode: 'semantic',
+      limit: this.config.temporal.candidates * 3,
+    });
+
+    // Collapse chunk hits to distinct documents, skipping the new one.
+    const candidateIds: string[] = [];
+    const seen = new Set<string>([newDocId]);
+    for (const h of hits) {
+      if (seen.has(h.documentId)) continue;
+      seen.add(h.documentId);
+      candidateIds.push(h.documentId);
+      if (candidateIds.length >= this.config.temporal.candidates) break;
+    }
+    if (candidateIds.length === 0) return { superseded: [] };
+
+    const rows = await this.db
+      .select({ id: documents.id, title: documents.title, content: documents.content, createdAt: documents.createdAt })
+      .from(documents)
+      .where(and(eq(documents.orgId, orgId), inArray(documents.id, candidateIds)));
+    const candidates: SupersedeCandidate[] = rows
+      .filter((r) => r.content)
+      .map((r) => ({ id: r.id, title: r.title, content: r.content as string, createdAt: r.createdAt.toISOString() }));
+
+    const verdicts = await judgeSupersession(this.llm, { title: newTitle, content: newContent }, candidates);
+    const superseded: { id: string; reason: string }[] = [];
+    for (const v of verdicts) {
+      const old = rows.find((r) => r.id === v.id);
+      if (!old) continue;
+      // Snapshot the old content as a version, then mark it superseded.
+      const [{ count } = { count: 0 }] = await this.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(memoryVersions)
+        .where(eq(memoryVersions.documentId, old.id));
+      await this.db.insert(memoryVersions).values({
+        documentId: old.id,
+        title: old.title,
+        content: old.content,
+        version: (count ?? 0) + 1,
+      });
+      await this.db
+        .update(documents)
+        .set({ supersededBy: newDocId, supersededAt: new Date(), updatedAt: new Date() })
+        .where(and(eq(documents.orgId, orgId), eq(documents.id, old.id)));
+      superseded.push({ id: old.id, reason: v.reason });
+    }
+
+    if (superseded.length > 0) {
+      // Record what the new memory replaced, for the timeline.
+      const [current] = await this.db
+        .select({ metadata: documents.metadata })
+        .from(documents)
+        .where(eq(documents.id, newDocId))
+        .limit(1);
+      const meta = (current?.metadata ?? {}) as Record<string, unknown>;
+      await this.db
+        .update(documents)
+        .set({ metadata: { ...meta, supersedes: superseded.map((s) => s.id) }, updatedAt: new Date() })
+        .where(eq(documents.id, newDocId));
+      void dispatchWebhooks(this.db, {
+        event: 'memory.superseded',
+        orgId,
+        data: { supersededBy: newDocId, superseded },
+      }).catch(() => {});
+    }
+    return { superseded };
   }
 
   /**
@@ -427,6 +524,27 @@ export class MemoryEngine {
       throw new Error('No audio-capable provider configured. Set LLM_PROVIDER to openai to transcribe audio.');
     }
     return this.llm.transcribeAudio(audio);
+  }
+
+  /**
+   * Turn a video into searchable text: transcribe its audio track and describe
+   * a sample of frames (on-screen text, slides, diagrams). Needs the ffmpeg
+   * binary on the host and at least one of a vision or audio provider.
+   */
+  async describeVideo(video: ImageInput, opts?: VideoOptions): Promise<VideoResult> {
+    if (!this.llm.supportsVision && !this.llm.supportsAudio) {
+      throw new Error(
+        'Video ingestion needs a vision or audio provider. Set LLM_PROVIDER to anthropic or openai.',
+      );
+    }
+    return describeVideo(
+      video,
+      {
+        transcribeAudio: (a) => this.transcribeAudio(a),
+        describeImage: (i, p) => this.describeImage(i, p),
+      },
+      opts,
+    );
   }
 
   /** Find memories similar to a given one (semantic "see also"), excluding itself. */

@@ -12,6 +12,8 @@ const addSchema = z.object({
   image: z.string().optional(),
   /** A data URL (data:audio/mpeg;base64,...) to transcribe with a speech model. */
   audio: z.string().optional(),
+  /** A data URL (data:video/mp4;base64,...) to transcribe + frame-caption via ffmpeg. */
+  video: z.string().optional(),
   format: z.enum(['text', 'markdown', 'html']).optional(),
   space: z.string().optional(),
   spaceId: z.string().uuid().optional(),
@@ -57,7 +59,18 @@ app.post('/', async (c) => {
       return c.json({ error: 'no_transcription', message: String((e as Error).message ?? e) }, 422);
     }
   }
-  if (!content) return c.json({ error: 'invalid_request', message: 'content, image, or audio is required' }, 400);
+  if (d.video) {
+    const clip = parseDataUrl(d.video);
+    if (!clip) return c.json({ error: 'invalid_video', message: 'video must be a data URL: data:video/mp4;base64,...' }, 400);
+    try {
+      const result = await engine.describeVideo(clip);
+      content = [content, result.text].filter(Boolean).join('\n\n');
+      sourceType = sourceType ?? 'video';
+    } catch (e) {
+      return c.json({ error: 'no_video', message: String((e as Error).message ?? e) }, 422);
+    }
+  }
+  if (!content) return c.json({ error: 'invalid_request', message: 'content, image, audio, or video is required' }, 400);
 
   const memory = await engine.addMemory({
     orgId: auth.orgId,
