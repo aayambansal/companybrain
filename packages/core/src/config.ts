@@ -28,6 +28,10 @@ export interface EngineConfig {
     overlapTokens: number;
     maxTokens: number;
   };
+  enrich: {
+    /** Run LLM enrichment (summary + auto-tags + facts) on ingest when an LLM is set. */
+    enabled: boolean;
+  };
 }
 
 function env(key: string, fallback = ''): string {
@@ -66,6 +70,9 @@ export function loadConfig(overrides: Partial<EngineConfig> = {}): EngineConfig 
       targetTokens: intEnv('CHUNK_TARGET_TOKENS', 512),
       overlapTokens: intEnv('CHUNK_OVERLAP_TOKENS', 64),
       maxTokens: intEnv('CHUNK_MAX_TOKENS', 1024),
+    },
+    enrich: {
+      enabled: env('ENRICH_ON_INGEST', 'true') !== 'false',
     },
   };
   return { ...base, ...overrides };
