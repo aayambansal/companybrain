@@ -134,6 +134,9 @@
       .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-top: 44px; }
       .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 44px; }
       @media (max-width: 760px) { .duo { grid-template-columns: 1fr; } }
+      .cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-top: 44px; }
+      .cases .tile h3 { margin-bottom: 8px; }
+      .cases .tile em { font-style: italic; color: var(--iris-strong); }
       .tile { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px; transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s; }
       .tile:hover { transform: translateY(-3px); box-shadow: 0 16px 40px oklch(0.2 0.02 266 / 0.08); border-color: var(--line-2); }
       .tile h3 { font-size: 1.28rem; margin-top: 16px; }
@@ -303,7 +306,33 @@
       </div>
     </section>
 
-    <section id="connectors" style="background: var(--bg-2); border-block: 1px solid var(--line);">
+    <section id="use-cases" style="background: var(--bg-2); border-block: 1px solid var(--line);">
+      <div class="wrap">
+        <span class="kicker">Who it's for</span>
+        <h2>Memory for every kind of work.</h2>
+        <p class="section-lede">The answer you need already exists somewhere in the work your team did. CompanyBrain makes it findable.</p>
+        <div class="cases">
+          <div class="tile">
+            <h3>Engineering</h3>
+            <p>The reason behind a strange line of code is usually a PR review or a thread from six months ago. Index the repo, the reviews, and the chat, then ask <em>why</em>.</p>
+          </div>
+          <div class="tile">
+            <h3>Sales</h3>
+            <p>Objections, promised follow-ups, and "let me check with the team" moments scatter across calls and threads. Point CompanyBrain at them and pull the thread when a deal needs it.</p>
+          </div>
+          <div class="tile">
+            <h3>Support</h3>
+            <p>The fix a teammate found last quarter should not be rediscovered from scratch. Search resolved tickets and docs, not your memory.</p>
+          </div>
+          <div class="tile">
+            <h3>Ops &amp; leadership</h3>
+            <p>Why did we pick this vendor? What did we agree in planning? The answer becomes a search with citations, not another meeting.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="connectors">
       <div class="wrap">
         <span class="kicker">Index everything</span>
         <h2>Forty-plus connectors, one store.</h2>
