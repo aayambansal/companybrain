@@ -88,6 +88,17 @@ GET /v1/topics?space=...&limit=24&minCount=2
 
 Returns `{ topics: [{ topic, count, sample: [{ id, title }] }] }`, ordered by count.
 
+## Digest
+
+Summarize what recently landed in the brain into a short brief.
+
+```
+GET /v1/digest?space=...&limit=15
+```
+
+Returns `{ digest: { summary, memories: [{ id, title, createdAt }], count } }`. `summary` is
+Markdown bullets when an LLM is configured, otherwise a plain dated list.
+
 ## Spaces
 
 ```

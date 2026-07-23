@@ -193,6 +193,23 @@ class AsyncCompanyBrain:
             params["minCount"] = min_count
         return await self.request("GET", "/v1/topics", params=params)
 
+    async def digest(
+        self,
+        *,
+        space: Optional[str] = None,
+        space_id: Optional[str] = None,
+        limit: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Summarize what recently landed in the brain."""
+        params: Dict[str, Any] = {}
+        if space is not None:
+            params["space"] = space
+        if space_id is not None:
+            params["spaceId"] = space_id
+        if limit is not None:
+            params["limit"] = limit
+        return await self.request("GET", "/v1/digest", params=params)
+
 
 class AsyncMemoriesResource:
     def __init__(self, client: AsyncCompanyBrain) -> None:

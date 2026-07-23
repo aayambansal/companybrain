@@ -193,6 +193,23 @@ class CompanyBrain:
             params["minCount"] = min_count
         return self.request("GET", "/v1/topics", params=params)
 
+    def digest(
+        self,
+        *,
+        space: Optional[str] = None,
+        space_id: Optional[str] = None,
+        limit: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Summarize what recently landed in the brain."""
+        params: Dict[str, Any] = {}
+        if space is not None:
+            params["space"] = space
+        if space_id is not None:
+            params["spaceId"] = space_id
+        if limit is not None:
+            params["limit"] = limit
+        return self.request("GET", "/v1/digest", params=params)
+
 
 class MemoriesResource:
     def __init__(self, client: CompanyBrain) -> None:

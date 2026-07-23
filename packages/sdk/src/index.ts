@@ -13,6 +13,7 @@ import type {
   ChatInput,
   ChatResponse,
   ConnectorInfo,
+  DigestResponse,
   Memory,
   PlaybookInput,
   PlaybookResponse,
@@ -120,6 +121,13 @@ export class CompanyBrain {
   /** Group memories by tag to surface projects, people, and themes. */
   topics(opts: TopicsInput = {}): Promise<{ topics: TopicGroup[] }> {
     return this.request<{ topics: TopicGroup[] }>('GET', '/v1/topics', {
+      query: opts as Record<string, unknown>,
+    });
+  }
+
+  /** Summarize what recently landed in the brain. */
+  digest(opts: { space?: string; spaceId?: string; limit?: number } = {}): Promise<{ digest: DigestResponse }> {
+    return this.request<{ digest: DigestResponse }>('GET', '/v1/digest', {
       query: opts as Record<string, unknown>,
     });
   }
