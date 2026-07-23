@@ -30,6 +30,10 @@ import { dropboxConnector } from './dropbox.js';
 import { boxConnector } from './box.js';
 import { clickupConnector } from './clickup.js';
 import { todoistConnector } from './todoist.js';
+import { gitbookConnector } from './gitbook.js';
+import { codaConnector } from './coda.js';
+import { hubspotConnector } from './hubspot.js';
+import { frontConnector } from './front.js';
 import { raindropConnector } from './raindrop.js';
 
 /** Every built-in connector, in a stable order. */
@@ -66,6 +70,10 @@ export const connectors: Connector[] = [
   boxConnector,
   clickupConnector,
   todoistConnector,
+  gitbookConnector,
+  codaConnector,
+  hubspotConnector,
+  frontConnector,
 ];
 
 /** Look up a connector by its stable id. */
@@ -112,3 +120,7 @@ export { dropboxConnector, dropboxEntryToDoc } from './dropbox.js';
 export { boxConnector, boxItemToDoc } from './box.js';
 export { clickupConnector, clickupTaskDoc } from './clickup.js';
 export { todoistConnector, todoistTaskDoc } from './todoist.js';
+export { gitbookConnector, flattenPages, gitbookPageDoc } from './gitbook.js';
+export { codaConnector, codaPageDoc } from './coda.js';
+export { hubspotConnector, hubspotNoteDoc } from './hubspot.js';
+export { frontConnector, frontConversationDoc } from './front.js';
