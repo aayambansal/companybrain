@@ -4,6 +4,9 @@ import { sitemapConnector } from './sitemap.js';
 import { filesConnector } from './files.js';
 import { obsidianConnector } from './obsidian.js';
 import { rssConnector } from './rss.js';
+import { githubConnector } from './github.js';
+import { notionConnector } from './notion.js';
+import { slackConnector } from './slack.js';
 
 /** Every built-in connector, in a stable order. */
 export const connectors: Connector[] = [
@@ -12,6 +15,9 @@ export const connectors: Connector[] = [
   filesConnector,
   obsidianConnector,
   rssConnector,
+  githubConnector,
+  notionConnector,
+  slackConnector,
 ];
 
 /** Look up a connector by its stable id. */
@@ -30,3 +36,6 @@ export {
 } from './files.js';
 export { obsidianConnector, parseFrontmatter, type Frontmatter } from './obsidian.js';
 export { rssConnector, parseRss } from './rss.js';
+export { githubConnector, selectIndexablePaths } from './github.js';
+export { notionConnector, blocksToText, notionPageTitle } from './notion.js';
+export { slackConnector, slackMessageDoc } from './slack.js';

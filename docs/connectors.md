@@ -31,18 +31,19 @@ embedding, and indexing from there.
 
 ## Available connectors
 
-| connector           | id           | auth            | status      |
-| ------------------- | ------------ | --------------- | ----------- |
-| Raw text / API      | `api`        | API key         | `[core]`    |
-| Web page / URL      | `web`        | none            | `[planned]` |
-| Markdown / files    | `files`      | local path      | `[planned]` |
-| Obsidian vault      | `obsidian`   | local path      | `[planned]` |
-| PDF / DOCX          | `documents`  | upload          | `[planned]` |
-| Google Docs / Drive | `google`     | OAuth           | `[planned]` |
-| Slack               | `slack`      | OAuth           | `[planned]` |
-| Notion              | `notion`     | OAuth           | `[planned]` |
-| GitHub              | `github`     | app / token     | `[planned]` |
-| RSS / Atom          | `rss`        | none            | `[planned]` |
+| connector           | id         | auth          | config                       | status      |
+| ------------------- | ---------- | ------------- | ---------------------------- | ----------- |
+| Raw text / API      | `api`      | none / key    | (post to /v1/memories)       | `[core]`    |
+| Web page / URL      | `web`      | none          | `url`                        | `[core]`    |
+| Sitemap crawl       | `sitemap`  | none          | `sitemapUrl`, `limit`        | `[core]`    |
+| Markdown / files    | `files`    | local path    | `path`, `extensions`         | `[core]`    |
+| Obsidian vault      | `obsidian` | local path    | `path`                       | `[core]`    |
+| RSS / Atom          | `rss`      | none          | `feedUrl`                    | `[core]`    |
+| GitHub              | `github`   | token         | `repo`, `token?`, `branch?`  | `[core]`    |
+| Notion              | `notion`   | token         | `token` (integration)        | `[core]`    |
+| Slack               | `slack`    | bot token     | `token`, `channel`           | `[core]`    |
+| Google Docs / Drive | `google`   | OAuth         | (planned)                    | `[planned]` |
+| PDF / DOCX          | `documents`| upload        | (planned)                    | `[planned]` |
 
 ## Writing your own
 

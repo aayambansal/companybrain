@@ -16,3 +16,31 @@ export async function fetchText(url: string, signal?: AbortSignal): Promise<stri
   }
   return res.text();
 }
+
+export interface JsonRequest {
+  method?: string;
+  headers?: Record<string, string>;
+  body?: unknown;
+  signal?: AbortSignal;
+}
+
+/** Fetch JSON with optional auth headers. Throws on non-2xx. */
+export async function fetchJson<T = unknown>(url: string, opts: JsonRequest = {}): Promise<T> {
+  const res = await fetch(url, {
+    method: opts.method ?? 'GET',
+    signal: opts.signal,
+    redirect: 'follow',
+    headers: {
+      'user-agent': USER_AGENT,
+      accept: 'application/json',
+      ...(opts.body !== undefined ? { 'content-type': 'application/json' } : {}),
+      ...opts.headers,
+    },
+    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`${opts.method ?? 'GET'} ${url} -> ${res.status} ${res.statusText} ${text.slice(0, 200)}`);
+  }
+  return (await res.json()) as T;
+}
