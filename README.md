@@ -177,6 +177,7 @@ Drop your company memory into the tools you already use:
 
 - LangChain / LangGraph: `@companybrain/langchain` — a `CompanyBrainRetriever`
 - Vercel AI SDK: `@companybrain/ai-sdk` — `searchMemory` / `askMemory` / `addMemory` tools
+- n8n: `n8n-nodes-companybrain` — a Search / Ask / Add node for no-code workflows
 
 ## Deploy
 
