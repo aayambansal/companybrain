@@ -18,6 +18,7 @@ export class OllamaProvider implements LlmProvider {
       : opts.messages;
     const res = await fetch(`${this.baseUrl}/api/chat`, {
       method: 'POST',
+      signal: AbortSignal.timeout(120_000),
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: this.model,

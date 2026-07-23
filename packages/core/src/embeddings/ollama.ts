@@ -22,6 +22,7 @@ export class OllamaEmbeddingProvider implements EmbeddingProvider {
     for (const text of texts) {
       const res = await fetch(`${this.baseUrl}/api/embeddings`, {
         method: 'POST',
+        signal: AbortSignal.timeout(60_000),
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: this.model, prompt: text }),
       });
