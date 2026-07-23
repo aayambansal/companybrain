@@ -1,0 +1,180 @@
+@import 'tailwindcss';
+
+/*
+  CompanyBrain design system.
+  Identity: amber phosphor on near-black. A precise instrument for institutional
+  memory, adjacent to a terminal. Restrained: one accent, dense, trustworthy.
+*/
+
+@theme {
+  /* Surfaces (near-black, a whisper of warmth toward the amber hue) */
+  --color-bg: oklch(0.165 0.006 74);
+  --color-bg-subtle: oklch(0.195 0.006 74);
+  --color-surface: oklch(0.212 0.007 74);
+  --color-surface-2: oklch(0.245 0.008 74);
+  --color-surface-hover: oklch(0.268 0.009 74);
+  --color-border: oklch(0.30 0.008 74);
+  --color-border-strong: oklch(0.40 0.01 74);
+
+  /* Ink */
+  --color-ink: oklch(0.965 0.008 85);
+  --color-ink-muted: oklch(0.745 0.012 80);
+  --color-ink-faint: oklch(0.60 0.012 78);
+
+  /* Brand: amber phosphor */
+  --color-primary: oklch(0.815 0.145 82);
+  --color-primary-strong: oklch(0.86 0.15 84);
+  --color-primary-ink: oklch(0.22 0.03 80);
+  --color-primary-soft: oklch(0.815 0.145 82 / 0.14);
+  --color-primary-line: oklch(0.815 0.145 82 / 0.34);
+
+  /* Status */
+  --color-success: oklch(0.78 0.14 152);
+  --color-success-soft: oklch(0.78 0.14 152 / 0.15);
+  --color-warn: oklch(0.82 0.14 72);
+  --color-danger: oklch(0.70 0.18 24);
+  --color-danger-soft: oklch(0.70 0.18 24 / 0.15);
+  --color-info: oklch(0.74 0.10 232);
+  --color-info-soft: oklch(0.74 0.10 232 / 0.15);
+
+  /* Type */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-jb), ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Radius */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.4);
+  --shadow-md: 0 4px 16px oklch(0 0 0 / 0.45);
+  --shadow-lg: 0 16px 48px oklch(0 0 0 / 0.55);
+  --shadow-glow: 0 0 0 1px var(--color-primary-line), 0 8px 30px oklch(0.815 0.145 82 / 0.14);
+
+  /* Semantic z-scale */
+  --z-dropdown: 40;
+  --z-sticky: 50;
+  --z-backdrop: 60;
+  --z-modal: 70;
+  --z-toast: 80;
+  --z-tooltip: 90;
+
+  /* Motion */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-strong);
+  }
+
+  /* Focus: a single, consistent amber ring across the app. */
+  :where(a, button, input, textarea, select, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Scrollbars, kept subtle rather than reinvented. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-strong) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--color-ink-faint);
+    background-clip: content-box;
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@layer components {
+  /* Faint grid + phosphor glow used on auth and empty surfaces. */
+  .bg-grid {
+    background-image:
+      linear-gradient(var(--color-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black 20%, transparent 75%);
+  }
+
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  /* Primary action */
+  .btn-primary {
+    background: var(--color-primary);
+    color: var(--color-primary-ink);
+    font-weight: 600;
+    transition: background 160ms var(--ease-out-quart), box-shadow 160ms var(--ease-out-quart);
+  }
+  .btn-primary:hover {
+    background: var(--color-primary-strong);
+  }
+  .btn-primary:active {
+    transform: translateY(0.5px);
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@keyframes cb-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes cb-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@keyframes cb-shimmer {
+  100% { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
