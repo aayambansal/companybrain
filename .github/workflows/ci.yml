@@ -1,0 +1,162 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: typecheck / test / format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      # Plain install (not --frozen-lockfile): the committed lockfile may lag.
+      - name: Install
+        run: pnpm install
+
+      # turbo run typecheck across the workspace.
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # `test` exists but is a no-op in packages without spec files;
+      # --passWithNoTests keeps those green while real suites still run.
+      - name: Test
+        run: pnpm -r --if-present test -- --passWithNoTests
+
+      # Formatting drift should not block CI.
+      - name: Format check
+        run: pnpm format:check
+        continue-on-error: true
+
+  integration:
+    name: db migrate + api smoke
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: companybrain
+          POSTGRES_PASSWORD: companybrain
+          POSTGRES_DB: companybrain
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U companybrain -d companybrain"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      DATABASE_URL: postgres://companybrain:companybrain@localhost:5432/companybrain
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install
+
+      # Applies the SQL migrations (creates the vector + pgcrypto extensions).
+      - name: Run migrations
+        run: pnpm --filter @companybrain/db migrate
+
+      # Boot the API and exercise a health + register + add + search round-trip.
+      # No API keys: local embeddings, no LLM.
+      - name: API smoke test
+        env:
+          AUTO_MIGRATE: "false"
+          EMBEDDING_PROVIDER: local
+          LLM_PROVIDER: none
+          API_HOST: 127.0.0.1
+          API_PORT: "3333"
+          JWT_SECRET: ci-smoke-secret-000000000000000000000000000000000000000000000000
+        run: |
+          set -euo pipefail
+          BASE="http://127.0.0.1:3333"
+
+          # Start the API in the background (tsx, no build step required).
+          pnpm --filter @companybrain/api exec tsx src/index.ts > /tmp/api.log 2>&1 &
+          API_PID=$!
+          cleanup() { kill "$API_PID" 2>/dev/null || true; }
+          trap cleanup EXIT
+
+          # Wait for /health to report ok (up to ~60s).
+          ok=""
+          for _ in $(seq 1 60); do
+            if curl -fsS "$BASE/health" 2>/dev/null | grep -q '"status":"ok"'; then
+              ok=1; break
+            fi
+            if ! kill -0 "$API_PID" 2>/dev/null; then
+              echo "::error::API process exited before becoming healthy"
+              cat /tmp/api.log; exit 1
+            fi
+            sleep 1
+          done
+          if [ -z "$ok" ]; then
+            echo "::error::/health never reported ok"
+            cat /tmp/api.log; exit 1
+          fi
+          echo "health ok"
+
+          # Register an org + owner and capture the session token.
+          REG=$(curl -fsS -X POST "$BASE/v1/auth/register" \
+            -H 'content-type: application/json' \
+            -d '{"email":"ci@example.com","password":"password123","name":"CI","orgName":"CI Org"}')
+          TOKEN=$(printf '%s' "$REG" | jq -r '.token')
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "::error::register did not return a token: $REG"; exit 1
+          fi
+          echo "register ok"
+
+          # Add a memory (literal words guarantee a keyword-arm hit).
+          curl -fsS -X POST "$BASE/v1/memories" \
+            -H "authorization: Bearer $TOKEN" \
+            -H 'content-type: application/json' \
+            -d '{"title":"CI smoke","content":"CompanyBrain integration smoke verification zulu quebec"}' \
+            > /dev/null
+          echo "add memory ok"
+
+          # Search and require at least one hit.
+          SEARCH=$(curl -fsS -X POST "$BASE/v1/search" \
+            -H "authorization: Bearer $TOKEN" \
+            -H 'content-type: application/json' \
+            -d '{"q":"smoke verification zulu","mode":"hybrid"}')
+          echo "search response: $SEARCH"
+          COUNT=$(printf '%s' "$SEARCH" | jq '.hits | length')
+          if [ "${COUNT:-0}" -lt 1 ]; then
+            echo "::error::search returned no hits"
+            cat /tmp/api.log; exit 1
+          fi
+          echo "smoke ok: $COUNT hit(s)"
