@@ -15,6 +15,10 @@ import { gmailConnector } from './gmail.js';
 import { discordConnector } from './discord.js';
 import { youtubeConnector } from './youtube.js';
 import { hackernewsConnector } from './hackernews.js';
+import { googleDriveConnector } from './googledrive.js';
+import { oneDriveConnector } from './onedrive.js';
+import { redditConnector } from './reddit.js';
+import { telegramConnector } from './telegram.js';
 
 /** Every built-in connector, in a stable order. */
 export const connectors: Connector[] = [
@@ -34,6 +38,10 @@ export const connectors: Connector[] = [
   discordConnector,
   youtubeConnector,
   hackernewsConnector,
+  googleDriveConnector,
+  oneDriveConnector,
+  redditConnector,
+  telegramConnector,
 ];
 
 /** Look up a connector by its stable id. */
@@ -64,3 +72,7 @@ export { gmailConnector, parseGmailMessage } from './gmail.js';
 export { discordConnector, discordMessageDoc } from './discord.js';
 export { youtubeConnector, extractYoutubeId, parseTimedText } from './youtube.js';
 export { hackernewsConnector, hnHitToDoc } from './hackernews.js';
+export { googleDriveConnector, driveFileToDoc } from './googledrive.js';
+export { oneDriveConnector, oneDriveItemToDoc } from './onedrive.js';
+export { redditConnector, redditPostToDoc } from './reddit.js';
+export { telegramConnector, telegramMessageDoc } from './telegram.js';
