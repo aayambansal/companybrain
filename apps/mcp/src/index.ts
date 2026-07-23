@@ -37,13 +37,11 @@ function errorResult(text: string): CallToolResult {
   return { content: [{ type: 'text', text }], isError: true };
 }
 
-/** Runs a tool body, guarding for a missing key and turning SDK failures into tool errors. */
+/** Runs a tool body, turning SDK failures into tool errors. */
 async function run(fn: () => Promise<CallToolResult>): Promise<CallToolResult> {
-  if (!API_KEY) {
-    return errorResult(
-      'COMPANYBRAIN_API_KEY is not set. Set it in the MCP server env (see this package\'s README) so tools can reach the API.',
-    );
-  }
+  // No key required: CompanyBrain in single-user mode (the default self-host)
+  // accepts requests with no auth. A key is only needed in multi-user mode,
+  // where a missing/invalid key surfaces below as a clean 401 tool error.
   try {
     return await fn();
   } catch (err) {
@@ -175,7 +173,7 @@ server.registerTool(
 async function main(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  log(`ready. API ${API_URL}${API_KEY ? '' : ' (no COMPANYBRAIN_API_KEY set — tools will error until it is)'}`);
+  log(`ready. API ${API_URL}${API_KEY ? ' (authed)' : ' (no key: works in single-user mode)'}`);
 }
 
 main().catch((err) => {
