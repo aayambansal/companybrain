@@ -293,6 +293,22 @@ importers:
         specifier: ^5.6.2
         version: 5.9.3
 
+  packages/openai:
+    dependencies:
+      '@companybrain/sdk':
+        specifier: workspace:*
+        version: link:../sdk
+    devDependencies:
+      '@types/node':
+        specifier: ^22.7.4
+        version: 22.20.1
+      typescript:
+        specifier: ^5.6.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.2
+        version: 2.1.9(@types/node@22.20.1)(lightningcss@1.32.0)
+
   packages/sdk:
     devDependencies:
       '@types/node':

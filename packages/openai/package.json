@@ -1,0 +1,26 @@
+{
+  "name": "@companybrain/openai",
+  "version": "0.1.0",
+  "description": "OpenAI function-calling tools for CompanyBrain — give any OpenAI-compatible agent (Agents SDK, Assistants, raw function calling) memory it can search, ask, and write.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "files": ["dist", "src", "README.md"],
+  "keywords": ["companybrain", "openai", "tools", "function-calling", "agents", "memory", "rag"],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@companybrain/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.2"
+  }
+}
