@@ -9,6 +9,7 @@ export class OpenAIProvider implements LlmProvider {
   readonly model: string;
   readonly available: boolean;
   readonly supportsVision = true;
+  readonly supportsAudio = true;
   private apiKey: string;
   private baseUrl: string;
 
@@ -41,6 +42,22 @@ export class OpenAIProvider implements LlmProvider {
     if (!res.ok) throw new Error(`OpenAI vision failed: ${res.status} ${await res.text()}`);
     const json = (await res.json()) as { choices: { message: { content: string } }[] };
     return json.choices[0]?.message.content ?? '';
+  }
+
+  async transcribeAudio(audio: ImageInput): Promise<string> {
+    if (!this.available) throw new Error('OPENAI_API_KEY is not set; cannot transcribe audio.');
+    const bytes = Buffer.from(audio.base64, 'base64');
+    const form = new FormData();
+    form.append('file', new Blob([bytes], { type: audio.mediaType }), 'audio');
+    form.append('model', 'whisper-1');
+    const res = await fetch(`${this.baseUrl}/audio/transcriptions`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${this.apiKey}` },
+      body: form,
+    });
+    if (!res.ok) throw new Error(`OpenAI transcription failed: ${res.status} ${await res.text()}`);
+    const json = (await res.json()) as { text: string };
+    return json.text ?? '';
   }
 
   async complete(opts: CompleteOptions): Promise<string> {
