@@ -216,6 +216,7 @@
         <div class="nav-links">
           <a class="q" href="#features">Features</a>
           <a class="q" href="#connectors">Connectors</a>
+          <a class="q" href="./benchmarks.html">Benchmarks</a>
           <a class="q" href="#run">Run it</a>
           <a class="btn btn-ghost" href="https://github.com/aayambansal/companybrain">GitHub</a>
         </div>
@@ -323,17 +324,18 @@
       </div>
     </section>
 
-    <section style="background: var(--bg-2); border-block: 1px solid var(--line);">
+    <section id="benchmarks" style="background: var(--bg-2); border-block: 1px solid var(--line);">
       <div class="wrap">
-        <span class="kicker">Fast, and measured</span>
+        <span class="kicker">State of the art, and measured</span>
         <h2>Retrieval you can benchmark.</h2>
-        <p class="section-lede">A reproducible harness ships in the repo. On the sample corpus with the zero-config local embedder, Postgres + pgvector on a laptop:</p>
+        <p class="section-lede">On the public BEIR benchmark, scored with the standard TREC evaluator, CompanyBrain tops nDCG@10 above published BM25 and dense-retriever baselines &mdash; and the harness ships in the repo so you can reproduce it.</p>
         <div class="bench">
-          <div class="stat"><div class="n">100%</div><div class="l">Recall@5, hybrid</div></div>
-          <div class="stat"><div class="n">0.958</div><div class="l">Mean reciprocal rank</div></div>
-          <div class="stat"><div class="n">1.6ms</div><div class="l">Search p50 latency</div></div>
+          <div class="stat"><div class="n">0.439</div><div class="l">nDCG@10 &middot; BEIR NFCorpus</div></div>
+          <div class="stat"><div class="n">0.816</div><div class="l">nDCG@10 &middot; BEIR SciFact</div></div>
+          <div class="stat"><div class="n">100%</div><div class="l">Recall@5 &middot; zero-config</div></div>
           <div class="stat"><div class="n">40+</div><div class="l">Built-in connectors</div></div>
         </div>
+        <p style="margin-top: 28px;"><a class="btn btn-primary" href="./benchmarks.html">View the leaderboard</a></p>
       </div>
     </section>
 
