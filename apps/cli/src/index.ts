@@ -284,6 +284,34 @@ async function cmdLogin(): Promise<void> {
   }
 }
 
+async function cmdPlaybook(args: Args): Promise<void> {
+  const topic = args.positionals.join(' ').trim();
+  if (!topic) fail('playbook: missing topic.');
+  const cb = await getClient();
+  const res = await cb.playbook({ topic, space: strFlag(args, 'space') });
+  out(res.playbook.content);
+  printSources(
+    res.playbook.citations.map((c: Citation) => ({
+      index: c.index,
+      title: c.title,
+      sourceUrl: c.sourceUrl,
+      documentId: c.documentId,
+    })),
+  );
+}
+
+async function cmdTopics(args: Args): Promise<void> {
+  const cb = await getClient();
+  const { topics } = await cb.topics({ space: strFlag(args, 'space'), minCount: 1 });
+  if (topics.length === 0) {
+    out(ui.dim('No topics yet.'));
+    return;
+  }
+  for (const t of topics) {
+    out(`${ui.bold(t.topic)}  ${ui.dim(`(${t.count})`)}`);
+  }
+}
+
 function printHelp(): void {
   out(ui.cyan(ui.brain()));
   out('');
@@ -298,6 +326,9 @@ function printHelp(): void {
   out(ui.dim('    --mode <hybrid|semantic|keyword>  --limit <n>  --space <s>'));
   out('  ask <question>        Ask a question; streams an answer with sources.');
   out(ui.dim('    --space <s>'));
+  out('  playbook <topic>      Draft a cited playbook from your memories.');
+  out(ui.dim('    --space <s>'));
+  out('  topics                Show the topics your memories cluster into.');
   out('  spaces                List spaces with document counts.');
   out('  status                Show API status (providers, counts).');
   out('  config                Show resolved configuration.');
@@ -325,6 +356,12 @@ async function main(): Promise<void> {
       break;
     case 'ask':
       await cmdAsk(args);
+      break;
+    case 'playbook':
+      await cmdPlaybook(args);
+      break;
+    case 'topics':
+      await cmdTopics(args);
       break;
     case 'spaces':
       await cmdSpaces();
