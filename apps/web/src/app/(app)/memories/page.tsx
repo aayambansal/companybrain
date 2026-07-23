@@ -19,6 +19,29 @@ function MemoriesInner() {
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
   const [activeSpace, setActiveSpace] = useState<string | undefined>(spaceId);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
+
+  function toggle(id: string) {
+    setSelected((s) => {
+      const next = new Set(s);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function deleteSelected() {
+    if (selected.size === 0 || deleting) return;
+    setDeleting(true);
+    try {
+      await Promise.all([...selected].map((id) => api.del(`/v1/memories/${id}`).catch(() => null)));
+      setSelected(new Set());
+      await load(activeSpace, offset);
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   const load = useCallback(async (space: string | undefined, off: number) => {
     setMemories(null);
@@ -93,12 +116,41 @@ function MemoriesInner() {
         />
       ) : (
         <>
+          {selected.size > 0 && (
+            <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-[var(--color-primary-line)] bg-[var(--color-primary-soft)] px-4 py-2.5">
+              <span className="text-[13px] font-medium text-[var(--color-primary-strong)]">
+                {selected.size} selected
+              </span>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>
+                  Clear
+                </Button>
+                <Button variant="danger" size="sm" loading={deleting} onClick={deleteSelected}>
+                  Delete{selected.size > 1 ? ` ${selected.size}` : ''}
+                </Button>
+              </div>
+            </div>
+          )}
           <ul className="space-y-2">
             {memories.map((m) => (
-              <li key={m.id}>
+              <li key={m.id} className="flex items-stretch gap-2">
+                <button
+                  aria-label={selected.has(m.id) ? 'Deselect memory' : 'Select memory'}
+                  onClick={() => toggle(m.id)}
+                  className={cx(
+                    'grid w-9 shrink-0 place-items-center rounded-lg border transition-colors',
+                    selected.has(m.id)
+                      ? 'border-[var(--color-primary-line)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                      : 'border-border bg-surface text-transparent hover:border-border-strong hover:text-ink-faint',
+                  )}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12l4 4 10-10" />
+                  </svg>
+                </button>
                 <Link
                   href={`/memories/${m.id}`}
-                  className="block rounded-lg border border-border bg-surface px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-hover"
+                  className="block flex-1 rounded-lg border border-border bg-surface px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-hover"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <p className="truncate font-medium text-ink">{m.title ?? 'Untitled'}</p>
