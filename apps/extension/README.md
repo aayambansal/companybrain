@@ -26,7 +26,9 @@ dependencies. Works in Chrome, Edge, and Brave.
 1. Click the icon, then **options** (or right-click the icon → Options).
 2. Set:
    - **API URL** — your CompanyBrain server, e.g. `http://localhost:3333`.
-   - **API key** — a key starting with `cb_` (create one via the API / dashboard).
+   - **API key** — optional. Leave it blank for a single-user instance (the default
+     self-host). For a multi-user instance, set a key starting with `cb_` (create one
+     via the API / dashboard).
    - **Default space** / **Default tags** — optional.
 3. Click **Test connection** to verify against `/v1/status`, then **Save**.
 

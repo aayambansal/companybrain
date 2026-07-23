@@ -49,23 +49,20 @@ async function save(e) {
 async function test() {
   const apiUrl = normalizeUrl(el.apiUrl.value);
   const apiKey = el.apiKey.value.trim();
-  if (!apiKey) {
-    showResult('err', 'Enter an API key first.');
-    return;
-  }
   el.test.disabled = true;
   showResult('pending', 'Testing ' + apiUrl + ' …');
   try {
-    const res = await fetch(apiUrl + '/v1/status', {
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + apiKey },
-    });
+    // A single-user instance needs no key; only send auth when one is set.
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers.Authorization = 'Bearer ' + apiKey;
+    const res = await fetch(apiUrl + '/v1/status', { headers: headers });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       showResult('err', 'Failed: HTTP ' + res.status + ' — ' + (data.message || data.error || ''));
       return;
     }
     if (!data.counts) {
-      showResult('err', 'Reached the server, but the API key was not accepted (unauthorized).');
+      showResult('err', 'Reached the server, but the request was not authorized. Set an API key if this instance runs in multi-user mode.');
       return;
     }
     const lines = [
