@@ -15,6 +15,7 @@
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
   "dependencies": {
+    "@companybrain/connectors": "workspace:*",
     "@companybrain/core": "workspace:*",
     "@companybrain/db": "workspace:*",
     "@hono/node-server": "^1.13.1",

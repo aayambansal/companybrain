@@ -1,7 +1,9 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { registerAll } from '@companybrain/connectors';
 import { getEnv, type Variables } from './context.js';
+import { getConnectorRegistry } from './connectors/registry.js';
 import { requireAuth } from './auth.js';
 import { openapiDocument, docsPage } from './openapi.js';
 import health from './routes/health.js';
@@ -17,6 +19,11 @@ import providers from './routes/providers.js';
 
 export function createApp() {
   const env = getEnv();
+
+  // Register the built-in connectors + sync runner so the Connections page and
+  // /v1/connections/* endpoints have something to offer.
+  registerAll(getConnectorRegistry());
+
   const app = new Hono<{ Variables: Variables }>();
 
   app.use('*', logger());
