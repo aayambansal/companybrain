@@ -12,6 +12,7 @@ import auth from './routes/auth.js';
 import memories from './routes/memories.js';
 import search from './routes/search.js';
 import chat from './routes/chat.js';
+import playbooks from './routes/playbooks.js';
 import spaces from './routes/spaces.js';
 import connections from './routes/connections.js';
 import apikeys from './routes/apikeys.js';
@@ -58,6 +59,7 @@ export function createApp() {
   v1.route('/memories', memories);
   v1.route('/search', search);
   v1.route('/chat', chat);
+  v1.route('/playbooks', playbooks);
   v1.route('/spaces', spaces);
   v1.route('/connections', connections);
   v1.route('/api-keys', apikeys);

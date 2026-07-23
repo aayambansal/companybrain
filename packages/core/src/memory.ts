@@ -17,6 +17,7 @@ import { hybridSearch } from './search/hybrid.js';
 import { llmRerank, llmRerankPointwise } from './search/rerank.js';
 import { hypotheticalDocuments, blendVectors } from './search/hyde.js';
 import { generateAnswer } from './chat.js';
+import { generatePlaybook, type PlaybookResult } from './playbook.js';
 import { enrichDocument } from './enrich.js';
 import { judgeSupersession, type SupersedeCandidate } from './temporal.js';
 import { dispatchWebhooks } from './webhooks.js';
@@ -623,6 +624,25 @@ export class MemoryEngine {
       limit: opts.limit ?? 8,
     });
     return generateAnswer(this.llm, message, hits, opts.history ?? []);
+  }
+
+  /**
+   * Synthesize a living playbook: retrieve the memories on a topic and have the
+   * LLM write a structured, cited Markdown document from them. Regenerating it
+   * reflects what the team knows now.
+   */
+  async generatePlaybook(
+    orgId: string,
+    opts: { topic: string; spaceId?: string; spaceSlug?: string; limit?: number },
+  ): Promise<PlaybookResult> {
+    const { hits } = await this.search(orgId, {
+      q: opts.topic,
+      spaceId: opts.spaceId,
+      spaceSlug: opts.spaceSlug,
+      mode: 'hybrid',
+      limit: opts.limit ?? 12,
+    });
+    return generatePlaybook(this.llm, opts.topic, hits);
   }
 
   // ── Internals ─────────────────────────────────────────────────────────────
