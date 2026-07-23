@@ -14,7 +14,7 @@ import type { ImageInput } from './llm/types.js';
 import { describeVideo, type VideoOptions, type VideoResult } from './video.js';
 import { indexDocument, findBySource } from './ingest.js';
 import { hybridSearch } from './search/hybrid.js';
-import { llmRerank } from './search/rerank.js';
+import { llmRerank, llmRerankPointwise } from './search/rerank.js';
 import { hypotheticalDocuments, blendVectors } from './search/hyde.js';
 import { generateAnswer } from './chat.js';
 import { enrichDocument } from './enrich.js';
@@ -540,7 +540,8 @@ export class MemoryEngine {
       keywordWeight: this.config.rrf.keywordWeight,
     });
     if (query.rerank && this.llm.available) {
-      hits = await llmRerank(this.llm, query.q, hits);
+      const rerankFn = query.rerankMode === 'pointwise' ? llmRerankPointwise : llmRerank;
+      hits = await rerankFn(this.llm, query.q, hits);
     }
     return { query: query.q, mode, hits, tookMs: Date.now() - started };
   }

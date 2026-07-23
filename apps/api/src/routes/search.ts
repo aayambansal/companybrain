@@ -13,6 +13,7 @@ const searchSchema = z.object({
   tags: z.array(z.string()).optional(),
   minScore: z.number().min(0).max(1).optional(),
   rerank: z.boolean().optional(),
+  rerankMode: z.enum(['listwise', 'pointwise']).optional(),
   hyde: z.boolean().optional(),
 });
 
@@ -28,6 +29,7 @@ async function run(c: Context<{ Variables: Variables }>, input: z.infer<typeof s
     tags: input.tags,
     minScore: input.minScore,
     rerank: input.rerank,
+    rerankMode: input.rerankMode,
     hyde: input.hyde,
   });
   return c.json(res);
