@@ -54,3 +54,7 @@ dist-py/
 # Docker
 .docker-data/
 pgdata/
+
+# BEIR benchmark data and runs (downloaded / generated, not committed)
+bench/beir/
+bench/*.run.json
