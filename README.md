@@ -1,24 +1,32 @@
-```
-                    _---~~(~~-_.                        __________  __  _______  ___    _   ____  __
-                  _{        )   )                      / ____/ __ \/  |/  / __ \/   |  / | / /\ \/ /
-                ,   ) -~~- ( ,-' )_                    / /   / / / / /|_/ / /_/ / /| | /  |/ /  \  /
-               (  `-,_..`., )-- '_,)                  / /___/ /_/ / /  / / ____/ ___ |/ /|  /   / /
-              ( ` _)  (  -~( -_ `,  }                 \____/\____/_/  /_/_/   /_/  |_/_/ |_/   /_/
-              (_-  _  ~_-~~~~`,  ,' )                     ____  ____  ___    _____   __
-                `~ -^(    __;-,((()))                    / __ )/ __ \/   |  /  _/ | / /
-                      ~~~~ {_ -_(())                    / __  / /_/ / /| |  / //  |/ /
-                             `\  }                     / /_/ / _, _/ ___ |_/ // /|  /
-                               { }                    /_____/_/ |_/_/  |_/___/_/ |_/
-```
+<div align="center">
 
-> The open-source memory layer for your company. Index everything, recall anything, own all of it.
+<pre>
+  ____ ___  __  __ ____   _    _   ___   __
+ / ___/ _ \|  \/  |  _ \ / \  | \ | \ \ / /
+| |  | | | | |\/| | |_) / _ \ |  \| |\ V / 
+| |__| |_| | |  | |  __/ ___ \| |\  | | |  
+ \____\___/|_|  |_|_| /_/   \_\_| \_| |_|  
+ ____  ____      _    ___ _   _ 
+| __ )|  _ \    / \  |_ _| \ | |
+|  _ \| |_) |  / _ \  | ||  \| |
+| |_) |  _ &lt;  / ___ \ | || |\  |
+|____/|_| \_\/_/   \_\___|_| \_|
+</pre>
 
-[![Website](https://img.shields.io/badge/site-companybrain-e6ac3f)](https://aayambansal.github.io/companybrain/)
-[![License](https://img.shields.io/badge/license-MIT-black)](./LICENSE)
+### The open-source memory layer for your company
+
+Index everything. Recall anything. Own all of it.
+
+[![Website](https://img.shields.io/badge/site-companybrain-2f5fe0)](https://aayambansal.github.io/companybrain/)
+[![License](https://img.shields.io/badge/license-MIT-1a1a1a)](./LICENSE)
 [![Postgres](https://img.shields.io/badge/db-postgres%20%2B%20pgvector-336791)](https://github.com/pgvector/pgvector)
 [![Self-host](https://img.shields.io/badge/self--host-one%20command-2ea44f)](#run-it)
-[![No sign-in](https://img.shields.io/badge/local-no%20sign--in-8a6d1f)](#no-sign-in)
-[![PRs](https://img.shields.io/badge/PRs-welcome-blue)](./CONTRIBUTING.md)
+[![Local](https://img.shields.io/badge/local-no%20sign--in-b8791f)](#no-sign-in)
+[![PRs](https://img.shields.io/badge/PRs-welcome-2f5fe0)](./CONTRIBUTING.md)
+
+</div>
+
+---
 
 CompanyBrain is a self-hosted memory backend. Point it at your knowledge (Obsidian vaults,
 Google Docs, Slack, Notion, GitHub, web pages, RSS, plain files) and it becomes one private,
@@ -72,15 +80,17 @@ key. It reconfigures the running engine on the spot. Nothing is required to star
 ## What you get
 
 ```
-  ingest ── chunk ── embed ── index ── search ── cite
-     │                                            │
-  connectors                                  agents · apps · you
+  ingest -- chunk -- embed -- index -- search -- cite
+     |                                            |
+  connectors                                  agents . apps . you
 ```
 
 - One store for everything. Files, notes, chat logs, docs, and web pages land as `documents`,
   split into retrievable `chunks` with a vector and a full-text index side by side.
 - Hybrid retrieval. Vector similarity and Postgres full-text search, fused with reciprocal
   rank fusion, so you get both meaning and exact keywords.
+- Multimodal ingest. OCR on images, Whisper transcripts on audio, extracted PDF text, and
+  video transcripts all land as searchable text.
 - Answers with receipts. RAG chat returns citations that point back at the source chunk.
 - Agent-native. A built-in Model Context Protocol server lets Claude, Cursor, or any agent
   read and write the brain as a tool.
@@ -94,17 +104,17 @@ key. It reconfigures the running engine on the spot. Nothing is required to star
       \                 \                |                 /                 /
        `------------------\-------------+----------------/-----------------'
                            \            |
-                        ┌────────────────────────┐
-                        │    companybrain api     │   hono + node
-                        │  auth · spaces · search │
-                        └───────────┬────────────┘
-                        ┌───────────────────────┐
-                        │     memory engine      │   ingest → chunk →
-                        │  embed · rank · fuse   │   embed → index → search
-                        └───────────┬────────────┘
-                        ┌───────────────────────┐
-                        │   postgres + pgvector  │   your database
-                        └────────────────────────┘
+                        +------------------------+
+                        |    companybrain api     |   hono + node
+                        |  auth . spaces . search |
+                        +-----------+-------------+
+                        +------------------------+
+                        |     memory engine      |   ingest -> chunk ->
+                        |  embed . rank . fuse   |   embed -> index -> search
+                        +-----------+-------------+
+                        +------------------------+
+                        |   postgres + pgvector  |   your database
+                        +------------------------+
 ```
 
 Design notes: [docs/architecture.md](./docs/architecture.md).
@@ -128,52 +138,23 @@ Design notes: [docs/architecture.md](./docs/architecture.md).
 
 ## Connectors
 
-| source                | id         | status      |
-| --------------------- | ---------- | ----------- |
-| Raw text / API        | `api`      | `[core]`    |
-| Web page / URL        | `web`      | `[core]`    |
-| Sitemap crawl         | `sitemap`  | `[core]`    |
-| Markdown / files / PDF | `files`   | `[core]`    |
-| Obsidian vault        | `obsidian` | `[core]`    |
-| RSS / Atom            | `rss`      | `[core]`    |
-| Notion                | `notion`   | `[core]`    |
-| Slack                 | `slack`    | `[core]`    |
-| GitHub                | `github`   | `[core]`    |
-| Google Docs (shared)  | `googledocs`| `[core]`   |
-| Linear                | `linear`   | `[core]`    |
-| Confluence            | `confluence`| `[core]`   |
-| Jira                  | `jira`     | `[core]`    |
-| Gmail                 | `gmail`    | `[core]`    |
-| Discord               | `discord`  | `[core]`    |
-| YouTube transcripts   | `youtube`  | `[core]`    |
-| Hacker News           | `hackernews`| `[core]`   |
-| Google Drive          | `googledrive`| `[core]` |
-| OneDrive              | `onedrive` | `[core]`    |
-| Reddit                | `reddit`   | `[core]`    |
-| Telegram              | `telegram` | `[core]`    |
-| Zendesk               | `zendesk`  | `[core]`    |
-| Intercom              | `intercom` | `[core]`    |
-| Trello                | `trello`   | `[core]`    |
-| Airtable              | `airtable` | `[core]`    |
-| GitLab                | `gitlab`   | `[core]`    |
-| Asana                 | `asana`    | `[core]`    |
-| Readwise              | `readwise` | `[core]`    |
-| Raindrop.io           | `raindrop` | `[core]`    |
-| Dropbox               | `dropbox`  | `[core]`    |
-| Box                   | `box`      | `[core]`    |
-| ClickUp               | `clickup`  | `[core]`    |
-| Todoist               | `todoist`  | `[core]`    |
-| GitBook               | `gitbook`  | `[core]`    |
-| Coda                  | `coda`     | `[core]`    |
-| HubSpot               | `hubspot`  | `[core]`    |
-| Front                 | `front`    | `[core]`    |
-| Bitbucket             | `bitbucket`| `[core]`    |
-| Sentry                | `sentry`   | `[core]`    |
-| Freshdesk             | `freshdesk`| `[core]`    |
-| Pipedrive             | `pipedrive`| `[core]`    |
+Configure and sync any of these from the dashboard under Connections.
 
-Forty connectors and counting. Configure and sync them from the dashboard under Connections. See
-[docs/connectors.md](./docs/connectors.md) to write your own.
+| | | | |
+| --- | --- | --- | --- |
+| Raw text / API | Web page / URL | Sitemap crawl | Markdown / files / PDF |
+| Obsidian vault | RSS / Atom | Notion | Slack |
+| GitHub | Google Docs | Google Drive | OneDrive |
+| Dropbox | Box | Linear | Jira |
+| Asana | Trello | ClickUp | Todoist |
+| Confluence | GitBook | Coda | Airtable |
+| Gmail | Discord | Telegram | Reddit |
+| YouTube | Hacker News | Readwise | Raindrop.io |
+| Zendesk | Intercom | Freshdesk | Front |
+| HubSpot | Pipedrive | GitLab | Bitbucket |
+| Sentry | Wispr Flow | | |
+
+Forty-plus connectors and counting. See [docs/connectors.md](./docs/connectors.md) to write your own.
 
 ## Clients
 
