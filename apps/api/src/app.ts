@@ -33,10 +33,16 @@ export function createApp() {
   const app = new Hono<{ Variables: Variables }>();
 
   app.use('*', logger());
+  // Browsers reject `Access-Control-Allow-Origin: *` together with credentials,
+  // so when the allow-list is a wildcard we reflect the request's own origin.
+  const allowAny = env.corsOrigins.includes('*');
   app.use(
     '*',
     cors({
-      origin: env.corsOrigins.includes('*') ? '*' : env.corsOrigins,
+      origin: (origin) => {
+        if (allowAny) return origin ?? '*';
+        return env.corsOrigins.includes(origin) ? origin : (env.corsOrigins[0] ?? '');
+      },
       credentials: true,
       allowHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
       allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

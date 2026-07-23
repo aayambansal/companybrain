@@ -123,7 +123,7 @@ export default function OverviewPage() {
         />
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
         {/* Recent memories */}
         <section>
           <div className="mb-2.5 flex items-center justify-between">
