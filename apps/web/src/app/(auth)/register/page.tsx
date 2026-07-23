@@ -21,8 +21,17 @@ export default function RegisterPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+    // name and workspace are optional; the server names the workspace for you when
+    // they are omitted. Sending an empty string instead trips its min-length check,
+    // so only include them when the user actually typed something.
+    const payload: Record<string, string> = {
+      email: form.email.trim(),
+      password: form.password,
+    };
+    if (form.name.trim()) payload.name = form.name.trim();
+    if (form.orgName.trim()) payload.orgName = form.orgName.trim();
     try {
-      await api.post('/v1/auth/register', form);
+      await api.post('/v1/auth/register', payload);
       router.replace('/');
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) setError('That email is already registered.');
