@@ -10,6 +10,13 @@ export interface CompleteOptions {
   maxTokens?: number;
 }
 
+export interface ImageInput {
+  /** Base64-encoded image bytes (no data-URL prefix). */
+  base64: string;
+  /** e.g. 'image/png', 'image/jpeg'. */
+  mediaType: string;
+}
+
 export interface LlmProvider {
   readonly name: string;
   readonly model: string;
@@ -18,4 +25,8 @@ export interface LlmProvider {
   complete(opts: CompleteOptions): Promise<string>;
   /** Optional token streaming; providers may fall back to a single chunk. */
   stream?(opts: CompleteOptions): AsyncIterable<string>;
+  /** Whether this provider can read images (vision). */
+  readonly supportsVision?: boolean;
+  /** Extract text and a description from an image (OCR + caption). */
+  describeImage?(image: ImageInput, prompt?: string): Promise<string>;
 }

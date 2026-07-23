@@ -1,10 +1,14 @@
-import type { LlmProvider, CompleteOptions } from './types.js';
+import type { LlmProvider, CompleteOptions, ImageInput } from './types.js';
+
+const IMAGE_PROMPT =
+  'Extract all text from this image verbatim (OCR). Then, on a new line starting with "Description:", briefly describe what the image shows. If there is no text, just give the description.';
 
 /** OpenAI chat completions (no SDK dependency). */
 export class OpenAIProvider implements LlmProvider {
   readonly name = 'openai';
   readonly model: string;
   readonly available: boolean;
+  readonly supportsVision = true;
   private apiKey: string;
   private baseUrl: string;
 
@@ -13,6 +17,30 @@ export class OpenAIProvider implements LlmProvider {
     this.model = opts.model ?? 'gpt-4o-mini';
     this.baseUrl = opts.baseUrl ?? 'https://api.openai.com/v1';
     this.available = Boolean(this.apiKey);
+  }
+
+  async describeImage(image: ImageInput, prompt?: string): Promise<string> {
+    if (!this.available) throw new Error('OPENAI_API_KEY is not set; cannot read images.');
+    const res = await fetch(`${this.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: this.model,
+        max_tokens: 1024,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt ?? IMAGE_PROMPT },
+              { type: 'image_url', image_url: { url: `data:${image.mediaType};base64,${image.base64}` } },
+            ],
+          },
+        ],
+      }),
+    });
+    if (!res.ok) throw new Error(`OpenAI vision failed: ${res.status} ${await res.text()}`);
+    const json = (await res.json()) as { choices: { message: { content: string } }[] };
+    return json.choices[0]?.message.content ?? '';
   }
 
   async complete(opts: CompleteOptions): Promise<string> {

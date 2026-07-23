@@ -9,6 +9,7 @@ import {
 import { loadConfig, type EngineConfig } from './config.js';
 import { createEmbeddingProvider, type EmbeddingProvider } from './embeddings/index.js';
 import { createLlmProvider, type LlmProvider } from './llm/index.js';
+import type { ImageInput } from './llm/types.js';
 import { indexDocument, findBySource } from './ingest.js';
 import { hybridSearch } from './search/hybrid.js';
 import { llmRerank } from './search/rerank.js';
@@ -380,6 +381,16 @@ export class MemoryEngine {
       hits = await llmRerank(this.llm, query.q, hits);
     }
     return { query: query.q, mode, hits, tookMs: Date.now() - started };
+  }
+
+  /** OCR + caption an image with the configured vision LLM. Throws if none. */
+  async describeImage(image: ImageInput, prompt?: string): Promise<string> {
+    if (!this.llm.supportsVision || !this.llm.describeImage) {
+      throw new Error(
+        'No vision-capable LLM configured. Set LLM_PROVIDER to anthropic or openai (with a vision model) to read images.',
+      );
+    }
+    return this.llm.describeImage(image, prompt);
   }
 
   /** Find memories similar to a given one (semantic "see also"), excluding itself. */
