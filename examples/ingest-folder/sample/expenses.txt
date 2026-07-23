@@ -1,0 +1,4 @@
+Expense reports are due on the last business day of each month.
+
+Anything over $500 needs manager approval before purchase. Reimbursements are
+paid out on the next payroll run after approval.
