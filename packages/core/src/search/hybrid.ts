@@ -30,6 +30,10 @@ export interface HybridSearchParams {
   poolSize?: number;
   /** Include memories that a newer memory has superseded (default false). */
   includeSuperseded?: boolean;
+  /** RRF weight on the vector arm (default 1). Raising it favors semantic matches. */
+  vectorWeight?: number;
+  /** RRF weight on the keyword arm (default 1). */
+  keywordWeight?: number;
 }
 
 /**
@@ -58,8 +62,8 @@ export async function hybridSearch(sql: Sql, params: HybridSearchParams): Promis
   // Hybrid: fuse with RRF.
   const fused = reciprocalRankFusion<Candidate>(
     [
-      { items: vectorHits, weight: 1 },
-      { items: keywordHits, weight: 1 },
+      { items: vectorHits, weight: params.vectorWeight ?? 1 },
+      { items: keywordHits, weight: params.keywordWeight ?? 1 },
     ],
     (c) => c.chunk_id,
     60,

@@ -536,6 +536,8 @@ export class MemoryEngine {
       limit: query.limit ?? 10,
       tags: query.tags,
       minScore: query.minScore,
+      vectorWeight: this.config.rrf.vectorWeight,
+      keywordWeight: this.config.rrf.keywordWeight,
     });
     if (query.rerank && this.llm.available) {
       hits = await llmRerank(this.llm, query.q, hits);
