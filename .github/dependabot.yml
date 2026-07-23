@@ -7,8 +7,13 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     groups:
+      # Group only minor/patch bumps. Majors (e.g. a TypeScript or vitest major)
+      # get their own PRs so each breaking upgrade is reviewed on its own.
       dev-dependencies:
         dependency-type: development
+        update-types:
+          - minor
+          - patch
       production-dependencies:
         dependency-type: production
         update-types:
