@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       # Build only (no push) to catch Dockerfile breakage.
       - name: Build API image
@@ -46,7 +46,7 @@ jobs:
 
       - name: Set up Docker Buildx
         if: steps.check.outputs.exists == 'true'
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build web image
         if: steps.check.outputs.exists == 'true'
