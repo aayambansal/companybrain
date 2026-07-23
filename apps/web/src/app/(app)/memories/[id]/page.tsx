@@ -16,6 +16,17 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
   const [memory, setMemory] = useState<Memory | null | 'missing'>(null);
   const [related, setRelated] = useState<SearchHit[]>([]);
   const [deleting, setDeleting] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  async function copyContent(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* clipboard blocked */
+    }
+  }
 
   useEffect(() => {
     api
@@ -105,7 +116,15 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
           )}
 
           <div className="mt-6">
-            <h2 className="mb-2 font-mono text-[12px] uppercase tracking-wide text-ink-faint">Content</h2>
+            <div className="mb-2 flex items-center justify-between">
+              <h2 className="font-mono text-[12px] uppercase tracking-wide text-ink-faint">Content</h2>
+              <button
+                onClick={() => copyContent(memory.content ?? '')}
+                className="text-[12px] text-ink-faint transition-colors hover:text-ink"
+              >
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+            </div>
             <div className="whitespace-pre-wrap rounded-lg border border-border bg-surface p-5 text-[14px] leading-relaxed text-ink">
               {memory.content}
             </div>
