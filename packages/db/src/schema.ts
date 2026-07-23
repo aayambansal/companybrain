@@ -278,6 +278,24 @@ export const chatSessions = pgTable(
   }),
 );
 
+// ── Memory version history ───────────────────────────────────────────────
+export const memoryVersions = pgTable(
+  'memory_versions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    documentId: uuid('document_id')
+      .notNull()
+      .references(() => documents.id, { onDelete: 'cascade' }),
+    title: text('title'),
+    content: text('content'),
+    version: integer('version').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    docIdx: index('memory_versions_doc_idx').on(t.documentId),
+  }),
+);
+
 // ── Webhooks (outbound events) ───────────────────────────────────────────
 export const webhooks = pgTable(
   'webhooks',
@@ -394,3 +412,5 @@ export type ChatMessage = typeof chatMessages.$inferSelect;
 export type NewChatMessage = typeof chatMessages.$inferInsert;
 export type Webhook = typeof webhooks.$inferSelect;
 export type NewWebhook = typeof webhooks.$inferInsert;
+export type MemoryVersion = typeof memoryVersions.$inferSelect;
+export type NewMemoryVersion = typeof memoryVersions.$inferInsert;

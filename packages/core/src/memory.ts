@@ -4,6 +4,7 @@ import {
   documents,
   chunks as chunksTable,
   spaces,
+  memoryVersions,
   type DbClient,
 } from '@companybrain/db';
 import { loadConfig, type EngineConfig } from './config.js';
@@ -307,6 +308,21 @@ export class MemoryEngine {
     if (!existing) return null;
     const contentChanged = patch.content !== undefined && patch.content !== existing.content;
     const normalized = patch.content !== undefined ? normalizeText(patch.content) : undefined;
+
+    // Snapshot the prior content before overwriting it, for temporal history.
+    if (contentChanged) {
+      const [{ count } = { count: 0 }] = await this.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(memoryVersions)
+        .where(eq(memoryVersions.documentId, id));
+      await this.db.insert(memoryVersions).values({
+        documentId: id,
+        title: existing.title,
+        content: existing.content,
+        version: (count ?? 0) + 1,
+      });
+    }
+
     await this.db
       .update(documents)
       .set({
@@ -323,6 +339,18 @@ export class MemoryEngine {
       await indexDocument(this.db, this.embedder, this.config, id);
     }
     return this.getMemory(orgId, id);
+  }
+
+  /** Prior versions of a memory's content, newest first. */
+  async getVersions(orgId: string, id: string): Promise<{ version: number; title: string | null; content: string | null; createdAt: string }[]> {
+    const mem = await this.getMemory(orgId, id);
+    if (!mem) return [];
+    const rows = await this.db
+      .select({ version: memoryVersions.version, title: memoryVersions.title, content: memoryVersions.content, createdAt: memoryVersions.createdAt })
+      .from(memoryVersions)
+      .where(eq(memoryVersions.documentId, id))
+      .orderBy(desc(memoryVersions.version));
+    return rows.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() }));
   }
 
   async deleteMemory(orgId: string, id: string): Promise<boolean> {

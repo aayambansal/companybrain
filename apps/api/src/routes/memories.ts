@@ -103,6 +103,14 @@ app.get('/:id/related', async (c) => {
   return c.json({ related });
 });
 
+// Prior content versions (temporal history).
+app.get('/:id/versions', async (c) => {
+  const auth = c.get('auth');
+  const engine = getEngine();
+  const versions = await engine.getVersions(auth.orgId, c.req.param('id'));
+  return c.json({ versions });
+});
+
 const patchSchema = z.object({
   title: z.string().max(500).optional(),
   content: z.string().optional(),
