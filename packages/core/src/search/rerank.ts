@@ -30,17 +30,24 @@ export function parseOrder(text: string, max: number): number[] {
  * Reorder hits with an LLM by relevance to the query. Falls back to the input
  * order if no LLM is available or the response is unusable.
  */
-export async function llmRerank(llm: LlmProvider, query: string, hits: SearchHit[]): Promise<SearchHit[]> {
+export async function llmRerank(
+  llm: LlmProvider,
+  query: string,
+  hits: SearchHit[],
+  opts: { snippetChars?: number } = {},
+): Promise<SearchHit[]> {
   if (!llm.available || hits.length <= 1) return hits;
+  const snippetChars = opts.snippetChars ?? 600;
   const list = hits
-    .map((h, i) => `[${i}] ${h.document.title ? h.document.title + ' — ' : ''}${h.content.slice(0, 240)}`)
+    .map((h, i) => `[${i}] ${h.document.title ? h.document.title + ' — ' : ''}${h.content.slice(0, snippetChars)}`)
     .join('\n\n');
   const res = await llm.complete({
     system:
-      'You reorder search results by relevance to a query. Return ONLY the passage numbers, most relevant first, comma-separated. No prose, no explanation.',
+      'You reorder search results by relevance to a query. Judge whether each passage actually answers or directly supports the query, not just topical overlap. Return ONLY the passage numbers, most relevant first, comma-separated. No prose, no explanation.',
+    // Enough budget to emit an ordering over a large candidate set.
     messages: [{ role: 'user', content: `Query: ${query}\n\nPassages:\n${list}` }],
     temperature: 0,
-    maxTokens: 120,
+    maxTokens: 600,
   });
   const order = parseOrder(res, hits.length);
   return order.length > 0 ? applyRerankOrder(hits, order) : hits;
