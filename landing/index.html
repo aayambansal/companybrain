@@ -3,201 +3,307 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CompanyBrain — the memory layer for your company</title>
+    <title>Ask your company anything · CompanyBrain</title>
     <meta
       name="description"
-      content="Self-hosted semantic memory for your team. Index everything, recall anything, own all of it. 44 connectors, hybrid search, MCP, SDKs, one-command self-host."
+      content="Self-hosted semantic memory for your team. Index everything from Slack to Google Docs to PDFs, then get cited answers over an API, an SDK, or MCP. 40+ connectors, hybrid search, one command to run."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="CompanyBrain — the memory layer for your company" />
-    <meta property="og:description" content="Self-hosted semantic memory for your team. Hybrid search + rerank, 44 connectors, MCP, SDKs. SOTA retrieval on BEIR, reproducibly." />
+    <meta property="og:title" content="Ask your company anything · CompanyBrain" />
+    <meta property="og:description" content="Self-hosted semantic memory. Hybrid search with reranking, 40+ connectors, MCP, SDKs. State-of-the-art retrieval on BEIR, reproducibly." />
     <meta property="og:url" content="https://aayambansal.github.io/companybrain/" />
     <meta property="og:image" content="https://aayambansal.github.io/companybrain/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="CompanyBrain — the memory layer for your company" />
-    <meta name="twitter:description" content="Self-hosted semantic memory. Hybrid search + rerank, 44 connectors, MCP. SOTA retrieval on BEIR." />
+    <meta name="twitter:title" content="Ask your company anything · CompanyBrain" />
+    <meta name="twitter:description" content="Self-hosted semantic memory. Hybrid search with reranking, 40+ connectors, MCP. SOTA retrieval on BEIR." />
     <meta name="twitter:image" content="https://aayambansal.github.io/companybrain/og.png" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ffffff'/%3E%3Cg fill='none' stroke='%235b45e4' stroke-width='1.6' stroke-linejoin='round'%3E%3Cpath d='M12 6.5C9.4 6.5 7.4 8.4 7.4 10.8c0 .4.05.9.15 1.3C6.3 12.8 5.5 14 5.5 15.4c0 1.2.55 2.3 1.5 3-.2.45-.28.95-.28 1.45 0 2.2 1.85 3.95 4.25 3.95.65 0 1.3-.18 1.85-.46.46 1 1.55 1.65 2.85 1.65V6.85c-.92-.28-2.4-.35-3.6-.35Z'/%3E%3Cpath d='M20 6.5c2.6 0 4.6 1.9 4.6 4.3 0 .4-.05.9-.15 1.3 1.25.7 2.05 1.9 2.05 3.3 0 1.2-.55 2.3-1.5 3 .2.45.28.95.28 1.45 0 2.2-1.85 3.95-4.25 3.95-.65 0-1.3-.18-1.85-.46-.46 1-1.55 1.65-2.85 1.65'/%3E%3C/g%3E%3Cpath d='M16 7v18' stroke='%23f0a63c' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E" />
     <link rel="preconnect" href="https://api.fontshare.com" />
-    <link
-      href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=switzer@400,500,600,700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=switzer@400,500,600,700&display=swap" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
     <style>
       :root {
-        --bg: oklch(0.987 0.004 265);
-        --bg-2: oklch(0.968 0.006 265);
+        --paper: oklch(0.986 0.005 264);
+        --paper-2: oklch(0.966 0.008 264);
         --surface: #ffffff;
-        --ink: oklch(0.215 0.021 266);
-        --ink-2: oklch(0.36 0.02 266);
-        --muted: oklch(0.505 0.02 266);
-        --line: oklch(0.905 0.007 266);
-        --line-2: oklch(0.86 0.01 266);
-        --iris: oklch(0.55 0.2 264);
-        --iris-strong: oklch(0.49 0.21 264);
-        --iris-soft: oklch(0.55 0.2 264 / 0.1);
-        --iris-line: oklch(0.55 0.2 264 / 0.24);
-        --spark: oklch(0.76 0.16 68);
-        --spark-strong: oklch(0.66 0.16 60);
+        --ink: oklch(0.205 0.024 266);
+        --ink-2: oklch(0.37 0.021 266);
+        --muted: oklch(0.52 0.019 266);
+        --line: oklch(0.905 0.008 266);
+        --line-2: oklch(0.85 0.012 266);
+        --iris: oklch(0.54 0.21 264);
+        --iris-strong: oklch(0.47 0.22 264);
+        --iris-soft: oklch(0.54 0.21 264 / 0.1);
+        --iris-line: oklch(0.54 0.21 264 / 0.26);
+        --spark: oklch(0.77 0.16 66);
+        --spark-ink: oklch(0.42 0.11 62);
+        --cyan: oklch(0.66 0.11 210);
         --display: "Clash Display", ui-sans-serif, system-ui, sans-serif;
         --sans: "Switzer", ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
         --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-        --maxw: 1120px;
+        --maxw: 1140px;
         --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --z-nav: 50;
       }
       * { box-sizing: border-box; }
       html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
       body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--ink);
-        font-family: var(--sans);
-        font-size: 17px;
-        line-height: 1.6;
-        -webkit-font-smoothing: antialiased;
-        overflow-x: hidden;
+        margin: 0; background: var(--paper); color: var(--ink);
+        font-family: var(--sans); font-size: 17px; line-height: 1.6;
+        -webkit-font-smoothing: antialiased; overflow-x: hidden;
       }
       a { color: var(--iris-strong); text-decoration: none; }
       a:hover { color: var(--iris); }
       ::selection { background: var(--iris-soft); color: var(--iris-strong); }
       :focus-visible { outline: 2px solid var(--iris); outline-offset: 3px; border-radius: 6px; }
+      button { font: inherit; }
       .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
-      h1, h2, h3 { font-family: var(--display); font-weight: 600; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+      h1, h2, h3 { font-family: var(--display); font-weight: 600; letter-spacing: -0.025em; margin: 0; text-wrap: balance; }
       p { text-wrap: pretty; }
-      .mono { font-family: var(--mono); }
+      .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
       /* ── Nav ── */
       nav {
-        position: sticky; top: 0; z-index: 50;
-        background: color-mix(in oklab, var(--bg) 82%, transparent);
-        backdrop-filter: saturate(1.4) blur(12px);
-        border-bottom: 1px solid transparent;
-        transition: border-color 0.3s;
+        position: sticky; top: 0; z-index: var(--z-nav);
+        background: color-mix(in oklab, var(--paper) 78%, transparent);
+        backdrop-filter: saturate(1.5) blur(14px);
+        border-bottom: 1px solid transparent; transition: border-color 0.3s;
       }
       nav.scrolled { border-color: var(--line); }
-      nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 66px; }
-      .brand { display: flex; align-items: center; gap: 11px; font-family: var(--display); font-weight: 600; font-size: 19px; letter-spacing: -0.02em; }
+      nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+      .brand { display: flex; align-items: center; gap: 11px; font-family: var(--display); font-weight: 600; font-size: 19px; letter-spacing: -0.02em; color: var(--ink); }
       .brand .mark { width: 30px; height: 30px; }
       .nav-links { display: flex; align-items: center; gap: 28px; font-size: 15px; font-weight: 500; }
       .nav-links a.q { color: var(--ink-2); }
       .nav-links a.q:hover { color: var(--ink); }
       .btn {
-        display: inline-flex; align-items: center; gap: 8px;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         font-family: var(--sans); font-weight: 600; font-size: 15px;
-        border-radius: 11px; padding: 11px 18px; cursor: pointer; border: 0;
-        transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease), background 0.2s;
+        border-radius: 11px; padding: 11px 18px; cursor: pointer; border: 1px solid transparent;
+        transition: transform 0.16s var(--ease), box-shadow 0.22s var(--ease), background 0.2s, border-color 0.2s, color 0.2s;
       }
-      .btn-primary { background: var(--ink); color: var(--bg); box-shadow: 0 1px 2px oklch(0.2 0.02 266 / 0.2); }
-      .btn-primary:hover { color: var(--bg); transform: translateY(-1px); box-shadow: 0 8px 22px oklch(0.2 0.02 266 / 0.22); }
-      .btn-iris { background: var(--iris); color: #fff; box-shadow: 0 6px 20px oklch(0.55 0.2 264 / 0.32); }
-      .btn-iris:hover { background: var(--iris-strong); color: #fff; transform: translateY(-1px); }
-      .btn-ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line-2); }
-      .btn-ghost:hover { border-color: var(--iris-line); color: var(--ink); }
-      @media (max-width: 720px) { .nav-links a.q { display: none; } }
+      .btn-primary { background: var(--ink); color: var(--paper); box-shadow: 0 1px 2px oklch(0.2 0.02 266 / 0.22); }
+      .btn-primary:hover { color: var(--paper); transform: translateY(-1px); box-shadow: 0 10px 26px oklch(0.2 0.02 266 / 0.22); }
+      .btn-iris { background: var(--iris); color: #fff; box-shadow: 0 8px 22px oklch(0.54 0.21 264 / 0.34); }
+      .btn-iris:hover { background: var(--iris-strong); color: #fff; transform: translateY(-1px); box-shadow: 0 12px 30px oklch(0.54 0.21 264 / 0.4); }
+      .btn-ghost { background: var(--surface); color: var(--ink); border-color: var(--line-2); }
+      .btn-ghost:hover { border-color: var(--iris-line); color: var(--iris-strong); }
+      @media (max-width: 760px) { .nav-links a.q { display: none; } }
 
       /* ── Hero ── */
-      header { position: relative; padding: clamp(56px, 10vw, 120px) 0 clamp(48px, 8vw, 96px); overflow: hidden; }
-      #constellation { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.9; }
-      header .veil {
-        position: absolute; inset: 0; z-index: 1; pointer-events: none;
-        background: radial-gradient(70% 60% at 50% 42%, transparent 30%, var(--bg) 82%);
-      }
-      header .wrap { position: relative; z-index: 2; text-align: center; }
+      header { position: relative; padding: clamp(48px, 8vw, 92px) 0 clamp(40px, 6vw, 72px); overflow: hidden; }
+      #constellation { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.85; }
+      header .veil { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(90% 70% at 50% 30%, transparent 34%, var(--paper) 88%); }
+      header .wrap { position: relative; z-index: 2; }
       .pill {
         display: inline-flex; align-items: center; gap: 9px;
         background: var(--surface); border: 1px solid var(--line-2); border-radius: 999px;
-        padding: 6px 8px 6px 14px; font-size: 13.5px; font-weight: 500; color: var(--ink-2);
-        box-shadow: 0 2px 10px oklch(0.2 0.02 266 / 0.05);
+        padding: 6px 14px 6px 8px; font-size: 13.5px; font-weight: 500; color: var(--ink-2);
+        box-shadow: 0 2px 12px oklch(0.2 0.02 266 / 0.05);
       }
-      .pill b { color: var(--iris-strong); }
       .pill .tag { font-family: var(--mono); font-size: 11px; background: var(--iris-soft); color: var(--iris-strong); padding: 3px 8px; border-radius: 999px; }
-      h1 { font-size: clamp(2.6rem, 7vw, 5.5rem); line-height: 1.02; margin: 26px auto 0; max-width: 15ch; font-weight: 600; }
-      h1 .g { color: var(--iris); position: relative; }
-      .lede { font-size: clamp(1.1rem, 2.3vw, 1.4rem); color: var(--ink-2); max-width: 60ch; margin: 22px auto 0; line-height: 1.5; }
-      .cmd-row { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 36px; }
+      .pill b { color: var(--ink); font-weight: 600; }
+      .hero-head { max-width: 20ch; }
+      h1 { font-size: clamp(2.5rem, 6.4vw, 4.9rem); line-height: 1.02; margin: 22px 0 0; font-weight: 600; }
+      h1 .g { color: var(--iris); }
+      .lede { font-size: clamp(1.08rem, 2vw, 1.32rem); color: var(--ink-2); max-width: 56ch; margin: 20px 0 0; line-height: 1.5; }
+      .hero-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 30px; }
       .cmd {
         display: inline-flex; align-items: center; gap: 12px;
-        background: var(--surface); border: 1px solid var(--line-2); border-radius: 13px;
-        padding: 12px 12px 12px 18px; font-family: var(--mono); font-size: 15.5px;
+        background: var(--surface); border: 1px solid var(--line-2); border-radius: 12px;
+        padding: 11px 11px 11px 17px; font-family: var(--mono); font-size: 15px;
         box-shadow: 0 4px 20px oklch(0.2 0.02 266 / 0.06);
       }
       .cmd .p { color: var(--muted); }
       .cmd .k { color: var(--iris-strong); }
-      .cmd .copy {
-        border: 1px solid var(--line-2); background: var(--bg-2); color: var(--muted);
-        border-radius: 8px; padding: 5px 10px; font-family: var(--mono); font-size: 12px; cursor: pointer; transition: all 0.15s;
-      }
+      .cmd .copy { border: 1px solid var(--line-2); background: var(--paper-2); color: var(--muted); border-radius: 8px; padding: 5px 10px; font-family: var(--mono); font-size: 12px; cursor: pointer; transition: all 0.15s; }
       .cmd .copy:hover { color: var(--iris-strong); border-color: var(--iris-line); }
-      .trust { margin-top: 24px; font-size: 13.5px; color: var(--muted); font-family: var(--mono); }
+      .trust { margin-top: 22px; font-size: 13.5px; color: var(--muted); font-family: var(--mono); }
       .trust b { color: var(--ink-2); font-weight: 500; }
 
-      /* ── Sections ── */
-      section { padding: clamp(64px, 9vw, 108px) 0; }
-      .kicker { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.02em; color: var(--iris-strong); font-weight: 500; }
-      h2 { font-size: clamp(1.8rem, 4vw, 2.9rem); line-height: 1.06; margin-top: 12px; }
-      .section-lede { color: var(--ink-2); max-width: 60ch; margin: 16px 0 0; font-size: 1.12rem; }
+      /* ── Ask console (hero centerpiece) ── */
+      .console {
+        position: relative; z-index: 2; margin: clamp(40px, 6vw, 64px) auto 0; max-width: 940px;
+        background: var(--surface); border: 1px solid var(--line-2); border-radius: 22px;
+        box-shadow: 0 2px 4px oklch(0.2 0.02 266 / 0.04), 0 30px 70px -30px oklch(0.35 0.06 266 / 0.28);
+        overflow: hidden;
+      }
+      .console-bar { display: flex; align-items: center; gap: 10px; padding: 13px 18px; border-bottom: 1px solid var(--line); background: var(--paper); }
+      .console-bar .dots { display: flex; gap: 6px; }
+      .console-bar .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line-2); display: block; }
+      .console-bar .title { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+      .console-bar .live { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11.5px; color: var(--iris-strong); }
+      .console-bar .live .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--iris); box-shadow: 0 0 0 4px var(--iris-soft); animation: breathe 2.4s var(--ease) infinite; }
+      @keyframes breathe { 50% { box-shadow: 0 0 0 7px transparent; } }
 
-      /* Feature bento */
-      .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-top: 44px; }
-      .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 44px; }
-      @media (max-width: 760px) { .duo { grid-template-columns: 1fr; } }
-      .cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-top: 44px; }
-      .cases .tile h3 { margin-bottom: 8px; }
-      .cases .tile em { font-style: italic; color: var(--iris-strong); }
-      .tile { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px; transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s; }
-      .tile:hover { transform: translateY(-3px); box-shadow: 0 16px 40px oklch(0.2 0.02 266 / 0.08); border-color: var(--line-2); }
-      .tile h3 { font-size: 1.28rem; margin-top: 16px; }
-      .tile p { color: var(--ink-2); margin: 8px 0 0; font-size: 1rem; }
-      .tile .ic { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: var(--iris-soft); color: var(--iris-strong); }
-      .tile.span3 { grid-column: span 3; }
-      .tile.span2 { grid-column: span 2; }
-      .tile.wide { grid-column: span 6; display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; align-items: center; }
-      .tile.wide .pipe { font-family: var(--mono); font-size: clamp(11px, 1.5vw, 13.5px); color: var(--ink-2); line-height: 1.9; overflow-x: auto; background: var(--bg-2); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
-      .tile.wide .pipe .k { color: var(--iris-strong); }
-      .tile.wide .pipe .s { color: var(--spark-strong); }
-      @media (max-width: 900px) { .bento { grid-template-columns: repeat(2, 1fr); } .tile.span3, .tile.span2 { grid-column: span 2; } .tile.wide { grid-column: span 2; grid-template-columns: 1fr; } }
-      @media (max-width: 560px) { .bento { grid-template-columns: 1fr; } .tile.span3, .tile.span2, .tile.wide { grid-column: span 1; } }
+      .console-body { display: grid; grid-template-columns: 1fr 1fr; }
+      @media (max-width: 800px) { .console-body { grid-template-columns: 1fr; } }
+      .console-left { padding: 22px; display: flex; flex-direction: column; }
+      .console-right { border-left: 1px solid var(--line); background: linear-gradient(180deg, var(--paper) 0%, var(--surface) 100%); display: grid; place-items: center; padding: 8px; min-height: 260px; }
+      @media (max-width: 800px) { .console-right { border-left: 0; border-top: 1px solid var(--line); order: -1; } }
+
+      .field { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line-2); border-radius: 12px; padding: 12px 14px; background: var(--paper); }
+      .field svg { width: 18px; height: 18px; color: var(--muted); flex: none; }
+      .field .q { font-size: 15px; color: var(--ink); min-height: 22px; line-height: 22px; }
+      .field .caret { display: inline-block; width: 2px; height: 17px; background: var(--iris); margin-left: 1px; vertical-align: -3px; animation: blink 1.1s steps(1) infinite; }
+      @keyframes blink { 50% { opacity: 0; } }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+      .chip-q {
+        font-size: 13px; font-weight: 500; color: var(--ink-2); cursor: pointer;
+        background: var(--surface); border: 1px solid var(--line-2); border-radius: 999px; padding: 7px 13px;
+        transition: all 0.16s var(--ease);
+      }
+      .chip-q:hover { border-color: var(--iris-line); color: var(--iris-strong); transform: translateY(-1px); }
+      .chip-q[aria-pressed="true"] { background: var(--iris); border-color: var(--iris); color: #fff; }
+
+      .answer { margin-top: 18px; padding-top: 18px; border-top: 1px dashed var(--line-2); flex: 1; min-height: 132px; }
+      .answer .lbl { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+      .answer .lbl .spin { width: 12px; height: 12px; border: 2px solid var(--iris-soft); border-top-color: var(--iris); border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+      .answer.thinking .lbl .spin { display: inline-block; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .answer .text { margin: 10px 0 0; font-size: 15px; color: var(--ink); line-height: 1.62; }
+      .answer .text .hint { color: var(--muted); }
+      .answer .text sup { color: var(--iris-strong); font-weight: 700; font-size: 11px; font-family: var(--mono); padding: 0 1px; }
+      .answer .cites { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; opacity: 0; transition: opacity 0.4s var(--ease); }
+      .answer .cites.show { opacity: 1; }
+      .cite { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); background: var(--paper-2); border: 1px solid var(--line); border-radius: 7px; padding: 4px 9px; }
+      .cite .n { color: var(--spark-ink); font-weight: 600; }
+
+      #graph { width: 100%; height: auto; max-width: 460px; display: block; }
+      .node circle.core { fill: color-mix(in oklab, var(--iris) 26%, var(--surface)); stroke: var(--iris-line); stroke-width: 1; transition: fill 0.4s var(--ease), stroke 0.4s; }
+      .node text { font-family: var(--mono); font-size: 9.5px; fill: var(--muted); transition: fill 0.4s; }
+      .node circle.ring { fill: none; stroke: var(--spark); stroke-width: 1.5; opacity: 0; transform-box: fill-box; transform-origin: center; }
+      .node.lit circle.core { fill: var(--spark); stroke: var(--spark); }
+      .node.lit text { fill: var(--spark-ink); font-weight: 600; }
+      .node.lit circle.ring { animation: ring 1.4s var(--ease) infinite; }
+      @keyframes ring { 0% { opacity: 0.7; r: 6; } 100% { opacity: 0; r: 15; } }
+      .edge { stroke: var(--spark); stroke-width: 1.4; opacity: 0; transition: opacity 0.35s, stroke-dashoffset 0.7s var(--ease); }
+      .edge.on { opacity: 0.6; }
+      .brain-node circle { fill: var(--surface); stroke: var(--iris); stroke-width: 1.4; }
+
+      /* ── Sections ── */
+      section { padding: clamp(60px, 8vw, 104px) 0; }
+      .band { background: var(--paper-2); border-block: 1px solid var(--line); }
+      h2 { font-size: clamp(1.85rem, 4vw, 2.85rem); line-height: 1.05; }
+      .deck { color: var(--ink-2); max-width: 60ch; margin: 16px 0 0; font-size: 1.12rem; }
+      .sec-top { max-width: 62ch; }
+
+      /* Retrieval explainer (asymmetric) */
+      .explain { display: grid; grid-template-columns: 0.92fr 1.08fr; gap: clamp(28px, 5vw, 64px); align-items: center; margin-top: 8px; }
+      @media (max-width: 900px) { .explain { grid-template-columns: 1fr; } }
+      .explain .lead h2 { margin-bottom: 16px; }
+      .explain .lead p { color: var(--ink-2); font-size: 1.06rem; }
+      .explain .lead .facts { list-style: none; padding: 0; margin: 22px 0 0; display: flex; flex-direction: column; gap: 13px; }
+      .explain .lead .facts li { display: flex; gap: 12px; align-items: flex-start; font-size: 0.98rem; color: var(--ink-2); }
+      .explain .lead .facts svg { width: 20px; height: 20px; color: var(--iris); flex: none; margin-top: 1px; }
+      .explain .lead .facts b { color: var(--ink); font-weight: 600; }
+
+      .diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 26px; box-shadow: 0 20px 50px -30px oklch(0.35 0.06 266 / 0.3); }
+      .lane { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 14px; }
+      .lane + .lane { margin-top: 14px; }
+      .lane .tag { font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 8px; text-align: center; }
+      .lane.vec .tag { background: var(--iris-soft); color: var(--iris-strong); }
+      .lane.kw .tag { background: color-mix(in oklab, var(--cyan) 15%, var(--surface)); color: color-mix(in oklab, var(--cyan) 72%, black); }
+      .lane .cells { display: flex; gap: 6px; }
+      .lane .cells i { height: 30px; flex: 1; border-radius: 6px; display: block; }
+      .lane.vec .cells i { background: color-mix(in oklab, var(--iris) 16%, var(--surface)); }
+      .lane.vec .cells i:nth-child(1) { background: color-mix(in oklab, var(--iris) 62%, var(--surface)); }
+      .lane.vec .cells i:nth-child(3) { background: color-mix(in oklab, var(--iris) 40%, var(--surface)); }
+      .lane.kw .cells i { background: color-mix(in oklab, var(--cyan) 14%, var(--surface)); }
+      .lane.kw .cells i:nth-child(2) { background: color-mix(in oklab, var(--cyan) 55%, var(--surface)); }
+      .lane.kw .cells i:nth-child(4) { background: color-mix(in oklab, var(--cyan) 36%, var(--surface)); }
+      .fuse { text-align: center; margin: 18px 0; font-family: var(--mono); font-size: 12px; color: var(--muted); position: relative; }
+      .fuse span { background: var(--surface); padding: 0 12px; position: relative; z-index: 1; }
+      .fuse::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--line); }
+      .result { display: flex; flex-direction: column; gap: 8px; }
+      .result .r { display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); }
+      .result .r.top { border-color: var(--iris-line); background: linear-gradient(90deg, var(--iris-soft), transparent 60%); }
+      .result .r .rk { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+      .result .r .rt { font-size: 14px; font-weight: 500; }
+      .result .r.top .rt { color: var(--iris-strong); }
+      .result .r .sc { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+      .result .r.top .sc { color: var(--iris-strong); font-weight: 600; }
+
+      /* Capabilities (editorial, varied) */
+      .caps { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; margin-top: 44px; }
+      .cap { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px; transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s; }
+      .cap:hover { transform: translateY(-3px); box-shadow: 0 18px 44px -20px oklch(0.35 0.06 266 / 0.28); border-color: var(--line-2); }
+      .cap .ic { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: var(--iris-soft); color: var(--iris-strong); margin-bottom: 16px; }
+      .cap h3 { font-size: 1.24rem; }
+      .cap p { color: var(--ink-2); margin: 9px 0 0; font-size: 1rem; }
+      .cap.c6 { grid-column: span 6; }
+      .cap.c4 { grid-column: span 4; }
+      .cap.c8 { grid-column: span 8; display: grid; grid-template-columns: 1.05fr 1fr; gap: 26px; align-items: center; }
+      .cap.c8 .art { align-self: stretch; }
+      @media (max-width: 880px) { .caps { grid-template-columns: repeat(6, 1fr); } .cap.c6, .cap.c4 { grid-column: span 6; } .cap.c8 { grid-column: span 6; grid-template-columns: 1fr; } }
+      @media (max-width: 520px) { .caps { grid-template-columns: 1fr; } .cap.c6, .cap.c4, .cap.c8 { grid-column: span 1; } }
+
+      /* temporal mini-visual */
+      .temporal { font-family: var(--mono); font-size: 12.5px; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; line-height: 2; }
+      .temporal .old { color: var(--muted); text-decoration: line-through; }
+      .temporal .new { color: var(--iris-strong); font-weight: 600; }
+      .temporal .flag { color: var(--spark-ink); }
+
+      /* Pipeline (a real sequence -> numbers earn their place) */
+      .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 44px; counter-reset: step; }
+      @media (max-width: 820px) { .pipeline { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 460px) { .pipeline { grid-template-columns: 1fr; } }
+      .pstep { position: relative; padding: 22px 20px; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); }
+      .pstep .no { font-family: var(--mono); font-size: 12px; color: var(--iris-strong); font-weight: 600; }
+      .pstep h4 { font-family: var(--display); font-weight: 600; font-size: 1.06rem; margin: 10px 0 6px; letter-spacing: -0.01em; }
+      .pstep p { margin: 0; font-size: 0.92rem; color: var(--muted); }
 
       /* Connector marquee */
       .marquee { position: relative; margin-top: 40px; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
       .row { display: flex; gap: 12px; width: max-content; }
       .row + .row { margin-top: 12px; }
-      .track1 { animation: drift 46s linear infinite; }
-      .track2 { animation: drift 60s linear infinite reverse; }
+      .track1 { animation: drift 52s linear infinite; }
+      .track2 { animation: drift 66s linear infinite reverse; }
       .marquee:hover .row { animation-play-state: paused; }
       @keyframes drift { to { transform: translateX(-50%); } }
-      .chip {
-        display: inline-flex; align-items: center; gap: 9px; white-space: nowrap;
-        background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
-        padding: 10px 17px; font-size: 14.5px; font-weight: 500; color: var(--ink);
-      }
-      .chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--iris); }
-      .chip:nth-child(3n) .dot { background: var(--spark); }
+      .connchip { display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 10px 17px; font-size: 14.5px; font-weight: 500; color: var(--ink); }
+      .connchip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--iris); }
+      .connchip:nth-child(3n) .dot { background: var(--spark); }
+      .connchip:nth-child(4n) .dot { background: var(--cyan); }
 
-      /* Clients grid */
-      .clients { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-top: 40px; }
-      .client { border: 1px solid var(--line); border-radius: 15px; padding: 20px 22px; background: var(--surface); transition: border-color 0.2s, transform 0.2s var(--ease); }
-      .client:hover { border-color: var(--iris-line); transform: translateY(-2px); }
-      .client .t { font-family: var(--display); font-weight: 600; font-size: 1.05rem; }
-      .client p { color: var(--muted); margin: 4px 0 0; font-size: 0.92rem; font-family: var(--mono); }
+      /* MCP flow */
+      .flow { margin-top: 40px; background: var(--ink); color: oklch(0.94 0.01 265); border-radius: 20px; padding: clamp(26px, 4vw, 40px); position: relative; overflow: hidden; }
+      .flow::before { content: ""; position: absolute; inset: 0; background: radial-gradient(70% 130% at 20% 0%, oklch(0.54 0.21 264 / 0.4), transparent 62%); }
+      .flow > * { position: relative; z-index: 1; }
+      .flow h3 { color: #fff; font-size: 1.5rem; }
+      .flow p { color: oklch(0.82 0.02 265); max-width: 54ch; margin: 12px 0 0; }
+      .flow .track { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 26px; font-family: var(--mono); font-size: 13px; }
+      .flow .box { border: 1px solid oklch(1 0 0 / 0.18); border-radius: 11px; padding: 12px 16px; background: oklch(1 0 0 / 0.05); }
+      .flow .box.hi { border-color: var(--spark); color: var(--spark); }
+      .flow .arrow { color: oklch(0.7 0.03 265); }
+      .flow .arrow.a2 { color: var(--spark); }
 
       /* Benchmark strip */
-      .bench { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 40px; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--surface); }
+      .benchwrap { display: grid; grid-template-columns: 1fr; gap: 0; margin-top: 40px; }
+      .bench { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--surface); }
       .stat { padding: 30px 26px; border-right: 1px solid var(--line); }
       .stat:last-child { border-right: 0; }
       .stat .n { font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 4vw, 2.9rem); line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+      .stat .n .u { font-size: 1.1rem; color: var(--muted); font-weight: 600; }
       .stat .l { color: var(--muted); font-size: 0.9rem; margin-top: 8px; }
       @media (max-width: 720px) { .bench { grid-template-columns: repeat(2, 1fr); } .stat:nth-child(2) { border-right: 0; } .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--line); } }
 
+      /* Clients */
+      .clients { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 40px; }
+      .client { border: 1px solid var(--line); border-radius: 15px; padding: 19px 21px; background: var(--surface); transition: border-color 0.2s, transform 0.2s var(--ease); }
+      .client:hover { border-color: var(--iris-line); transform: translateY(-2px); }
+      .client .t { font-family: var(--display); font-weight: 600; font-size: 1.04rem; }
+      .client p { color: var(--muted); margin: 4px 0 0; font-size: 0.9rem; font-family: var(--mono); }
+
       /* CTA */
-      .cta { position: relative; margin-top: 20px; border-radius: 26px; padding: clamp(48px, 7vw, 88px) 28px; text-align: center; overflow: hidden; background: var(--ink); color: var(--bg); }
-      .cta::before { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 120% at 50% 0%, oklch(0.55 0.2 264 / 0.5), transparent 60%); }
+      .cta { position: relative; border-radius: 26px; padding: clamp(48px, 7vw, 84px) 28px; text-align: center; overflow: hidden; background: var(--ink); color: var(--paper); }
+      .cta::before { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 120% at 50% 0%, oklch(0.54 0.21 264 / 0.55), transparent 60%); }
       .cta > * { position: relative; z-index: 1; }
       .cta h2 { color: #fff; }
-      .cta p { color: oklch(0.86 0.02 266); max-width: 52ch; margin: 14px auto 0; }
-      .cta .cmd-row { margin-top: 32px; }
+      .cta p { color: oklch(0.85 0.02 266); max-width: 52ch; margin: 14px auto 0; }
+      .cta .hero-actions { justify-content: center; margin-top: 30px; }
       .cta .cmd { background: oklch(0.28 0.02 266); border-color: oklch(0.4 0.02 266); color: #fff; }
       .cta .cmd .p { color: oklch(0.7 0.02 266); }
       .cta .cmd .k { color: var(--spark); }
@@ -205,14 +311,18 @@
 
       footer { padding: 44px 0; border-top: 1px solid var(--line); }
       footer .wrap { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; color: var(--muted); font-size: 14px; }
+      footer a { color: var(--muted); }
+      footer a:hover { color: var(--iris-strong); }
 
-      .reveal { opacity: 0; transform: translateY(16px); animation: rise 0.8s var(--ease) forwards; }
-      .d1 { animation-delay: 0.05s; } .d2 { animation-delay: 0.13s; } .d3 { animation-delay: 0.21s; } .d4 { animation-delay: 0.29s; }
-      @keyframes rise { to { opacity: 1; transform: none; } }
+      /* reveal (enhances an already-visible default) */
+      .js .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+      .js .reveal.in { opacity: 1; transform: none; }
       @media (prefers-reduced-motion: reduce) {
-        .reveal { animation: none; opacity: 1; transform: none; }
-        .row { animation: none !important; }
         html { scroll-behavior: auto; }
+        .js .reveal { opacity: 1; transform: none; transition: none; }
+        .row { animation: none !important; }
+        .console-bar .live .dot { animation: none; }
+        .node.lit circle.ring { animation: none; }
       }
     </style>
   </head>
@@ -228,7 +338,7 @@
           companybrain
         </a>
         <div class="nav-links">
-          <a class="q" href="#features">Features</a>
+          <a class="q" href="#retrieval">How it works</a>
           <a class="q" href="#connectors">Connectors</a>
           <a class="q" href="./benchmarks.html">Benchmarks</a>
           <a class="q" href="#run">Run it</a>
@@ -241,156 +351,204 @@
       <canvas id="constellation" aria-hidden="true"></canvas>
       <div class="veil"></div>
       <div class="wrap">
-        <span class="pill reveal d1"><span class="tag">MIT</span> open source, self-hosted, <b>no sign-in</b></span>
-        <h1 class="reveal d2">The memory layer for your <span class="g">company</span></h1>
-        <p class="lede reveal d3">
-          Point it at everything your team knows, from Obsidian and Google Docs to Slack, GitHub, PDFs, images, and
-          audio. Get one private brain that answers with citations, over an API, an SDK, or MCP.
+        <span class="pill reveal"><span class="tag">MIT</span> open source, self-hosted, <b>no sign-in</b></span>
+        <div class="hero-head">
+          <h1 class="reveal">Ask your company <span class="g">anything.</span></h1>
+        </div>
+        <p class="lede reveal">
+          CompanyBrain indexes everything your team knows, from Slack and Google Docs to GitHub, PDFs, images, and
+          audio, into one private store. Then it answers, with a citation for every claim.
         </p>
-        <div class="cmd-row reveal d3">
+        <div class="hero-actions reveal">
           <div class="cmd">
             <span class="p">$</span><code><span class="k">npx</span> companybrain</code>
-            <button class="copy" id="copyBtn" aria-label="Copy command">copy</button>
+            <button class="copy" id="copyBtn" aria-label="Copy install command">copy</button>
           </div>
           <a class="btn btn-iris" href="https://github.com/aayambansal/companybrain">Get started</a>
         </div>
-        <p class="trust reveal d4"><b>40+ connectors</b> &middot; hybrid search + rerank &middot; bring your own keys &middot; your Postgres</p>
+        <p class="trust reveal"><b>40+ connectors</b> &middot; hybrid search with reranking &middot; bring your own keys &middot; your Postgres</p>
+
+        <!-- Interactive ask console -->
+        <div class="console reveal" aria-label="Interactive retrieval demo">
+          <div class="console-bar">
+            <span class="dots"><i></i><i></i><i></i></span>
+            <span class="title">companybrain / ask</span>
+            <span class="live"><span class="dot"></span> retrieving</span>
+          </div>
+          <div class="console-body">
+            <div class="console-left">
+              <div class="field">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.2-3.2" stroke-linecap="round" /></svg>
+                <span class="q" id="qText"><span class="hint" style="color:var(--muted)">Ask a question</span><span class="caret"></span></span>
+              </div>
+              <div class="chips" id="chips" role="group" aria-label="Example questions"></div>
+              <div class="answer" id="answer">
+                <div class="lbl">Answer <span class="spin" aria-hidden="true"></span></div>
+                <p class="text" id="aText"><span class="hint">Pick a question and watch CompanyBrain retrieve the sources, then answer with citations.</span></p>
+                <div class="cites" id="cites"></div>
+              </div>
+            </div>
+            <div class="console-right">
+              <svg id="graph" viewBox="0 0 480 260" role="img" aria-label="Knowledge graph of company sources"></svg>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
-    <section id="features">
+    <!-- How retrieval works -->
+    <section id="retrieval">
       <div class="wrap">
-        <span class="kicker">A real memory backend</span>
-        <h2>Not a wrapper. A store you own.</h2>
-        <p class="section-lede">Everything you drop in is chunked, embedded, and indexed with a vector and a full-text signal side by side. Retrieval fuses both, so you get meaning and exact keywords.</p>
-        <div class="bento">
-          <div class="tile span3">
-            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg></div>
-            <h3>Hybrid search, ranked well</h3>
-            <p>pgvector similarity and Postgres full-text, fused with reciprocal rank fusion, then optionally reordered by an LLM.</p>
+        <div class="explain">
+          <div class="lead">
+            <h2 class="reveal">Two ways to find. One ranked answer.</h2>
+            <p class="reveal">Every passage you store carries a vector for meaning and a full-text signal for exact words. A query runs both lanes at once, then reciprocal rank fusion merges them into a single ordering. An optional reranker reads the top candidates and settles the final order.</p>
+            <ul class="facts reveal">
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg><span><b>Meaning and keywords together.</b> Semantic recall finds the idea; full-text catches the exact identifier, code symbol, or name.</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h10M4 18h7" stroke-linecap="round"/></svg><span><b>Fusion, not a toggle.</b> Weighted RRF blends both rankings, so a result strong on either signal surfaces.</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2 5 5 .5-3.8 3.4 1.2 5.1L12 19l-4.6 3 1.2-5.1L4.8 8.5 9.8 8z" stroke-linejoin="round"/></svg><span><b>Reranked for precision.</b> HyDE query expansion and an LLM reranker push the right passage to the top.</span></li>
+            </ul>
           </div>
-          <div class="tile span3">
+          <div class="diagram reveal" aria-hidden="true">
+            <div class="lane vec"><span class="tag">vector</span><div class="cells"><i></i><i></i><i></i><i></i><i></i></div></div>
+            <div class="lane kw"><span class="tag">full-text</span><div class="cells"><i></i><i></i><i></i><i></i><i></i></div></div>
+            <div class="fuse"><span>reciprocal rank fusion + rerank</span></div>
+            <div class="result">
+              <div class="r top"><span class="rk">1</span><span class="rt">Datastore decision, ADR-014</span><span class="sc">0.94</span></div>
+              <div class="r"><span class="rk">2</span><span class="rt">Infra thread, vector store</span><span class="sc">0.71</span></div>
+              <div class="r"><span class="rk">3</span><span class="rt">PR #812, pgvector setup</span><span class="sc">0.63</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Capabilities -->
+    <section class="band">
+      <div class="wrap">
+        <div class="sec-top">
+          <h2 class="reveal">A real memory backend, not a wrapper.</h2>
+          <p class="deck reveal">Everything you drop in is chunked, embedded, indexed, and kept current. These are the parts that make recall trustworthy.</p>
+        </div>
+        <div class="caps">
+          <div class="cap c8 reveal">
+            <div>
+              <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2" stroke-linecap="round"/></svg></div>
+              <h3>Temporal memory</h3>
+              <p>Knowledge changes. When a new memory updates a fact already on record, the old one is marked superseded, so recall returns today's truth while the history stays intact.</p>
+            </div>
+            <div class="art temporal">
+              <div><span class="old">deploy target: Heroku</span></div>
+              <div><span class="new">deploy target: Fly.io</span> <span class="flag">&#9873; supersedes</span></div>
+              <div style="color:var(--muted)">recall &rarr; returns Fly.io</div>
+            </div>
+          </div>
+          <div class="cap c4 reveal">
             <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5h16v11H9l-4 3.5V16H4z"/><path d="M8 9h8M8 12h5"/></svg></div>
             <h3>Answers with receipts</h3>
-            <p>RAG chat streams answers grounded in your knowledge, each citation pointing back at the exact source passage.</p>
+            <p>RAG chat streams a grounded answer, each citation pointing back at the exact passage it came from.</p>
           </div>
-          <div class="tile span2">
-            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></div>
+          <div class="cap c4 reveal">
+            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" stroke-linejoin="round"/></svg></div>
             <h3>Reads more than text</h3>
-            <p>OCRs images, transcribes audio, extracts PDFs, pulls video transcripts.</p>
+            <p>OCRs images, transcribes audio with Whisper, extracts PDFs, and pulls transcripts out of video.</p>
           </div>
-          <div class="tile span2">
-            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></div>
-            <h3>Stays organized</h3>
-            <p>Auto-summaries, tags, and facts on ingest. Dedup, version history, signed webhooks.</p>
-          </div>
-          <div class="tile span2">
-            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 3v6M15 3v6"/><path d="M7 9h10v3a5 5 0 0 1-10 0z"/><path d="M12 17v4"/></svg></div>
-            <h3>Agent-native</h3>
-            <p>A built-in MCP server. Claude, Cursor, and any agent read and write the brain as a tool.</p>
-          </div>
-          <div class="tile span3">
-            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v15H5.5A1.5 1.5 0 0 0 4 20.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H12v15h6.5a1.5 1.5 0 0 1 1.5 1.5z"/></svg></div>
+          <div class="cap c4 reveal">
+            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 3v5h5" /><path d="M6 3h9l5 5v13H6z" stroke-linejoin="round"/><path d="M9 13h6M9 16.5h6" stroke-linecap="round"/></svg></div>
             <h3>Living playbooks</h3>
-            <p>Ask for a topic and CompanyBrain drafts a cited page from your memories &mdash; decisions, process, people, open questions. Regenerate it and it reflects what the team knows now.</p>
+            <p>Ask for a topic and CompanyBrain drafts a cited page from your memories: decisions, process, people, open questions. Regenerate it and it reflects what the team knows now.</p>
           </div>
-          <div class="tile span3">
-            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></div>
-            <h3>Temporal memory</h3>
-            <p>Knowledge changes. When a new memory updates a fact already on record, the old one is marked superseded &mdash; so recall returns the current truth while the history stays.</p>
-          </div>
-          <div class="tile wide">
-            <div>
-              <h3>Ingest, embed, retrieve, cite</h3>
-              <p style="color: var(--ink-2); margin-top: 10px;">One pipeline from any source to a cited answer. Bring your own Postgres; nothing phones home.</p>
-            </div>
-            <div class="pipe">
-<span class="k">connectors</span> &rarr; ingest &rarr; chunk &rarr; embed &rarr; index &rarr; <span class="k">search</span> &rarr; cite
-                                        &darr;
-   obsidian &middot; slack &middot; gdocs &middot; github    <span class="s">postgres + pgvector</span>
-   pdf &middot; image &middot; audio &middot; 44 sources     <span class="s">(your database)</span>
-            </div>
+          <div class="cap c4 reveal">
+            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2" stroke-linecap="round"/></svg></div>
+            <h3>Stays organized on its own</h3>
+            <p>Summaries, tags, and facts on ingest. Deduplication, version history, and signed webhooks on every change.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="use-cases" style="background: var(--bg-2); border-block: 1px solid var(--line);">
+    <!-- Pipeline (real sequence) -->
+    <section>
       <div class="wrap">
-        <span class="kicker">Who it's for</span>
-        <h2>Memory for every kind of work.</h2>
-        <p class="section-lede">The answer you need already exists somewhere in the work your team did. CompanyBrain makes it findable.</p>
-        <div class="cases">
-          <div class="tile">
-            <h3>Engineering</h3>
-            <p>The reason behind a strange line of code is usually a PR review or a thread from six months ago. Index the repo, the reviews, and the chat, then ask <em>why</em>.</p>
-          </div>
-          <div class="tile">
-            <h3>Sales</h3>
-            <p>Objections, promised follow-ups, and "let me check with the team" moments scatter across calls and threads. Point CompanyBrain at them and pull the thread when a deal needs it.</p>
-          </div>
-          <div class="tile">
-            <h3>Support</h3>
-            <p>The fix a teammate found last quarter should not be rediscovered from scratch. Search resolved tickets and docs, not your memory.</p>
-          </div>
-          <div class="tile">
-            <h3>Ops &amp; leadership</h3>
-            <p>Why did we pick this vendor? What did we agree in planning? The answer becomes a search with citations, not another meeting.</p>
-          </div>
+        <div class="sec-top">
+          <h2 class="reveal">From any source to a cited answer.</h2>
+          <p class="deck reveal">One pipeline runs end to end. Bring your own Postgres and providers. Nothing phones home.</p>
+        </div>
+        <div class="pipeline">
+          <div class="pstep reveal"><span class="no">01</span><h4>Connect</h4><p>Point a connector at Slack, Docs, GitHub, a folder, or a URL.</p></div>
+          <div class="pstep reveal"><span class="no">02</span><h4>Embed</h4><p>Chunk each document and embed it, with a full-text signal alongside.</p></div>
+          <div class="pstep reveal"><span class="no">03</span><h4>Index</h4><p>Store vectors and text in your Postgres with pgvector.</p></div>
+          <div class="pstep reveal"><span class="no">04</span><h4>Retrieve</h4><p>Fuse both signals, expand the query, and rerank the candidates.</p></div>
+          <div class="pstep reveal"><span class="no">05</span><h4>Cite</h4><p>Return an answer with a link back to every source passage.</p></div>
         </div>
       </div>
     </section>
 
-    <section id="connectors">
+    <!-- Connectors -->
+    <section id="connectors" class="band">
       <div class="wrap">
-        <span class="kicker">Index everything</span>
-        <h2>Forty-plus connectors, one store.</h2>
-        <p class="section-lede">Configure and sync any source from the dashboard. It all lands in the same place, so search and chat work across every source at once.</p>
+        <div class="sec-top">
+          <h2 class="reveal">Forty-plus connectors, one store.</h2>
+          <p class="deck reveal">Configure and sync any source from the dashboard. It all lands in the same place, so search and chat work across every source at once.</p>
+        </div>
       </div>
-      <div class="marquee" aria-label="Connectors">
+      <div class="marquee" aria-label="Supported connectors">
         <div class="row track1" id="row1"></div>
         <div class="row track2" id="row2"></div>
       </div>
     </section>
 
-    <section id="teams">
+    <!-- MCP flow -->
+    <section id="agents">
       <div class="wrap">
-        <span class="kicker">One brain, one team</span>
-        <h2>Built for you. Ready for your whole team.</h2>
-        <p class="section-lede">Start as one person with no login wall. Turn on shared workspaces when the team shows up. The memory, the connectors, and the agents all come along.</p>
-        <div class="duo">
-          <div class="tile">
-            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.3 3-5.5 7-5.5s7 2.2 7 5.5"/></svg></div>
-            <h3>For you</h3>
-            <p>Single-user mode is the default: no sign-in, one workspace, everything you index is yours. Capture notes, connect your own tools, ask questions, and draft playbooks from your own work. Delete anything, any time.</p>
-          </div>
-          <div class="tile">
-            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9.5" r="2.5"/><path d="M2.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M15 14.2c2.6.2 4.5 2 4.5 4.8"/></svg></div>
-            <h3>For your team</h3>
-            <p>Flip on multi-workspace auth and the same brain scales: shared spaces, API keys, roles, and the decision behind every doc. Everyone searches one source of truth, and the why is tagged to the thread it came from.</p>
-          </div>
+        <div class="sec-top">
+          <h2 class="reveal">Record in one agent, recall in another.</h2>
+          <p class="deck reveal">The built-in Model Context Protocol server lets Claude, Cursor, and your own tools read and write the same memory. Context stops living in one chat window and starts following the work.</p>
         </div>
-        <div class="tile wide" style="margin-top: 14px;">
-          <div>
-            <h3>Record in one agent, recall in another</h3>
-            <p style="color: var(--ink-2); margin-top: 10px;">The built-in Model Context Protocol server means Claude, Cursor, and your own tools read and write the same memory. Context stops living in one chat window and starts following the work.</p>
-          </div>
-          <div class="pipe">
-<span class="k">claude</span> &rarr; record &rarr; <span class="s">companybrain</span> &rarr; recall &rarr; <span class="k">cursor</span>
-   any MCP client writes once, every client reads it back
+        <div class="flow reveal">
+          <h3>One brain, every agent</h3>
+          <p>Any MCP client writes a memory once. Every other client reads it back, with the same search, the same citations, the same store.</p>
+          <div class="track" aria-hidden="true">
+            <span class="box hi">claude</span>
+            <span class="arrow">&rarr; writes &rarr;</span>
+            <span class="box">companybrain</span>
+            <span class="arrow a2">&rarr; reads &rarr;</span>
+            <span class="box hi">cursor</span>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- Benchmarks -->
+    <section id="benchmarks" class="band">
+      <div class="wrap">
+        <div class="sec-top">
+          <h2 class="reveal">Retrieval you can benchmark.</h2>
+          <p class="deck reveal">On the public BEIR datasets, scored with the standard TREC evaluator, CompanyBrain tops nDCG@10 above published BM25 and dense-retriever baselines. The harness ships in the repo, so you can reproduce every number.</p>
+        </div>
+        <div class="benchwrap reveal">
+          <div class="bench">
+            <div class="stat"><div class="n">0.439</div><div class="l">nDCG@10 &middot; BEIR NFCorpus</div></div>
+            <div class="stat"><div class="n">0.816</div><div class="l">nDCG@10 &middot; BEIR SciFact</div></div>
+            <div class="stat"><div class="n">100<span class="u">%</span></div><div class="l">Recall@5 &middot; zero-config</div></div>
+            <div class="stat"><div class="n">40<span class="u">+</span></div><div class="l">Built-in connectors</div></div>
+          </div>
+        </div>
+        <p class="reveal" style="margin-top: 26px;"><a class="btn btn-primary" href="./benchmarks.html">View the leaderboard</a></p>
+      </div>
+    </section>
+
+    <!-- Clients -->
     <section>
       <div class="wrap">
-        <span class="kicker">Talk to it your way</span>
-        <h2>Clients for every surface.</h2>
-        <div class="clients">
+        <div class="sec-top">
+          <h2 class="reveal">Reach it from every surface.</h2>
+          <p class="deck reveal">The same store, however your team works: a REST API, typed SDKs, a CLI, MCP, and drop-in framework adapters.</p>
+        </div>
+        <div class="clients reveal">
           <div class="client"><div class="t">TypeScript SDK</div><p>@companybrain/sdk</p></div>
           <div class="client"><div class="t">Python SDK</div><p>pip install companybrain</p></div>
-          <div class="client"><div class="t">CLI</div><p>companybrain add &middot; search &middot; ask</p></div>
+          <div class="client"><div class="t">CLI</div><p>companybrain add / search / ask</p></div>
           <div class="client"><div class="t">MCP server</div><p>Claude Desktop, Cursor</p></div>
           <div class="client"><div class="t">Chrome extension</div><p>save any page</p></div>
           <div class="client"><div class="t">Slack bot</div><p>/brain in Slack</p></div>
@@ -404,31 +562,16 @@
       </div>
     </section>
 
-    <section id="benchmarks" style="background: var(--bg-2); border-block: 1px solid var(--line);">
-      <div class="wrap">
-        <span class="kicker">State of the art, and measured</span>
-        <h2>Retrieval you can benchmark.</h2>
-        <p class="section-lede">On the public BEIR benchmark, scored with the standard TREC evaluator, CompanyBrain tops nDCG@10 above published BM25 and dense-retriever baselines &mdash; and the harness ships in the repo so you can reproduce it.</p>
-        <div class="bench">
-          <div class="stat"><div class="n">0.439</div><div class="l">nDCG@10 &middot; BEIR NFCorpus</div></div>
-          <div class="stat"><div class="n">0.816</div><div class="l">nDCG@10 &middot; BEIR SciFact</div></div>
-          <div class="stat"><div class="n">100%</div><div class="l">Recall@5 &middot; zero-config</div></div>
-          <div class="stat"><div class="n">40+</div><div class="l">Built-in connectors</div></div>
-        </div>
-        <p style="margin-top: 28px;"><a class="btn btn-primary" href="./benchmarks.html">View the leaderboard</a></p>
-      </div>
-    </section>
-
+    <!-- CTA -->
     <section id="run">
       <div class="wrap">
-        <div class="cta">
-          <span class="kicker" style="color: var(--spark);">Run it in a minute</span>
+        <div class="cta reveal">
           <h2>Your company's memory, on your metal.</h2>
-          <p>One command clones, sets up, and starts everything. No account, no sign-in, no per-seat pricing. Deploy to Render, Railway, or Fly when you are ready.</p>
-          <div class="cmd-row">
+          <p>One command clones, sets up, and starts everything. No account, no per-seat pricing. Deploy to Render, Railway, or Fly when you are ready.</p>
+          <div class="hero-actions">
             <div class="cmd">
               <span class="p">$</span><code><span class="k">npx</span> companybrain</code>
-              <button class="copy" id="copyBtn2" aria-label="Copy command">copy</button>
+              <button class="copy" id="copyBtn2" aria-label="Copy install command">copy</button>
             </div>
             <a class="btn btn-iris" href="https://github.com/aayambansal/companybrain">Read the docs</a>
           </div>
@@ -444,104 +587,320 @@
     </footer>
 
     <script>
+      document.documentElement.classList.add('js');
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
       // Copy buttons
-      for (const id of ['copyBtn', 'copyBtn2']) {
-        const b = document.getElementById(id);
-        if (b) b.addEventListener('click', async () => {
-          try { await navigator.clipboard.writeText('npx companybrain'); b.textContent = 'copied'; setTimeout(() => (b.textContent = 'copy'), 1500); }
+      ['copyBtn', 'copyBtn2'].forEach(function (id) {
+        var b = document.getElementById(id);
+        if (!b) return;
+        b.addEventListener('click', async function () {
+          try { await navigator.clipboard.writeText('npx companybrain'); b.textContent = 'copied'; setTimeout(function () { b.textContent = 'copy'; }, 1500); }
           catch (e) { b.textContent = 'npx companybrain'; }
         });
-      }
+      });
 
       // Nav border on scroll
-      const nav = document.getElementById('nav');
-      const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 8);
+      var nav = document.getElementById('nav');
+      var onScroll = function () { nav.classList.toggle('scrolled', window.scrollY > 8); };
       onScroll();
       window.addEventListener('scroll', onScroll, { passive: true });
 
-      // Connector marquee
-      const CONNECTORS = ['Web','Sitemap','Files & PDF','Obsidian','RSS','Google Docs','Google Drive','OneDrive','Dropbox','Box','Notion','Confluence','GitBook','Coda','Slack','Discord','Telegram','Gmail','GitHub','GitLab','Bitbucket','Sentry','Linear','Jira','Asana','ClickUp','Trello','Todoist','Airtable','Zendesk','Intercom','Freshdesk','Front','HubSpot','Pipedrive','YouTube','Hacker News','Reddit','Readwise','Raindrop','Wispr Flow'];
-      function fill(rowId, list) {
-        const row = document.getElementById(rowId);
-        const html = list.map((c) => `<span class="chip"><span class="dot"></span>${c}</span>`).join('');
-        row.innerHTML = html + html; // duplicate for seamless loop
+      // Scroll reveal (enhances an already-visible default; never gates visibility)
+      var reveals = document.querySelectorAll('.reveal');
+      function revealAll() { reveals.forEach(function (el) { el.classList.add('in'); }); }
+      if (reduce || !('IntersectionObserver' in window)) {
+        revealAll();
+      } else {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e, i) {
+            if (e.isIntersecting) { var el = e.target; setTimeout(function () { el.classList.add('in'); }, Math.min(i * 60, 180)); io.unobserve(el); }
+          });
+        }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+        reveals.forEach(function (el) { io.observe(el); });
+        // Safety net: a hidden tab, a headless crawler, or a fast anchor jump can
+        // stop the observer from firing. Never leave a section blank.
+        var safety = setTimeout(revealAll, 2600);
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) { clearTimeout(safety); revealAll(); } });
       }
-      const half = Math.ceil(CONNECTORS.length / 2);
+
+      // Connector marquee
+      var CONNECTORS = ['Web','Sitemap','Files & PDF','Obsidian','RSS','Google Docs','Google Drive','OneDrive','Dropbox','Box','Notion','Confluence','GitBook','Coda','Slack','Discord','Telegram','Gmail','GitHub','GitLab','Bitbucket','Sentry','Linear','Jira','Asana','ClickUp','Trello','Todoist','Airtable','Zendesk','Intercom','Freshdesk','Front','HubSpot','Pipedrive','YouTube','Hacker News','Reddit','Readwise','Raindrop','Wispr Flow'];
+      function fill(rowId, list) {
+        var row = document.getElementById(rowId);
+        if (!row) return;
+        var html = list.map(function (c) { return '<span class="connchip"><span class="dot"></span>' + c + '</span>'; }).join('');
+        row.innerHTML = html + html;
+      }
+      var half = Math.ceil(CONNECTORS.length / 2);
       fill('row1', CONNECTORS.slice(0, half));
       fill('row2', CONNECTORS.slice(half));
 
-      // Hero memory constellation
+      // ── Interactive ask console ──
       (function () {
-        const canvas = document.getElementById('constellation');
-        const ctx = canvas.getContext('2d');
-        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        let w, h, dpr, nodes, pulses, raf;
-        const IRIS = 'oklch(0.55 0.2 264)';
-        const SPARK = 'oklch(0.76 0.16 68)';
-        function rand(a, b) { return a + (b - a) * (Math.sin(seed++ * 12.9898) * 43758.5453 % 1 + 1) / 2 % 1; }
-        let seed = 7;
+        var SVGNS = 'http://www.w3.org/2000/svg';
+        var CX = 240, CY = 132;
+        var NODES = [
+          { id: 'adr',   x: 66,  y: 54,  l: 'ADR-014' },
+          { id: 'infra', x: 50,  y: 142, l: '#infra' },
+          { id: 'pr812', x: 106, y: 214, l: 'PR #812' },
+          { id: 'qbr',   x: 414, y: 52,  l: 'Acme QBR' },
+          { id: 'cal',   x: 428, y: 134, l: 'Calendar' },
+          { id: 'mail',  x: 404, y: 214, l: 'Email' },
+          { id: 'run',   x: 196, y: 32,  l: 'Runbook' },
+          { id: 'onb',   x: 300, y: 30,  l: 'Onboarding' },
+          { id: 'pr733', x: 322, y: 224, l: 'PR #733' }
+        ];
+        var QUERIES = [
+          {
+            q: 'Why did we choose Postgres over a vector DB?',
+            nodes: ['adr', 'infra', 'pr812'],
+            answer: 'You kept retrieval and the system of record in one database, Postgres with pgvector.<sup>1</sup> The infra thread weighed a dedicated vector store and rejected the extra operations surface,<sup>2</sup> and the switch shipped in one migration.<sup>3</sup>',
+            cites: ['ADR-014 · Datastore', 'Slack · #infra', 'PR #812']
+          },
+          {
+            q: 'What did we promise Acme in the last review?',
+            nodes: ['qbr', 'cal', 'mail'],
+            answer: 'SSO by the March release and a dedicated support channel.<sup>1</sup> The QBR was booked for the 12th,<sup>2</sup> and the follow-up email restated the SSO date in writing.<sup>3</sup>',
+            cites: ['Acme QBR deck', 'Calendar · QBR', 'Email · Acme']
+          },
+          {
+            q: 'How do we rotate a leaked API key?',
+            nodes: ['run', 'onb', 'pr733'],
+            answer: 'Revoke in the provider console, rotate the secret in the deploy environment, then redeploy.<sup>1</sup> Onboarding covers where each key lives,<sup>2</sup> and PR #733 moved every key to env-only.<sup>3</sup>',
+            cites: ['Runbook · Security', 'Onboarding · Secrets', 'PR #733']
+          }
+        ];
+
+        var graph = document.getElementById('graph');
+        var qText = document.getElementById('qText');
+        var aText = document.getElementById('aText');
+        var citesEl = document.getElementById('cites');
+        var answerEl = document.getElementById('answer');
+        var chipsEl = document.getElementById('chips');
+        if (!graph) return;
+
+        // Build edges then nodes
+        var nodeEls = {};
+        var edgeEls = {};
+        NODES.forEach(function (n) {
+          var len = Math.hypot(n.x - CX, n.y - CY);
+          var line = document.createElementNS(SVGNS, 'line');
+          line.setAttribute('x1', n.x); line.setAttribute('y1', n.y);
+          line.setAttribute('x2', CX); line.setAttribute('y2', CY);
+          line.setAttribute('class', 'edge');
+          line.style.strokeDasharray = len;
+          line.style.strokeDashoffset = len;
+          line._len = len;
+          graph.appendChild(line);
+          edgeEls[n.id] = line;
+        });
+        // Central brain node
+        var brain = document.createElementNS(SVGNS, 'g');
+        brain.setAttribute('class', 'brain-node');
+        brain.innerHTML = '<circle cx="' + CX + '" cy="' + CY + '" r="17"/>' +
+          '<g transform="translate(' + (CX - 11) + ',' + (CY - 11) + ') scale(0.92)" fill="none" stroke="var(--iris)" stroke-width="1.4" stroke-linejoin="round">' +
+          '<path d="M9 3.2C7 3.2 5.4 4.7 5.4 6.5c0 .35.05.65.12 1C4.5 8 3.9 8.9 3.9 10c0 .9.4 1.7 1.1 2.2-.14.35-.2.7-.2 1.1 0 1.7 1.35 3 3.1 3 .48 0 .95-.12 1.35-.33.33.76 1.13 1.25 2.05 1.25V3.4c-.66-.2-1.72-.2-2.75-.2Z"/>' +
+          '<path d="M15 3.2c1.9 0 3.4 1.4 3.4 3.2 0 .35-.05.65-.12 1 .86.5 1.42 1.4 1.42 2.5 0 .9-.4 1.7-1.1 2.2.14.35.2.7.2 1.1 0 1.7-1.35 3-3.1 3-.48 0-.95-.12-1.35-.33-.33.76-1.13 1.25-2.05 1.25"/>' +
+          '</g>';
+        graph.appendChild(brain);
+        // Source nodes
+        NODES.forEach(function (n) {
+          var g = document.createElementNS(SVGNS, 'g');
+          g.setAttribute('class', 'node');
+          var ring = document.createElementNS(SVGNS, 'circle');
+          ring.setAttribute('cx', n.x); ring.setAttribute('cy', n.y); ring.setAttribute('r', 6); ring.setAttribute('class', 'ring');
+          var core = document.createElementNS(SVGNS, 'circle');
+          core.setAttribute('cx', n.x); core.setAttribute('cy', n.y); core.setAttribute('r', 5.5); core.setAttribute('class', 'core');
+          var t = document.createElementNS(SVGNS, 'text');
+          var top = n.y < 46, bottom = n.y > 200;
+          var left = n.x < CX - 34, right = n.x > CX + 34;
+          if (top || bottom) { t.setAttribute('x', n.x); t.setAttribute('y', top ? n.y - 11 : n.y + 15); t.setAttribute('text-anchor', 'middle'); }
+          else if (left) { t.setAttribute('x', n.x + 10); t.setAttribute('y', n.y + 3.4); t.setAttribute('text-anchor', 'start'); }
+          else if (right) { t.setAttribute('x', n.x - 10); t.setAttribute('y', n.y + 3.4); t.setAttribute('text-anchor', 'end'); }
+          else { t.setAttribute('x', n.x); t.setAttribute('y', n.y - 11); t.setAttribute('text-anchor', 'middle'); }
+          t.textContent = n.l;
+          g.appendChild(ring); g.appendChild(core); g.appendChild(t);
+          graph.appendChild(g);
+          nodeEls[n.id] = g;
+        });
+
+        var gen = 0;
+        var chips = QUERIES.map(function (item, i) {
+          var b = document.createElement('button');
+          b.className = 'chip-q';
+          b.type = 'button';
+          b.textContent = item.q.replace(/\?$/, '');
+          b.setAttribute('aria-pressed', 'false');
+          b.addEventListener('click', function () { run(i, true); });
+          chipsEl.appendChild(b);
+          return b;
+        });
+
+        function clearState() {
+          Object.keys(nodeEls).forEach(function (id) { nodeEls[id].classList.remove('lit'); });
+          Object.keys(edgeEls).forEach(function (id) {
+            var e = edgeEls[id]; e.classList.remove('on'); e.style.strokeDashoffset = e._len;
+          });
+        }
+
+        function typeInto(el, text, isHTML, done) {
+          var myGen = gen;
+          // For HTML answers, reveal by clause for reliability with <sup> tags.
+          if (isHTML) {
+            el.innerHTML = '';
+            var parts = text.split(/(?<=[.,])\s/);
+            var i = 0;
+            (function next() {
+              if (myGen !== gen) return;
+              if (i >= parts.length) { if (done) done(); return; }
+              el.innerHTML += (i ? ' ' : '') + parts[i]; i++;
+              setTimeout(next, 190);
+            })();
+          } else {
+            el.textContent = '';
+            var j = 0;
+            (function step() {
+              if (myGen !== gen) return;
+              if (j > text.length) { if (done) done(); return; }
+              el.textContent = text.slice(0, j); j++;
+              setTimeout(step, 22);
+            })();
+          }
+        }
+
+        function run(idx, fromClick) {
+          gen++;
+          var myGen = gen;
+          var item = QUERIES[idx];
+          chips.forEach(function (c, i) { c.setAttribute('aria-pressed', i === idx ? 'true' : 'false'); });
+          clearState();
+          citesEl.classList.remove('show');
+          citesEl.innerHTML = '';
+          answerEl.classList.add('thinking');
+
+          if (reduce) {
+            // Static resolved state, no animation
+            qText.innerHTML = item.q;
+            item.nodes.forEach(function (id) { nodeEls[id].classList.add('lit'); edgeEls[id].classList.add('on'); edgeEls[id].style.strokeDashoffset = 0; });
+            aText.innerHTML = item.answer;
+            renderCites(item);
+            answerEl.classList.remove('thinking');
+            return;
+          }
+
+          // 1) type the question
+          qText.innerHTML = '';
+          var caret = document.createElement('span'); caret.className = 'caret';
+          typeInto(qText, item.q, false, function () {
+            qText.appendChild(caret);
+            if (myGen !== gen) return;
+            // 2) light nodes + draw edges in sequence
+            item.nodes.forEach(function (id, k) {
+              setTimeout(function () {
+                if (myGen !== gen) return;
+                nodeEls[id].classList.add('lit');
+                var e = edgeEls[id]; e.classList.add('on'); e.style.strokeDashoffset = 0;
+              }, 220 * k);
+            });
+            // 3) after edges, type the answer
+            setTimeout(function () {
+              if (myGen !== gen) return;
+              aText.innerHTML = '';
+              typeInto(aText, item.answer, true, function () {
+                if (myGen !== gen) return;
+                answerEl.classList.remove('thinking');
+                renderCites(item);
+              });
+            }, 220 * item.nodes.length + 320);
+          });
+        }
+
+        function renderCites(item) {
+          citesEl.innerHTML = item.cites.map(function (c, i) {
+            return '<span class="cite"><span class="n">' + (i + 1) + '</span>' + c + '</span>';
+          }).join('');
+          citesEl.classList.add('show');
+        }
+
+        // Autoplay the first question once the console scrolls into view (or immediately if reduced motion)
+        if (reduce) {
+          run(0, false);
+        } else if ('IntersectionObserver' in window) {
+          var started = false;
+          var cio = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+              if (e.isIntersecting && !started) { started = true; setTimeout(function () { run(0, false); }, 650); cio.disconnect(); }
+            });
+          }, { threshold: 0.4 });
+          cio.observe(document.querySelector('.console'));
+        } else {
+          setTimeout(function () { run(0, false); }, 800);
+        }
+      })();
+
+      // Hero constellation (ambient)
+      (function () {
+        var canvas = document.getElementById('constellation');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        var w, h, dpr, nodes, pulses, raf;
+        var SPARK = 'oklch(0.77 0.16 66)';
         function resize() {
-          const header = canvas.parentElement;
+          var host = canvas.parentElement;
           dpr = Math.min(window.devicePixelRatio || 1, 2);
-          w = header.clientWidth; h = header.clientHeight;
+          w = host.clientWidth; h = host.clientHeight;
           canvas.width = w * dpr; canvas.height = h * dpr;
           ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-          const count = Math.max(24, Math.min(56, Math.floor((w * h) / 26000)));
-          nodes = Array.from({ length: count }, () => ({
-            x: Math.random() * w, y: Math.random() * h,
-            vx: (Math.random() - 0.5) * 0.22, vy: (Math.random() - 0.5) * 0.22,
-            r: 1.4 + Math.random() * 1.8,
-          }));
+          var count = Math.max(22, Math.min(52, Math.floor((w * h) / 30000)));
+          nodes = Array.from({ length: count }, function () {
+            return { x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 0.2, vy: (Math.random() - 0.5) * 0.2, r: 1.3 + Math.random() * 1.7 };
+          });
           pulses = [];
         }
         function step() {
           ctx.clearRect(0, 0, w, h);
-          const R = 150;
-          for (const n of nodes) {
+          var R = 150;
+          for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
             n.x += n.vx; n.y += n.vy;
             if (n.x < 0 || n.x > w) n.vx *= -1;
             if (n.y < 0 || n.y > h) n.vy *= -1;
           }
-          // links
-          for (let i = 0; i < nodes.length; i++) {
-            for (let j = i + 1; j < nodes.length; j++) {
-              const a = nodes[i], b = nodes[j];
-              const dx = a.x - b.x, dy = a.y - b.y;
-              const d = Math.hypot(dx, dy);
+          for (var a = 0; a < nodes.length; a++) {
+            for (var b = a + 1; b < nodes.length; b++) {
+              var dx = nodes[a].x - nodes[b].x, dy = nodes[a].y - nodes[b].y;
+              var d = Math.hypot(dx, dy);
               if (d < R) {
-                const alpha = (1 - d / R) * 0.18;
-                ctx.strokeStyle = `oklch(0.55 0.2 264 / ${alpha})`;
+                ctx.strokeStyle = 'oklch(0.54 0.21 264 / ' + (1 - d / R) * 0.16 + ')';
                 ctx.lineWidth = 1;
-                ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(nodes[a].x, nodes[a].y); ctx.lineTo(nodes[b].x, nodes[b].y); ctx.stroke();
               }
             }
           }
-          // nodes
-          for (const n of nodes) {
-            ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-            ctx.fillStyle = 'oklch(0.55 0.2 264 / 0.55)'; ctx.fill();
+          for (var c = 0; c < nodes.length; c++) {
+            ctx.beginPath(); ctx.arc(nodes[c].x, nodes[c].y, nodes[c].r, 0, Math.PI * 2);
+            ctx.fillStyle = 'oklch(0.54 0.21 264 / 0.5)'; ctx.fill();
           }
-          // occasional retrieval pulse along an edge
-          if (!reduce && Math.random() < 0.03 && nodes.length > 2) {
-            const a = nodes[(Math.random() * nodes.length) | 0];
-            let b = nodes[(Math.random() * nodes.length) | 0];
-            if (a !== b && Math.hypot(a.x - b.x, a.y - b.y) < R) pulses.push({ a, b, t: 0 });
+          if (Math.random() < 0.028 && nodes.length > 2) {
+            var p = nodes[(Math.random() * nodes.length) | 0], q = nodes[(Math.random() * nodes.length) | 0];
+            if (p !== q && Math.hypot(p.x - q.x, p.y - q.y) < R) pulses.push({ a: p, b: q, t: 0 });
           }
-          for (let k = pulses.length - 1; k >= 0; k--) {
-            const p = pulses[k]; p.t += 0.035;
-            if (p.t >= 1) { pulses.splice(k, 1); continue; }
-            const x = p.a.x + (p.b.x - p.a.x) * p.t, y = p.a.y + (p.b.y - p.a.y) * p.t;
-            ctx.beginPath(); ctx.arc(x, y, 2.6, 0, Math.PI * 2);
+          for (var k = pulses.length - 1; k >= 0; k--) {
+            var pu = pulses[k]; pu.t += 0.035;
+            if (pu.t >= 1) { pulses.splice(k, 1); continue; }
+            var x = pu.a.x + (pu.b.x - pu.a.x) * pu.t, y = pu.a.y + (pu.b.y - pu.a.y) * pu.t;
+            ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2);
             ctx.fillStyle = SPARK; ctx.shadowColor = SPARK; ctx.shadowBlur = 10; ctx.fill(); ctx.shadowBlur = 0;
           }
           raf = requestAnimationFrame(step);
         }
-        resize();
-        window.addEventListener('resize', () => { cancelAnimationFrame(raf); resize(); if (!reduce) step(); else drawStatic(); });
         function drawStatic() {
           ctx.clearRect(0, 0, w, h);
-          for (const n of nodes) { ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fillStyle = 'oklch(0.55 0.2 264 / 0.4)'; ctx.fill(); }
+          for (var i = 0; i < nodes.length; i++) { ctx.beginPath(); ctx.arc(nodes[i].x, nodes[i].y, nodes[i].r, 0, Math.PI * 2); ctx.fillStyle = 'oklch(0.54 0.21 264 / 0.4)'; ctx.fill(); }
         }
+        resize();
+        window.addEventListener('resize', function () { cancelAnimationFrame(raf); resize(); if (!reduce) step(); else drawStatic(); });
         if (reduce) drawStatic(); else step();
       })();
     </script>

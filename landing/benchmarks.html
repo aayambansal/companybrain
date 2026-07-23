@@ -3,15 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Benchmarks — CompanyBrain</title>
+    <title>Benchmarks · CompanyBrain</title>
     <meta name="description" content="CompanyBrain retrieval benchmarks on public BEIR datasets, scored with pytrec_eval. State-of-the-art nDCG@10 on NFCorpus and SciFact, beating published BM25 and dense-retriever baselines." />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="CompanyBrain Benchmarks — SOTA retrieval on BEIR" />
+    <meta property="og:title" content="CompanyBrain Benchmarks · SOTA retrieval on BEIR" />
     <meta property="og:description" content="Reproducible nDCG@10 on BEIR NFCorpus (0.44) and SciFact (0.82), scored with pytrec_eval, above published BM25 and dense baselines." />
     <meta property="og:url" content="https://aayambansal.github.io/companybrain/benchmarks.html" />
     <meta property="og:image" content="https://aayambansal.github.io/companybrain/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="CompanyBrain Benchmarks — SOTA retrieval on BEIR" />
+    <meta name="twitter:title" content="CompanyBrain Benchmarks · SOTA retrieval on BEIR" />
     <meta name="twitter:image" content="https://aayambansal.github.io/companybrain/og.png" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%A7%A0%3C/text%3E%3C/svg%3E" />
     <link rel="preconnect" href="https://api.fontshare.com" />
@@ -21,20 +21,20 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
     <style>
       :root {
-        --bg: oklch(0.987 0.004 265);
-        --bg-2: oklch(0.968 0.006 265);
+        --bg: oklch(0.986 0.005 264);
+        --bg-2: oklch(0.966 0.008 264);
         --surface: #ffffff;
-        --ink: oklch(0.215 0.021 266);
-        --ink-2: oklch(0.36 0.02 266);
-        --muted: oklch(0.505 0.02 266);
-        --line: oklch(0.905 0.007 266);
-        --line-2: oklch(0.86 0.01 266);
-        --iris: oklch(0.55 0.2 264);
-        --iris-strong: oklch(0.49 0.21 264);
-        --iris-soft: oklch(0.55 0.2 264 / 0.1);
-        --iris-line: oklch(0.55 0.2 264 / 0.24);
-        --spark: oklch(0.76 0.16 68);
-        --spark-strong: oklch(0.66 0.16 60);
+        --ink: oklch(0.205 0.024 266);
+        --ink-2: oklch(0.37 0.021 266);
+        --muted: oklch(0.52 0.019 266);
+        --line: oklch(0.905 0.008 266);
+        --line-2: oklch(0.85 0.012 266);
+        --iris: oklch(0.54 0.21 264);
+        --iris-strong: oklch(0.47 0.22 264);
+        --iris-soft: oklch(0.54 0.21 264 / 0.1);
+        --iris-line: oklch(0.54 0.21 264 / 0.26);
+        --spark: oklch(0.77 0.16 66);
+        --spark-strong: oklch(0.67 0.15 62);
         --good: oklch(0.62 0.16 155);
         --display: "Clash Display", ui-sans-serif, system-ui, sans-serif;
         --sans: "Switzer", ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
@@ -197,7 +197,7 @@
           companybrain
         </a>
         <div class="nav-links">
-          <a class="q" href="./index.html#features">Features</a>
+          <a class="q" href="./index.html#retrieval">How it works</a>
           <a class="q" href="./index.html#connectors">Connectors</a>
           <a class="q active" href="./benchmarks.html">Benchmarks</a>
           <a class="btn btn-ghost" href="https://github.com/aayambansal/companybrain">GitHub</a>
@@ -209,7 +209,7 @@
       <div class="wrap">
         <div class="eyebrow"><span class="dot"></span> Benchmarks &middot; reproducible &middot; pytrec_eval</div>
         <h1>Retrieval that beats the published <em>state of the art</em>.</h1>
-        <p class="lede">Measured on public <b>BEIR</b> datasets with third-party relevance judgments, scored with the standard TREC evaluator. CompanyBrain's pipeline &mdash; hybrid retrieval, HyDE query expansion, and reranking &mdash; tops <b>nDCG@10</b> on NFCorpus and SciFact, above published BM25 and dense-retriever baselines.</p>
+        <p class="lede">Measured on public <b>BEIR</b> datasets with third-party relevance judgments, scored with the standard TREC evaluator. CompanyBrain's pipeline (hybrid retrieval, HyDE query expansion, and reranking) tops <b>nDCG@10</b> on NFCorpus and SciFact, above published BM25 and dense-retriever baselines.</p>
         <div class="stats">
           <div class="stat up"><div class="v">+11<small> pts</small></div><div class="k">nDCG@10 over BM25 on NFCorpus</div></div>
           <div class="stat up"><div class="v">+15<small> pts</small></div><div class="k">nDCG@10 over BM25 on SciFact</div></div>
@@ -293,11 +293,11 @@
             <tbody>
               <tr><td class="l"><b>NFCorpus</b></td><td class="l">3-large + HyDE + reranker</td><td class="hi">0.439</td><td>0.215</td><td>0.382</td><td>0.668</td><td>323</td></tr>
               <tr><td class="l"><b>SciFact</b></td><td class="l">3-large + pointwise reranker</td><td class="hi">0.816</td><td>0.923</td><td>0.977</td><td>0.781</td><td>300</td></tr>
-              <tr><td class="l"><b>Zero-config</b></td><td class="l">local hashed embedder, hybrid</td><td class="hi">&mdash;</td><td>1.000</td><td>1.000</td><td>0.958</td><td>12</td></tr>
+              <tr><td class="l"><b>Zero-config</b></td><td class="l">local hashed embedder, hybrid</td><td class="hi" style="color:var(--muted)">n/a</td><td>1.000</td><td>1.000</td><td>0.958</td><td>12</td></tr>
             </tbody>
           </table>
         </div>
-        <p class="note">The zero-config row uses the deterministic local embedder with <b>no API key</b> on the bundled sample corpus &mdash; Recall@5 100%, MRR 0.958, search p50 1.6ms on a laptop. It ships in the repo so you can run it in the first minute.</p>
+        <p class="note">The zero-config row uses the deterministic local embedder with <b>no API key</b> on the bundled sample corpus: Recall@5 100%, MRR 0.958, search p50 1.6ms on a laptop. It ships in the repo so you can run it in the first minute.</p>
       </div>
     </section>
 
@@ -307,11 +307,11 @@
         <div class="method">
           <div class="m">
             <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10" stroke-linecap="round"/></svg> Public datasets</div>
-            <p>BEIR NFCorpus &amp; SciFact with third-party relevance judgments &mdash; the same corpora on the public leaderboard.</p>
+            <p>BEIR NFCorpus &amp; SciFact with third-party relevance judgments, the same corpora on the public leaderboard.</p>
           </div>
           <div class="m">
             <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9"/></svg> Standard scoring</div>
-            <p>Scored with <code>pytrec_eval</code>, the reference TREC evaluator. nDCG@10, Recall@k, MRR &mdash; nothing hand-rolled.</p>
+            <p>Scored with <code>pytrec_eval</code>, the reference TREC evaluator. nDCG@10, Recall@k, MRR. Nothing hand-rolled.</p>
           </div>
           <div class="m">
             <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3" stroke-linecap="round" stroke-linejoin="round"/></svg> Run it yourself</div>
@@ -329,7 +329,7 @@
           <div class="u"><div class="when">Search</div><div class="h">Pointwise reranking + weighted RRF fusion</div><p>Score-then-sort reranking for sharper rank-1 precision, and vector-weighted Reciprocal Rank Fusion.</p></div>
           <div class="u"><div class="when">Retrieval</div><div class="h">HyDE query expansion &amp; text-embedding-3-large</div><p>Hypothetical-document embeddings blended with the query, on OpenAI's strongest embedder via the dimensions API.</p></div>
           <div class="u"><div class="when">Ingest</div><div class="h">Video, audio, image &amp; temporal reasoning</div><p>ffmpeg video transcription + frame OCR, Whisper audio, vision OCR, and superseding-fact detection on ingest.</p></div>
-          <div class="u"><div class="when">Connectors</div><div class="h">40+ sources, one store</div><p>Obsidian, Slack, Notion, GitHub, Google Docs, Wispr Flow, and more &mdash; all searchable together.</p></div>
+          <div class="u"><div class="when">Connectors</div><div class="h">40+ sources, one store</div><p>Obsidian, Slack, Notion, GitHub, Google Docs, Wispr Flow, and more, all searchable together.</p></div>
         </div>
       </div>
     </section>
