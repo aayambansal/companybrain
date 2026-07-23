@@ -6,6 +6,7 @@ const KEYS = [
   'AUTH_MODE',
   'API_HOST',
   'API_PORT',
+  'PORT',
   'JWT_SECRET',
   'COMPANYBRAIN_VERSION',
   'ACCESS_TOKEN',
@@ -59,5 +60,16 @@ describe('loadApiEnv', () => {
   it('parses the port as a number', () => {
     process.env.API_PORT = '8080';
     expect(loadApiEnv().port).toBe(8080);
+  });
+
+  it('falls back to the conventional PORT when API_PORT is unset', () => {
+    process.env.PORT = '10000';
+    expect(loadApiEnv().port).toBe(10000);
+  });
+
+  it('prefers API_PORT over PORT when both are set', () => {
+    process.env.API_PORT = '3333';
+    process.env.PORT = '10000';
+    expect(loadApiEnv().port).toBe(3333);
   });
 });

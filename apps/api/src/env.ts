@@ -22,7 +22,9 @@ export function loadApiEnv(): ApiEnv {
   const authMode: AuthMode = process.env.AUTH_MODE === 'multi' ? 'multi' : 'single';
   return {
     host: process.env.API_HOST ?? '0.0.0.0',
-    port: Number.parseInt(process.env.API_PORT ?? '3333', 10),
+    // API_PORT wins (explicit config); otherwise honor the conventional PORT
+    // that platforms like Railway, Heroku, and Cloud Run inject.
+    port: Number.parseInt(process.env.API_PORT ?? process.env.PORT ?? '3333', 10),
     jwtSecret: process.env.JWT_SECRET ?? 'dev-insecure-secret-change-me',
     corsOrigins: corsRaw
       .split(',')
