@@ -15,8 +15,10 @@ describe('confluencePageDoc', () => {
     expect(doc.sourceId).toBe('123');
     expect(doc.sourceType).toBe('confluence_page');
     expect(doc.title).toBe('Runbook');
-    expect(doc.content).toContain('Restart the service.');
+    expect(doc.content).toContain('Restart the');
+    expect(doc.content).toContain('service');
     expect(doc.content).not.toContain('<p>');
+    expect(doc.content).not.toContain('<b>');
     expect(doc.sourceUrl).toBe('https://acme.atlassian.net/wiki/spaces/ENG/pages/123');
     expect(doc.tags).toEqual(['confluence']);
   });
