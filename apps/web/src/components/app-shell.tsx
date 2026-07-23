@@ -15,6 +15,7 @@ import {
   IconPlug,
   IconSettings,
   IconLogout,
+  IconLayers,
 } from './icons';
 
 const NAV = [
@@ -24,6 +25,7 @@ const NAV = [
   { href: '/memories', label: 'Memories', icon: IconMemory },
   { href: '/spaces', label: 'Spaces', icon: IconSpaces },
   { href: '/connections', label: 'Connections', icon: IconPlug },
+  { href: '/analytics', label: 'Analytics', icon: IconLayers },
   { href: '/settings', label: 'Settings', icon: IconSettings },
 ];
 
