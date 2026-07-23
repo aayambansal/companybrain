@@ -43,13 +43,22 @@ export class AnthropicProvider implements LlmProvider {
 
   /** POST, retrying once without `temperature` if the model rejects it. */
   private async postMessages(body: Record<string, unknown>): Promise<Response> {
-    const res = await fetch(`${this.baseUrl}/messages`, { method: 'POST', headers: this.headers(), body: JSON.stringify(body) });
+    // Bound the request so a hung completion can't stall the caller. 90s is
+    // generous enough for long (including streamed) generations.
+    const post = (b: Record<string, unknown>) =>
+      fetch(`${this.baseUrl}/messages`, {
+        method: 'POST',
+        signal: AbortSignal.timeout(90_000),
+        headers: this.headers(),
+        body: JSON.stringify(b),
+      });
+    const res = await post(body);
     if (res.status === 400 && 'temperature' in body) {
       const text = await res.clone().text();
       if (/temperature/i.test(text)) {
         this.tempUnsupported = true;
         const { temperature, ...rest } = body;
-        return fetch(`${this.baseUrl}/messages`, { method: 'POST', headers: this.headers(), body: JSON.stringify(rest) });
+        return post(rest);
       }
     }
     return res;
