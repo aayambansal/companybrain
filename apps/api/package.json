@@ -1,0 +1,31 @@
+{
+  "name": "@companybrain/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CompanyBrain HTTP API (Hono).",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@companybrain/core": "workspace:*",
+    "@companybrain/db": "workspace:*",
+    "@hono/node-server": "^1.13.1",
+    "drizzle-orm": "^0.36.4",
+    "hono": "^4.6.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.2"
+  }
+}
