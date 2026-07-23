@@ -1,6 +1,6 @@
 # Contributing to CompanyBrain
 
-Thanks for helping build the open-source memory layer for teams. 🧠
+Thanks for helping build the open-source memory layer for teams.
 
 ## Development setup
 
