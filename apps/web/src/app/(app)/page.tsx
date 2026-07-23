@@ -1,0 +1,219 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { api, type Status, type Memory, type Space } from '@/lib/api';
+import { Page } from '@/components/app-shell';
+import { Button, Textarea, Badge, StatusDot, Skeleton, EmptyState, cx } from '@/components/ui';
+import { useToast } from '@/components/toast';
+import { timeAgo, hostname } from '@/lib/format';
+import { IconSearch, IconSparkle, IconArrowRight, IconMemory, IconLayers, IconSpaces } from '@/components/icons';
+
+export default function OverviewPage() {
+  const router = useRouter();
+  const toast = useToast();
+  const [status, setStatus] = useState<Status | null>(null);
+  const [memories, setMemories] = useState<Memory[] | null>(null);
+  const [spaces, setSpaces] = useState<Space[]>([]);
+  const [q, setQ] = useState('');
+  const [note, setNote] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  async function load() {
+    const [s, m, sp] = await Promise.allSettled([
+      api.get<Status>('/v1/status'),
+      api.get<{ memories: Memory[] }>('/v1/memories?limit=6'),
+      api.get<{ spaces: Space[] }>('/v1/spaces'),
+    ]);
+    if (s.status === 'fulfilled') setStatus(s.value);
+    setMemories(m.status === 'fulfilled' ? m.value.memories : []);
+    if (sp.status === 'fulfilled') setSpaces(sp.value.spaces);
+  }
+  useEffect(() => {
+    load();
+  }, []);
+
+  function search(e: React.FormEvent) {
+    e.preventDefault();
+    if (q.trim()) router.push(`/search?q=${encodeURIComponent(q.trim())}`);
+  }
+
+  async function capture() {
+    if (!note.trim()) return;
+    setSaving(true);
+    try {
+      await api.post('/v1/memories', { content: note.trim() });
+      setNote('');
+      toast('success', 'Saved to your brain.');
+      load();
+    } catch {
+      toast('error', 'Could not save that.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const counts = status?.counts;
+
+  return (
+    <Page
+      title="Overview"
+      subtitle={status ? `${status.embedding.provider} embeddings, ${status.llm.available ? status.llm.provider + ' llm' : 'no llm'}` : undefined}
+    >
+      {/* Search bar */}
+      <form onSubmit={search} className="mb-5">
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-bg-subtle px-3.5 transition-colors focus-within:border-[var(--color-primary-line)]">
+          <IconSearch size={18} className="text-ink-faint" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Ask your brain anything, or search for it"
+            className="h-12 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-faint"
+          />
+          <kbd className="hidden rounded border border-border px-1.5 py-0.5 font-mono text-[11px] text-ink-faint sm:block">
+            enter
+          </kbd>
+        </div>
+      </form>
+
+      {/* Stats */}
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat icon={<IconMemory size={16} />} label="Memories" value={counts?.documents} />
+        <Stat icon={<IconLayers size={16} />} label="Chunks" value={counts?.chunks} />
+        <Stat icon={<IconSpaces size={16} />} label="Spaces" value={counts?.spaces} />
+        <Stat
+          icon={<IconSparkle size={16} />}
+          label="Model"
+          text={status?.embedding.model ?? '—'}
+        />
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
+        {/* Recent memories */}
+        <section>
+          <div className="mb-2.5 flex items-center justify-between">
+            <h2 className="font-mono text-sm text-ink-muted">Recent</h2>
+            <Link href="/memories" className="flex items-center gap-1 text-[13px] text-ink-faint hover:text-ink">
+              All memories <IconArrowRight size={13} />
+            </Link>
+          </div>
+          {memories === null ? (
+            <div className="space-y-2">
+              {[0, 1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          ) : memories.length === 0 ? (
+            <EmptyState
+              title="nothing indexed yet"
+              description="Capture a note on the right, or connect a source to fill your brain."
+              icon={<IconMemory size={28} />}
+            />
+          ) : (
+            <ul className="space-y-2">
+              {memories.map((m) => (
+                <li key={m.id}>
+                  <Link
+                    href={`/memories/${m.id}`}
+                    className="block rounded-lg border border-border bg-surface px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-hover"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="truncate font-medium text-ink">{m.title ?? 'Untitled'}</p>
+                      <span className="shrink-0 font-mono text-[11px] text-ink-faint">{timeAgo(m.createdAt)}</span>
+                    </div>
+                    <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-ink-muted">
+                      {m.content?.slice(0, 200)}
+                    </p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="flex items-center gap-1.5 text-[11px] text-ink-faint">
+                        <StatusDot status={m.status} />
+                        {m.status}
+                      </span>
+                      <Badge tone="neutral" mono>
+                        {m.connector}
+                      </Badge>
+                      {hostname(m.sourceUrl) && <Badge tone="info">{hostname(m.sourceUrl)}</Badge>}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* Quick capture */}
+        <section className="space-y-5">
+          <div className="card p-4">
+            <h2 className="mb-2.5 flex items-center gap-1.5 font-mono text-sm text-ink-muted">
+              <IconSparkle size={15} className="text-[var(--color-primary)]" /> Quick capture
+            </h2>
+            <Textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') capture();
+              }}
+              rows={5}
+              placeholder="Paste a decision, a doc, a link, a thought. It gets chunked, embedded, and made searchable."
+            />
+            <div className="mt-2.5 flex items-center justify-between">
+              <span className="font-mono text-[11px] text-ink-faint">cmd/ctrl + enter to save</span>
+              <Button variant="primary" size="sm" onClick={capture} loading={saving} disabled={!note.trim()}>
+                Save memory
+              </Button>
+            </div>
+          </div>
+
+          <div className="card p-4">
+            <h2 className="mb-3 font-mono text-sm text-ink-muted">Spaces</h2>
+            {spaces.length === 0 ? (
+              <p className="text-[13px] text-ink-faint">No spaces yet.</p>
+            ) : (
+              <ul className="space-y-1">
+                {spaces.slice(0, 6).map((s) => (
+                  <li key={s.id}>
+                    <Link
+                      href={`/memories?spaceId=${s.id}`}
+                      className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className={cx('size-1.5 rounded-full', s.isDefault ? 'bg-[var(--color-primary)]' : 'bg-ink-faint')} />
+                        {s.name}
+                      </span>
+                      <span className="font-mono text-[11px] text-ink-faint">{s.documentCount ?? 0}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
+      </div>
+    </Page>
+  );
+}
+
+function Stat({
+  icon,
+  label,
+  value,
+  text,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value?: number;
+  text?: string;
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-surface px-4 py-3">
+      <div className="flex items-center gap-1.5 text-ink-faint">
+        {icon}
+        <span className="text-[11px] uppercase tracking-wide">{label}</span>
+      </div>
+      <p className="mt-1.5 font-mono text-2xl font-semibold text-ink">
+        {text ?? (value === undefined ? <span className="text-ink-faint">—</span> : value.toLocaleString())}
+      </p>
+    </div>
+  );
+}
