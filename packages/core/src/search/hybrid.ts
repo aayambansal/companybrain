@@ -28,6 +28,8 @@ export interface HybridSearchParams {
   minScore?: number;
   /** How many candidates to pull per arm before fusing. */
   poolSize?: number;
+  /** Include memories that a newer memory has superseded (default false). */
+  includeSuperseded?: boolean;
 }
 
 /**
@@ -97,6 +99,7 @@ async function vectorArm(
       AND c.embedding IS NOT NULL
       ${spaceId ? sql`AND c.space_id = ${spaceId}` : sql``}
       ${tags ? sql`AND d.tags ?| ${tags}` : sql``}
+      ${params.includeSuperseded ? sql`` : sql`AND d.superseded_by IS NULL`}
     ORDER BY c.embedding <=> ${vec}::vector
     LIMIT ${pool}
   `;
@@ -126,6 +129,7 @@ async function keywordArm(
       AND c.tsv @@ to_tsquery('english', ${orQuery})
       ${spaceId ? sql`AND c.space_id = ${spaceId}` : sql``}
       ${tags ? sql`AND d.tags ?| ${tags}` : sql``}
+      ${params.includeSuperseded ? sql`` : sql`AND d.superseded_by IS NULL`}
     ORDER BY score DESC
     LIMIT ${pool}
   `;
