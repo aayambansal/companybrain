@@ -7,6 +7,7 @@ import { Button, Input, Skeleton, Badge } from '@/components/ui';
 import { useToast } from '@/components/toast';
 import { timeAgo } from '@/lib/format';
 import { IconPlus, IconTrash } from '@/components/icons';
+import { ProvidersSection } from './providers';
 
 export default function SettingsPage() {
   const toast = useToast();
@@ -78,6 +79,9 @@ export default function SettingsPage() {
             <Row label="Version" value={status ? `v${status.version}` : '—'} mono />
           </div>
         </section>
+
+        {/* Providers */}
+        <ProvidersSection />
 
         {/* API keys */}
         <section>

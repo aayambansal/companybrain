@@ -53,10 +53,11 @@ export interface ListMemoriesInput {
  * MCP server, and connectors build on.
  */
 export class MemoryEngine {
-  readonly config: EngineConfig;
+  config: EngineConfig;
   readonly client: DbClient;
-  readonly embedder: EmbeddingProvider;
-  readonly llm: LlmProvider;
+  // Providers can be reconfigured at runtime (e.g. from dashboard settings).
+  embedder: EmbeddingProvider;
+  llm: LlmProvider;
 
   constructor(opts: { config?: EngineConfig; client?: DbClient } = {}) {
     this.config = opts.config ?? loadConfig();
@@ -71,6 +72,25 @@ export class MemoryEngine {
 
   async close(): Promise<void> {
     await this.client.close();
+  }
+
+  /**
+   * Reconfigure the embedding and/or LLM providers at runtime and rebuild the
+   * provider instances. Changing the embedding provider does not re-embed
+   * existing chunks; reindex if you need comparable scores across providers.
+   */
+  configureProviders(update: {
+    embedding?: Partial<EngineConfig['embedding']>;
+    llm?: Partial<EngineConfig['llm']>;
+  }): void {
+    if (update.embedding) {
+      this.config = { ...this.config, embedding: { ...this.config.embedding, ...update.embedding } };
+      this.embedder = createEmbeddingProvider(this.config);
+    }
+    if (update.llm) {
+      this.config = { ...this.config, llm: { ...this.config.llm, ...update.llm } };
+      this.llm = createLlmProvider(this.config);
+    }
   }
 
   // ── Spaces ───────────────────────────────────────────────────────────────
