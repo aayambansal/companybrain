@@ -50,18 +50,30 @@ export const intercomConnector: Connector = {
   category: 'docs',
   auth: 'apiKey',
   configSchema: [
-    { key: 'accessToken', label: 'Access token', type: 'password', required: true, help: 'Create under Intercom > Settings > Developers > Developer Hub.' },
+    {
+      key: 'accessToken',
+      label: 'Access token',
+      type: 'password',
+      required: true,
+      help: 'Create under Intercom > Settings > Developers > Developer Hub.',
+    },
   ],
   async *pull(ctx) {
     const accessToken = String(ctx.config.accessToken ?? '').trim();
     if (!accessToken) throw new Error('intercom connector: config.accessToken is required');
-    const headers = { authorization: `Bearer ${accessToken}`, 'intercom-version': INTERCOM_VERSION };
+    const headers = {
+      authorization: `Bearer ${accessToken}`,
+      'intercom-version': INTERCOM_VERSION,
+    };
 
     const base = 'https://api.intercom.io/articles?per_page=50';
     let url: string | undefined = base;
     while (url) {
       if (ctx.signal?.aborted) return;
-      const res: IntercomArticlesResponse = await fetchJson<IntercomArticlesResponse>(url, { headers, signal: ctx.signal });
+      const res: IntercomArticlesResponse = await fetchJson<IntercomArticlesResponse>(url, {
+        headers,
+        signal: ctx.signal,
+      });
       for (const article of res.data ?? []) yield intercomArticleDoc(article);
       url = intercomNextUrl(res.pages?.next, base);
     }

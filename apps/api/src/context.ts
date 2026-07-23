@@ -62,9 +62,13 @@ export async function ensureDefaultOrg(): Promise<string> {
     .returning({ id: organizations.id });
   if (!org) throw new Error('failed to provision default workspace');
   defaultOrgId = org.id;
-  await engine.db
-    .insert(spaces)
-    .values({ orgId: defaultOrgId, name: 'General', slug: 'general', isDefault: true, icon: 'brain' });
+  await engine.db.insert(spaces).values({
+    orgId: defaultOrgId,
+    name: 'General',
+    slug: 'general',
+    isDefault: true,
+    icon: 'brain',
+  });
   return defaultOrgId;
 }
 

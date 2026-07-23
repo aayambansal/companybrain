@@ -34,7 +34,9 @@ describe('parseLinearIssues', () => {
   });
 
   it('falls back to the title (or "Issue") when there is no identifier', () => {
-    const [a] = parseLinearIssues({ data: { issues: { nodes: [{ id: '1', title: 'Just a title' }] } } });
+    const [a] = parseLinearIssues({
+      data: { issues: { nodes: [{ id: '1', title: 'Just a title' }] } },
+    });
     expect(a!.title).toBe('Just a title');
     const [b] = parseLinearIssues({ data: { issues: { nodes: [{ id: '2' }] } } });
     expect(b!.title).toBe('Issue');

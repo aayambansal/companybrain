@@ -35,13 +35,28 @@ export const slackConnector: Connector = {
   category: 'chat',
   auth: 'apiKey',
   configSchema: [
-    { key: 'token', label: 'Bot token', type: 'password', required: true, placeholder: 'xoxb-...', help: 'A bot token with channels:history and channels:read scopes.' },
-    { key: 'channel', label: 'Channel ID', type: 'string', required: true, placeholder: 'C0123456789', help: 'The channel to index. Invite the bot to it first.' },
+    {
+      key: 'token',
+      label: 'Bot token',
+      type: 'password',
+      required: true,
+      placeholder: 'xoxb-...',
+      help: 'A bot token with channels:history and channels:read scopes.',
+    },
+    {
+      key: 'channel',
+      label: 'Channel ID',
+      type: 'string',
+      required: true,
+      placeholder: 'C0123456789',
+      help: 'The channel to index. Invite the bot to it first.',
+    },
   ],
   async *pull(ctx) {
     const token = String(ctx.config.token ?? '').trim();
     const channel = String(ctx.config.channel ?? '').trim();
-    if (!token || !channel) throw new Error('slack connector: config.token and config.channel are required');
+    if (!token || !channel)
+      throw new Error('slack connector: config.token and config.channel are required');
     const auth = { authorization: `Bearer ${token}` };
 
     let cursor: string | undefined = ctx.cursor ?? undefined;
@@ -53,7 +68,10 @@ export const slackConnector: Connector = {
         error?: string;
         messages?: SlackMessage[];
         response_metadata?: { next_cursor?: string };
-      }>(`https://slack.com/api/conversations.history?${params}`, { headers: auth, signal: ctx.signal });
+      }>(`https://slack.com/api/conversations.history?${params}`, {
+        headers: auth,
+        signal: ctx.signal,
+      });
       if (!res.ok) throw new Error(`slack: ${res.error ?? 'request failed'}`);
 
       for (const msg of res.messages ?? []) {

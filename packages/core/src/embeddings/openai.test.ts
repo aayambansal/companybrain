@@ -18,13 +18,21 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe('OpenAIEmbeddingProvider dimensions', () => {
   it('requests a reduced width for text-embedding-3-large so it fits storage', () => {
-    const p = new OpenAIEmbeddingProvider({ apiKey: 'sk-x', model: 'text-embedding-3-large', dimensions: 1536 });
+    const p = new OpenAIEmbeddingProvider({
+      apiKey: 'sk-x',
+      model: 'text-embedding-3-large',
+      dimensions: 1536,
+    });
     expect(p.dimensions).toBe(1536);
   });
 
   it('sends the dimensions param for text-embedding-3-* models', async () => {
     const calls = stubFetch(1536);
-    const p = new OpenAIEmbeddingProvider({ apiKey: 'sk-x', model: 'text-embedding-3-large', dimensions: 1536 });
+    const p = new OpenAIEmbeddingProvider({
+      apiKey: 'sk-x',
+      model: 'text-embedding-3-large',
+      dimensions: 1536,
+    });
     await p.embed(['hello']);
     expect(calls[0].model).toBe('text-embedding-3-large');
     expect(calls[0].dimensions).toBe(1536);
@@ -32,7 +40,11 @@ describe('OpenAIEmbeddingProvider dimensions', () => {
 
   it('omits dimensions for models that do not support it (ada-002)', async () => {
     const calls = stubFetch(1536);
-    const p = new OpenAIEmbeddingProvider({ apiKey: 'sk-x', model: 'text-embedding-ada-002', dimensions: 1536 });
+    const p = new OpenAIEmbeddingProvider({
+      apiKey: 'sk-x',
+      model: 'text-embedding-ada-002',
+      dimensions: 1536,
+    });
     await p.embed(['hello']);
     expect('dimensions' in calls[0]).toBe(false);
   });

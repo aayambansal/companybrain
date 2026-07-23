@@ -9,14 +9,26 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "files": ["dist", "src", "README.md"],
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
-  "keywords": ["companybrain", "memory", "rag", "vector", "search", "ai", "sdk"],
+  "keywords": [
+    "companybrain",
+    "memory",
+    "rag",
+    "vector",
+    "search",
+    "ai",
+    "sdk"
+  ],
   "devDependencies": {
     "@types/node": "^22.7.4",
     "typescript": "^5.6.2",

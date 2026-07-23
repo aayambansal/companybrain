@@ -15,7 +15,8 @@ describe('normalizeText', () => {
 
 describe('markdownToText', () => {
   it('strips headings, emphasis, links, and images but keeps prose', () => {
-    const md = '# Title\n\nSome **bold** and _italic_ and `code` and [a link](https://x) ![img](y.png).';
+    const md =
+      '# Title\n\nSome **bold** and _italic_ and `code` and [a link](https://x) ![img](y.png).';
     const out = markdownToText(md);
     expect(out).toContain('Some bold and italic and code and a link');
     expect(out).not.toContain('#');
@@ -37,6 +38,8 @@ describe('htmlToText', () => {
     expect(out).not.toContain('.a{}');
   });
   it('decodes the common entities', () => {
-    expect(htmlToText('<p>a &amp; b &lt;c&gt; &quot;d&quot; &#39;e&#39;</p>').trim()).toBe('a & b <c> "d" \'e\'');
+    expect(htmlToText('<p>a &amp; b &lt;c&gt; &quot;d&quot; &#39;e&#39;</p>').trim()).toBe(
+      'a & b <c> "d" \'e\'',
+    );
   });
 });

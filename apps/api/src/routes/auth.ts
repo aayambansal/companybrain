@@ -20,11 +20,16 @@ const registerSchema = z.object({
 app.post('/register', async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const parsed = registerSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   const d = parsed.data;
   const engine = getEngine();
 
-  const existing = await engine.db.select({ id: users.id }).from(users).where(eq(users.email, d.email)).limit(1);
+  const existing = await engine.db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, d.email))
+    .limit(1);
   if (existing.length > 0) return c.json({ error: 'email_taken' }, 409);
 
   const orgName = d.orgName ?? `${d.name ?? d.email.split('@')[0]}'s workspace`;
@@ -34,14 +39,25 @@ app.post('/register', async (c) => {
     .returning();
   const [user] = await engine.db
     .insert(users)
-    .values({ orgId: org!.id, email: d.email, name: d.name, role: 'owner', passwordHash: hashPassword(d.password) })
+    .values({
+      orgId: org!.id,
+      email: d.email,
+      name: d.name,
+      role: 'owner',
+      passwordHash: hashPassword(d.password),
+    })
     .returning();
   await engine.db
     .insert(spaces)
     .values({ orgId: org!.id, name: 'General', slug: 'general', isDefault: true, icon: 'brain' });
 
   const token = await signSession(user!.id, org!.id);
-  setCookie(c, SESSION_COOKIE, token, { httpOnly: true, sameSite: 'Lax', path: '/', maxAge: 60 * 60 * 24 * 7 });
+  setCookie(c, SESSION_COOKIE, token, {
+    httpOnly: true,
+    sameSite: 'Lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 7,
+  });
   return c.json({ token, user: publicUser(user!), org: { id: org!.id, name: org!.name } }, 201);
 });
 
@@ -50,7 +66,8 @@ const loginSchema = z.object({ email: z.string().email(), password: z.string() }
 app.post('/login', async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const parsed = loginSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   const { email, password } = parsed.data;
   const engine = getEngine();
   const [user] = await engine.db.select().from(users).where(eq(users.email, email)).limit(1);
@@ -59,7 +76,12 @@ app.post('/login', async (c) => {
   }
   void engine.db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, user.id));
   const token = await signSession(user.id, user.orgId);
-  setCookie(c, SESSION_COOKIE, token, { httpOnly: true, sameSite: 'Lax', path: '/', maxAge: 60 * 60 * 24 * 7 });
+  setCookie(c, SESSION_COOKIE, token, {
+    httpOnly: true,
+    sameSite: 'Lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 7,
+  });
   return c.json({ token, user: publicUser(user) });
 });
 
@@ -72,7 +94,11 @@ app.get('/me', async (c) => {
   const auth = await resolveAuth(c);
   if (!auth) return c.json({ error: 'unauthorized' }, 401);
   const engine = getEngine();
-  const [org] = await engine.db.select().from(organizations).where(eq(organizations.id, auth.orgId)).limit(1);
+  const [org] = await engine.db
+    .select()
+    .from(organizations)
+    .where(eq(organizations.id, auth.orgId))
+    .limit(1);
   let user = null;
   if (auth.userId) {
     const [u] = await engine.db

@@ -31,7 +31,8 @@ app.post('/', async (c) => {
   const auth = c.get('auth');
   const body = await c.req.json().catch(() => ({}));
   const parsed = createSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   const engine = getEngine();
   const { key, prefix, hash } = generateApiKey();
   const [row] = await engine.db
@@ -43,7 +44,12 @@ app.post('/', async (c) => {
       keyHash: hash,
       prefix,
     })
-    .returning({ id: apiKeys.id, name: apiKeys.name, prefix: apiKeys.prefix, createdAt: apiKeys.createdAt });
+    .returning({
+      id: apiKeys.id,
+      name: apiKeys.name,
+      prefix: apiKeys.prefix,
+      createdAt: apiKeys.createdAt,
+    });
   // The plaintext key is returned exactly once.
   return c.json({ key: { ...row, secret: key } }, 201);
 });

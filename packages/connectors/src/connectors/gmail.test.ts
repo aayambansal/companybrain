@@ -18,7 +18,10 @@ const sampleMessage = {
     ],
     parts: [
       { mimeType: 'text/plain', body: { data: bodyData } },
-      { mimeType: 'text/html', body: { data: Buffer.from('<p>ignored</p>', 'utf8').toString('base64url') } },
+      {
+        mimeType: 'text/html',
+        body: { data: Buffer.from('<p>ignored</p>', 'utf8').toString('base64url') },
+      },
     ],
   },
 };
@@ -39,7 +42,11 @@ describe('parseGmailMessage', () => {
   });
 
   it('falls back to the snippet and a placeholder subject when there is no body', () => {
-    const doc = parseGmailMessage({ id: 'm2', snippet: 'just a snippet', payload: { headers: [] } });
+    const doc = parseGmailMessage({
+      id: 'm2',
+      snippet: 'just a snippet',
+      payload: { headers: [] },
+    });
     expect(doc.title).toBe('(no subject)');
     expect(doc.content).toContain('just a snippet');
   });

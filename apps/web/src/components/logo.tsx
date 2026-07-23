@@ -20,7 +20,13 @@ export function BrainMark({ size = 24, className }: { size?: number; className?:
         strokeWidth="1.4"
         strokeLinejoin="round"
       />
-      <path d="M16 6v20M11.5 11.5c1.2.6 2.8.6 4.5.6M20.5 15c-1.4.5-3 .5-4.5.2M12.5 19.5c1.3-.5 2.4-.5 3.5-.2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
+      <path
+        d="M16 6v20M11.5 11.5c1.2.6 2.8.6 4.5.6M20.5 15c-1.4.5-3 .5-4.5.2M12.5 19.5c1.3-.5 2.4-.5 3.5-.2"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        opacity="0.6"
+      />
     </svg>
   );
 }

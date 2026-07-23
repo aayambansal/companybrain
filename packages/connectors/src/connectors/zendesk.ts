@@ -40,21 +40,45 @@ export const zendeskConnector: Connector = {
   category: 'docs',
   auth: 'apiKey',
   configSchema: [
-    { key: 'subdomain', label: 'Subdomain', type: 'string', required: true, placeholder: 'acme', help: 'The <subdomain> in https://<subdomain>.zendesk.com.' },
-    { key: 'email', label: 'Account email', type: 'string', required: true, placeholder: 'you@company.com' },
-    { key: 'apiToken', label: 'API token', type: 'password', required: true, help: 'Create under Admin Center > Apps and integrations > APIs > Zendesk API.' },
+    {
+      key: 'subdomain',
+      label: 'Subdomain',
+      type: 'string',
+      required: true,
+      placeholder: 'acme',
+      help: 'The <subdomain> in https://<subdomain>.zendesk.com.',
+    },
+    {
+      key: 'email',
+      label: 'Account email',
+      type: 'string',
+      required: true,
+      placeholder: 'you@company.com',
+    },
+    {
+      key: 'apiToken',
+      label: 'API token',
+      type: 'password',
+      required: true,
+      help: 'Create under Admin Center > Apps and integrations > APIs > Zendesk API.',
+    },
   ],
   async *pull(ctx) {
     const subdomain = String(ctx.config.subdomain ?? '').trim();
     const email = String(ctx.config.email ?? '').trim();
     const apiToken = String(ctx.config.apiToken ?? '').trim();
-    if (!subdomain || !email || !apiToken) throw new Error('zendesk connector: subdomain, email, and apiToken are required');
+    if (!subdomain || !email || !apiToken)
+      throw new Error('zendesk connector: subdomain, email, and apiToken are required');
     const headers = { authorization: basicAuth(email, apiToken) };
 
-    let url: string | undefined = `https://${subdomain}.zendesk.com/api/v2/help_center/articles.json?page[size]=100`;
+    let url: string | undefined =
+      `https://${subdomain}.zendesk.com/api/v2/help_center/articles.json?page[size]=100`;
     while (url) {
       if (ctx.signal?.aborted) return;
-      const res: ZendeskArticlesResponse = await fetchJson<ZendeskArticlesResponse>(url, { headers, signal: ctx.signal });
+      const res: ZendeskArticlesResponse = await fetchJson<ZendeskArticlesResponse>(url, {
+        headers,
+        signal: ctx.signal,
+      });
       for (const article of res.articles ?? []) yield zendeskArticleDoc(article);
       url = res.meta?.has_more ? (res.links?.next ?? undefined) : undefined;
     }

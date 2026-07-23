@@ -38,7 +38,8 @@ export function hnHitToDoc(hit: HnHit): SourceDocument {
 export const hackernewsConnector: Connector = {
   id: 'hackernews',
   displayName: 'Hacker News',
-  description: 'Index Hacker News stories matching a search query or submitted by a user, via the Algolia HN API.',
+  description:
+    'Index Hacker News stories matching a search query or submitted by a user, via the Algolia HN API.',
   category: 'web',
   auth: 'none',
   configSchema: [
@@ -62,7 +63,8 @@ export const hackernewsConnector: Connector = {
   async *pull(ctx) {
     const query = String(ctx.config.query ?? '').trim();
     const user = String(ctx.config.user ?? '').trim();
-    if (!query && !user) throw new Error('hackernews connector: config.query or config.user is required');
+    if (!query && !user)
+      throw new Error('hackernews connector: config.query or config.user is required');
     const params = new URLSearchParams({
       query,
       tags: user ? `story,author_${user}` : 'story',

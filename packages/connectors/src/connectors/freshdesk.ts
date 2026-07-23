@@ -33,8 +33,21 @@ export const freshdeskConnector: Connector = {
   category: 'chat',
   auth: 'apiKey',
   configSchema: [
-    { key: 'domain', label: 'Domain', type: 'string', required: true, placeholder: 'acme', help: 'The <domain> in https://<domain>.freshdesk.com.' },
-    { key: 'apiKey', label: 'API key', type: 'password', required: true, help: 'Find under Freshdesk > Profile settings > Your API Key.' },
+    {
+      key: 'domain',
+      label: 'Domain',
+      type: 'string',
+      required: true,
+      placeholder: 'acme',
+      help: 'The <domain> in https://<domain>.freshdesk.com.',
+    },
+    {
+      key: 'apiKey',
+      label: 'API key',
+      type: 'password',
+      required: true,
+      help: 'Find under Freshdesk > Profile settings > Your API Key.',
+    },
   ],
   async *pull(ctx) {
     const domain = String(ctx.config.domain ?? '').trim();

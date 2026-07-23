@@ -40,7 +40,9 @@ describe('tagText', () => {
 
 describe('extractTitle', () => {
   it('extracts and collapses whitespace in the document title', () => {
-    expect(extractTitle('<html><head><title>Hello\n   World</title></head></html>')).toBe('Hello World');
+    expect(extractTitle('<html><head><title>Hello\n   World</title></head></html>')).toBe(
+      'Hello World',
+    );
   });
   it('returns undefined for a missing or empty title', () => {
     expect(extractTitle('<html></html>')).toBeUndefined();

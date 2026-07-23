@@ -4,7 +4,8 @@ import { pipedriveNoteDoc } from './pipedrive.js';
 describe('pipedriveNoteDoc', () => {
   const note = {
     id: 314,
-    content: '<p>Follow up with the customer &amp; send the <a href="https://acme.com/quote">quote</a>.</p>',
+    content:
+      '<p>Follow up with the customer &amp; send the <a href="https://acme.com/quote">quote</a>.</p>',
     add_time: '2024-01-16 03:20:00',
   };
 

@@ -22,19 +22,42 @@ export {
 export type { EmbeddingProvider } from './embeddings/index.js';
 
 // LLM
-export { createLlmProvider, AnthropicProvider, OpenAIProvider, OllamaProvider, NoopLlmProvider } from './llm/index.js';
+export {
+  createLlmProvider,
+  AnthropicProvider,
+  OpenAIProvider,
+  OllamaProvider,
+  NoopLlmProvider,
+} from './llm/index.js';
 export type { LlmProvider, LlmMessage, CompleteOptions } from './llm/index.js';
 
 // Search
 export { hybridSearch } from './search/hybrid.js';
 export { reciprocalRankFusion } from './search/rrf.js';
-export { llmRerank, llmRerankPointwise, applyRerankOrder, parseOrder, parseScores } from './search/rerank.js';
-export { hypotheticalDocument, hypotheticalDocuments, hydePrompt, blendVectors } from './search/hyde.js';
+export {
+  llmRerank,
+  llmRerankPointwise,
+  applyRerankOrder,
+  parseOrder,
+  parseScores,
+} from './search/rerank.js';
+export {
+  hypotheticalDocument,
+  hypotheticalDocuments,
+  hydePrompt,
+  blendVectors,
+} from './search/hyde.js';
 
 // Ingest, chat & enrichment
 export { indexDocument, findBySource } from './ingest.js';
 export { generateAnswer, extractiveAnswer, buildContext, toCitations } from './chat.js';
-export { generatePlaybook, buildPlaybookPrompt, extractTitle, PLAYBOOK_SYSTEM, type PlaybookResult } from './playbook.js';
+export {
+  generatePlaybook,
+  buildPlaybookPrompt,
+  extractTitle,
+  PLAYBOOK_SYSTEM,
+  type PlaybookResult,
+} from './playbook.js';
 export { buildTopics, buildTopic, type Topic, type TopicRow } from './topics.js';
 export { generateDigest, buildDigestPrompt, type DigestResult } from './digest.js';
 export { enrichDocument, parseEnrichment, type Enrichment } from './enrich.js';

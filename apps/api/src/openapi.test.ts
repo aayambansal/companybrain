@@ -15,7 +15,14 @@ describe('openapiDocument', () => {
   });
 
   it('documents the core routes', () => {
-    for (const p of ['/health', '/v1/memories', '/v1/search', '/v1/chat', '/v1/spaces', '/v1/api-keys']) {
+    for (const p of [
+      '/health',
+      '/v1/memories',
+      '/v1/search',
+      '/v1/chat',
+      '/v1/spaces',
+      '/v1/api-keys',
+    ]) {
       expect(doc.paths[p], `missing ${p}`).toBeTruthy();
     }
   });

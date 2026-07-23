@@ -43,18 +43,28 @@ export const hubspotConnector: Connector = {
   category: 'other',
   auth: 'apiKey',
   configSchema: [
-    { key: 'accessToken', label: 'Access token', type: 'password', required: true, help: 'Create a private app under HubSpot > Settings > Integrations > Private Apps and copy its token.' },
+    {
+      key: 'accessToken',
+      label: 'Access token',
+      type: 'password',
+      required: true,
+      help: 'Create a private app under HubSpot > Settings > Integrations > Private Apps and copy its token.',
+    },
   ],
   async *pull(ctx) {
     const accessToken = String(ctx.config.accessToken ?? '').trim();
     if (!accessToken) throw new Error('hubspot connector: config.accessToken is required');
     const headers = { authorization: `Bearer ${accessToken}` };
 
-    const base = 'https://api.hubapi.com/crm/v3/objects/notes?limit=100&properties=hs_note_body,hs_timestamp';
+    const base =
+      'https://api.hubapi.com/crm/v3/objects/notes?limit=100&properties=hs_note_body,hs_timestamp';
     let url: string | undefined = base;
     while (url) {
       if (ctx.signal?.aborted) return;
-      const res: HubspotNotesResponse = await fetchJson<HubspotNotesResponse>(url, { headers, signal: ctx.signal });
+      const res: HubspotNotesResponse = await fetchJson<HubspotNotesResponse>(url, {
+        headers,
+        signal: ctx.signal,
+      });
       for (const note of res.results ?? []) {
         const doc = hubspotNoteDoc(note);
         if (!doc.content.trim()) continue;

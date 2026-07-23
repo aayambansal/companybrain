@@ -43,14 +43,16 @@ app.get('/', async (c) => {
     space: c.req.query('space') || undefined,
     limit: c.req.query('limit') ? Number.parseInt(c.req.query('limit')!, 10) : undefined,
   });
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   return run(c, parsed.data);
 });
 
 app.post('/', async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const parsed = searchSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   return run(c, parsed.data);
 });
 

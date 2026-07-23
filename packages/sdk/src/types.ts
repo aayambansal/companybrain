@@ -36,7 +36,13 @@ export interface SearchHit {
   scores: { vector?: number; keyword?: number; fused: number };
   content: string;
   chunkIndex: number;
-  document: { id: string; title: string | null; sourceUrl: string | null; connector: string; tags: string[] };
+  document: {
+    id: string;
+    title: string | null;
+    sourceUrl: string | null;
+    connector: string;
+    tags: string[];
+  };
   metadata: Record<string, unknown>;
 }
 

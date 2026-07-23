@@ -37,7 +37,11 @@ describe('gitbookDocumentText', () => {
       object: 'document',
       nodes: [
         { object: 'block', type: 'heading-1', nodes: [{ object: 'text', text: 'Overview' }] },
-        { object: 'block', type: 'paragraph', nodes: [{ object: 'text', text: ' We ship weekly.' }] },
+        {
+          object: 'block',
+          type: 'paragraph',
+          nodes: [{ object: 'text', text: ' We ship weekly.' }],
+        },
       ],
     };
     expect(gitbookDocumentText(document)).toBe('Overview We ship weekly.');
@@ -46,7 +50,10 @@ describe('gitbookDocumentText', () => {
 
 describe('gitbookPageDoc', () => {
   it('maps a page and its text into a SourceDocument', () => {
-    const doc = gitbookPageDoc({ id: 'a1', title: 'Setup', path: 'intro/setup' }, 'Install the CLI.');
+    const doc = gitbookPageDoc(
+      { id: 'a1', title: 'Setup', path: 'intro/setup' },
+      'Install the CLI.',
+    );
     expect(doc.sourceId).toBe('a1');
     expect(doc.sourceType).toBe('gitbook');
     expect(doc.title).toBe('Setup');

@@ -16,24 +16,37 @@ describe('companyBrainOpenAITools', () => {
 
 describe('runCompanyBrainTool', () => {
   const client = {
-    search: vi.fn(async () => ({ hits: [{ document: { title: 'Release', sourceUrl: null }, content: 'ship thursdays', score: 0.9 }] })),
-    chat: vi.fn(async () => ({ message: 'We ship on Thursdays.', citations: [{ title: 'Release', sourceUrl: null }] })),
+    search: vi.fn(async () => ({
+      hits: [
+        { document: { title: 'Release', sourceUrl: null }, content: 'ship thursdays', score: 0.9 },
+      ],
+    })),
+    chat: vi.fn(async () => ({
+      message: 'We ship on Thursdays.',
+      citations: [{ title: 'Release', sourceUrl: null }],
+    })),
     memories: { add: vi.fn(async () => ({ id: 'm1', status: 'indexed' })) },
   } as unknown as CompanyBrain;
 
   it('runs search_memory', async () => {
-    const out = (await runCompanyBrainTool(client, 'search_memory', { query: 'release' })) as unknown[];
+    const out = (await runCompanyBrainTool(client, 'search_memory', {
+      query: 'release',
+    })) as unknown[];
     expect(out).toHaveLength(1);
     expect((out[0] as { title: string }).title).toBe('Release');
   });
 
   it('runs ask_memory', async () => {
-    const out = (await runCompanyBrainTool(client, 'ask_memory', { question: 'when?' })) as { answer: string };
+    const out = (await runCompanyBrainTool(client, 'ask_memory', { question: 'when?' })) as {
+      answer: string;
+    };
     expect(out.answer).toContain('Thursdays');
   });
 
   it('runs add_memory', async () => {
-    const out = (await runCompanyBrainTool(client, 'add_memory', { content: 'x' })) as { id: string };
+    const out = (await runCompanyBrainTool(client, 'add_memory', { content: 'x' })) as {
+      id: string;
+    };
     expect(out.id).toBe('m1');
   });
 

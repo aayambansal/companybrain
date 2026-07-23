@@ -36,7 +36,10 @@ export function BackupSection() {
       const parsed = JSON.parse(text) as { memories?: unknown[] };
       const memories = Array.isArray(parsed) ? parsed : parsed.memories;
       if (!Array.isArray(memories)) throw new Error('bad shape');
-      const r = await api.post<{ imported: number; failed: number }>('/v1/backup/import', { memories, dedupe: true });
+      const r = await api.post<{ imported: number; failed: number }>('/v1/backup/import', {
+        memories,
+        dedupe: true,
+      });
       toast('success', `Imported ${r.imported} memories${r.failed ? `, ${r.failed} failed` : ''}.`);
     } catch {
       toast('error', 'Import failed. Expected a CompanyBrain export JSON.');
@@ -48,7 +51,9 @@ export function BackupSection() {
   return (
     <section>
       <h2 className="mb-1 font-mono text-sm text-ink-muted">Backup</h2>
-      <p className="mb-3 text-[13px] text-ink-faint">Export every memory as JSON, or import from a previous export.</p>
+      <p className="mb-3 text-[13px] text-ink-faint">
+        Export every memory as JSON, or import from a previous export.
+      </p>
       <div className="card flex flex-wrap items-center justify-between gap-3 p-4">
         <p className="text-[13px] text-ink-muted">Your data, portable. Nothing is locked in.</p>
         <div className="flex items-center gap-2">

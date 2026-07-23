@@ -49,7 +49,9 @@ async function postMemory(config, payload) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     if (res.status === 401) {
-      throw new Error('The API rejected the request. If it runs in multi-user mode, set an API key in the extension options.');
+      throw new Error(
+        'The API rejected the request. If it runs in multi-user mode, set an API key in the extension options.',
+      );
     }
     const msg = (data && (data.message || data.error)) || 'HTTP ' + res.status;
     throw new Error(String(msg));
@@ -92,7 +94,8 @@ async function saveTab(tab, mode, extra) {
   }
 
   const tags = parseTags(extra.tags != null ? extra.tags : config.defaultTags);
-  const space = (extra.space != null && extra.space !== '' ? extra.space : config.defaultSpace) || '';
+  const space =
+    (extra.space != null && extra.space !== '' ? extra.space : config.defaultSpace) || '';
 
   const payload = {
     title: page.title || tab.title || page.url,

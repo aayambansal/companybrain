@@ -85,7 +85,10 @@ function runFfmpeg(bin: string, args: string[], signal?: AbortSignal): Promise<v
     proc.on('error', reject);
     proc.on('close', (code) => {
       if (code === 0) resolve();
-      else reject(new Error(`ffmpeg exited ${code}: ${stderr.trim().split('\n').slice(-3).join(' ')}`));
+      else
+        reject(
+          new Error(`ffmpeg exited ${code}: ${stderr.trim().split('\n').slice(-3).join(' ')}`),
+        );
     });
   });
 }
@@ -123,10 +126,24 @@ export async function describeVideo(
     if (!opts.noAudio) {
       const audioPath = join(dir, 'audio.mp3');
       try {
-        await runFfmpeg(bin, ['-y', '-i', videoPath, '-vn', '-ac', '1', '-ar', '16000', '-b:a', '96k', audioPath]);
+        await runFfmpeg(bin, [
+          '-y',
+          '-i',
+          videoPath,
+          '-vn',
+          '-ac',
+          '1',
+          '-ar',
+          '16000',
+          '-b:a',
+          '96k',
+          audioPath,
+        ]);
         const audioB64 = readFileSync(audioPath).toString('base64');
         if (audioB64.length > 0) {
-          transcript = (await deps.transcribeAudio({ base64: audioB64, mediaType: 'audio/mpeg' })).trim();
+          transcript = (
+            await deps.transcribeAudio({ base64: audioB64, mediaType: 'audio/mpeg' })
+          ).trim();
         }
       } catch {
         // No audio stream, or transcription unavailable: keep going with frames.

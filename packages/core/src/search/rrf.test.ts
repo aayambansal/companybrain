@@ -28,10 +28,7 @@ describe('reciprocalRankFusion', () => {
 
   it('lets an item ranked well in two lists beat one ranked first in a single list', () => {
     const out = reciprocalRankFusion(
-      [
-        { items: ['top', 'shared'] },
-        { items: ['shared', 'other'] },
-      ],
+      [{ items: ['top', 'shared'] }, { items: ['shared', 'other'] }],
       id,
       0,
     );

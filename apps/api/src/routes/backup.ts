@@ -57,7 +57,8 @@ app.post('/import', async (c) => {
   const auth = c.get('auth');
   const body = await c.req.json().catch(() => ({}));
   const parsed = importSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   const engine = getEngine();
   const { memories, space, dedupe } = parsed.data;
 

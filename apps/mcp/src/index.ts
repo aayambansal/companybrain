@@ -61,7 +61,10 @@ function truncate(text: string, max = 280): string {
 
 function formatHit(hit: SearchHit, i: number): string {
   const title = hit.document.title ?? 'Untitled';
-  const lines = [`${i + 1}. ${title}  (score ${hit.score.toFixed(3)})`, `   ${truncate(hit.content)}`];
+  const lines = [
+    `${i + 1}. ${title}  (score ${hit.score.toFixed(3)})`,
+    `   ${truncate(hit.content)}`,
+  ];
   if (hit.document.sourceUrl) lines.push(`   ${hit.document.sourceUrl}`);
   return lines.join('\n');
 }
@@ -79,8 +82,17 @@ server.registerTool(
       'Search the company brain and return the most relevant memories. Use for recall of facts, docs, and past context.',
     inputSchema: {
       query: z.string().describe('Natural-language search query.'),
-      mode: z.enum(['hybrid', 'semantic', 'keyword']).optional().describe('Retrieval mode. Defaults to hybrid.'),
-      limit: z.number().int().positive().max(50).optional().describe('Max hits to return (default 10).'),
+      mode: z
+        .enum(['hybrid', 'semantic', 'keyword'])
+        .optional()
+        .describe('Retrieval mode. Defaults to hybrid.'),
+      limit: z
+        .number()
+        .int()
+        .positive()
+        .max(50)
+        .optional()
+        .describe('Max hits to return (default 10).'),
       space: z.string().optional().describe('Restrict to a space (id or slug).'),
     },
   },
@@ -132,7 +144,8 @@ server.registerTool(
   'ask_memory',
   {
     title: 'Ask memory',
-    description: 'Ask a question and get a RAG answer grounded in the company brain, with cited sources.',
+    description:
+      'Ask a question and get a RAG answer grounded in the company brain, with cited sources.',
     inputSchema: {
       question: z.string().describe('The question to answer from memory.'),
       space: z.string().optional().describe('Restrict retrieval to a space (id or slug).'),
@@ -144,7 +157,10 @@ server.registerTool(
       let text = res.message;
       if (res.citations.length > 0) {
         const sources = res.citations
-          .map((c: Citation) => `[${c.index}] ${c.title ?? 'Untitled'}${c.sourceUrl ? ` — ${c.sourceUrl}` : ''}`)
+          .map(
+            (c: Citation) =>
+              `[${c.index}] ${c.title ?? 'Untitled'}${c.sourceUrl ? ` — ${c.sourceUrl}` : ''}`,
+          )
           .join('\n');
         text += `\n\nSources:\n${sources}`;
       }
@@ -164,7 +180,10 @@ server.registerTool(
       const spaces = await client.spaces.list();
       if (spaces.length === 0) return textResult('No spaces found.', { spaces: [] });
       const text = spaces
-        .map((s: Space) => `- ${s.name} (${s.slug})${s.isDefault ? ' [default]' : ''}${s.description ? ` — ${s.description}` : ''}`)
+        .map(
+          (s: Space) =>
+            `- ${s.name} (${s.slug})${s.isDefault ? ' [default]' : ''}${s.description ? ` — ${s.description}` : ''}`,
+        )
         .join('\n');
       return textResult(`Spaces:\n${text}`, { spaces });
     }),

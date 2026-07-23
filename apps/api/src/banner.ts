@@ -1,5 +1,10 @@
 /** ASCII banner printed on API startup. */
-export function banner(opts: { version: string; port: number; embedding: string; llm: string }): string {
+export function banner(opts: {
+  version: string;
+  port: number;
+  embedding: string;
+  llm: string;
+}): string {
   return `
        _---~~(~~-_.          CompanyBrain API  v${opts.version}
      _{        )   )         the open-source memory layer

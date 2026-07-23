@@ -70,7 +70,11 @@ export default function ConnectionsPage() {
       const config = { ...form, syncIntervalMinutes: Number(syncEvery) || 0 };
       // The server requires a non-empty name; fall back to the connector's label
       // if the field was cleared, rather than failing with a generic error.
-      await api.post('/v1/connections', { connector: selected.id, name: name.trim() || selected.displayName, config });
+      await api.post('/v1/connections', {
+        connector: selected.id,
+        name: name.trim() || selected.displayName,
+        config,
+      });
       toast('success', `Connected ${selected.displayName}.`);
       setSelected(null);
       load();
@@ -92,7 +96,10 @@ export default function ConnectionsPage() {
   }
 
   return (
-    <Page title="Connections" subtitle="Point CompanyBrain at your sources. Everything lands in one searchable store.">
+    <Page
+      title="Connections"
+      subtitle="Point CompanyBrain at your sources. Everything lands in one searchable store."
+    >
       {/* Configured */}
       {connections.length > 0 && (
         <section className="mb-8">
@@ -106,11 +113,22 @@ export default function ConnectionsPage() {
                 <div>
                   <p className="font-medium text-ink">{c.name}</p>
                   <p className="font-mono text-[11px] text-ink-faint">
-                    {c.connector} · {c.lastSyncedAt ? `synced ${timeAgo(c.lastSyncedAt)}` : 'never synced'}
+                    {c.connector} ·{' '}
+                    {c.lastSyncedAt ? `synced ${timeAgo(c.lastSyncedAt)}` : 'never synced'}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge tone={c.status === 'active' ? 'success' : c.status === 'error' ? 'danger' : 'neutral'}>{c.status}</Badge>
+                  <Badge
+                    tone={
+                      c.status === 'active'
+                        ? 'success'
+                        : c.status === 'error'
+                          ? 'danger'
+                          : 'neutral'
+                    }
+                  >
+                    {c.status}
+                  </Badge>
                   <Button variant="secondary" size="sm" onClick={() => sync(c)}>
                     Sync now
                   </Button>
@@ -126,7 +144,11 @@ export default function ConnectionsPage() {
         <form onSubmit={create} className="card mb-8 space-y-4 p-5">
           <div className="flex items-center justify-between">
             <h2 className="font-mono text-sm text-ink">Configure {selected.displayName}</h2>
-            <button type="button" onClick={() => setSelected(null)} className="text-[13px] text-ink-faint hover:text-ink">
+            <button
+              type="button"
+              onClick={() => setSelected(null)}
+              className="text-[13px] text-ink-faint hover:text-ink"
+            >
               Cancel
             </button>
           </div>

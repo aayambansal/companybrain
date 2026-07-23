@@ -1,13 +1,19 @@
 [
   { "q": "how do we ship a release?", "expect": "Release process" },
   { "q": "what do I do to undo a broken deployment?", "expect": "Deploy rollback" },
-  { "q": "who is paged when something breaks and when does the rotation change?", "expect": "On-call rotation" },
+  {
+    "q": "who is paged when something breaks and when does the rotation change?",
+    "expect": "On-call rotation"
+  },
   { "q": "do I need approval to expense a 40 dollar lunch?", "expect": "Expense policy" },
   { "q": "what happens on a new employee's first day?", "expect": "Onboarding checklist" },
   { "q": "which payment provider handles invoices and who owns it?", "expect": "Billing system" },
   { "q": "how long are customer logs stored before deletion?", "expect": "Data retention" },
   { "q": "how fast do enterprise customers get a first response?", "expect": "Support SLA" },
-  { "q": "where is the espresso machine and how often is it descaled?", "expect": "Coffee machine" },
+  {
+    "q": "where is the espresso machine and how often is it descaled?",
+    "expect": "Coffee machine"
+  },
   { "q": "how do I get onto the VPN to reach staging?", "expect": "VPN access" },
   { "q": "how many approvals does a pull request need?", "expect": "Code review" },
   { "q": "what do we produce after an outage?", "expect": "Incident retro" }

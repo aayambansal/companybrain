@@ -9,7 +9,9 @@
     "companybrain": "./dist/index.js",
     "cb": "./dist/index.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc",
@@ -17,7 +19,13 @@
     "test": "vitest run",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
-  "keywords": ["companybrain", "cli", "memory", "search", "rag"],
+  "keywords": [
+    "companybrain",
+    "cli",
+    "memory",
+    "search",
+    "rag"
+  ],
   "dependencies": {
     "@companybrain/sdk": "workspace:*"
   },

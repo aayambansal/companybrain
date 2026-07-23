@@ -23,7 +23,10 @@ export function startScheduler(intervalMs = 60_000): NodeJS.Timeout {
       const runner = getConnectorRegistry().getRunner();
       if (!runner) return;
       const engine = getEngine();
-      const rows = await engine.db.select().from(connections).where(eq(connections.status, 'active'));
+      const rows = await engine.db
+        .select()
+        .from(connections)
+        .where(eq(connections.status, 'active'));
       const now = Date.now();
       for (const conn of rows) {
         const interval = intervalMinutes(conn.config);
@@ -31,7 +34,10 @@ export function startScheduler(intervalMs = 60_000): NodeJS.Timeout {
         const last = conn.lastSyncedAt ? new Date(conn.lastSyncedAt).getTime() : 0;
         if (now - last < interval * 60_000) continue;
         running.add(conn.id);
-        const [run] = await engine.db.insert(syncRuns).values({ connectionId: conn.id }).returning();
+        const [run] = await engine.db
+          .insert(syncRuns)
+          .values({ connectionId: conn.id })
+          .returning();
         if (!run) {
           running.delete(conn.id);
           continue;

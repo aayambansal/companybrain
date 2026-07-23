@@ -82,13 +82,16 @@ export function parseGranolaExport(raw: string): GranolaMeeting[] {
       if (Array.isArray(v)) return v as GranolaMeeting[];
     }
   }
-  throw new Error('granola connector: export is not an array or a known wrapper ({ meetings: [...] })');
+  throw new Error(
+    'granola connector: export is not an array or a known wrapper ({ meetings: [...] })',
+  );
 }
 
 export const granolaConnector: Connector = {
   id: 'granola',
   displayName: 'Granola',
-  description: 'Index your Granola meeting notes and transcripts, one searchable memory per meeting.',
+  description:
+    'Index your Granola meeting notes and transcripts, one searchable memory per meeting.',
   category: 'chat',
   auth: 'path',
   configSchema: [
@@ -103,7 +106,8 @@ export const granolaConnector: Connector = {
   ],
   async *pull(ctx) {
     const path = String(ctx.config.path ?? '').trim();
-    if (!path || !existsSync(path)) throw new Error(`granola connector: export file does not exist: ${path}`);
+    if (!path || !existsSync(path))
+      throw new Error(`granola connector: export file does not exist: ${path}`);
     const meetings = parseGranolaExport(readFileSync(path, 'utf8'));
     ctx.log?.('parsed granola export', { path: basename(path), meetings: meetings.length });
     let i = 0;

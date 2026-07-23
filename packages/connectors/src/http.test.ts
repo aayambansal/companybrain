@@ -20,24 +20,36 @@ describe('requestSignal', () => {
 describe('fetchJson', () => {
   it('always passes an abort signal and parses JSON on success', async () => {
     let sawSignal = false;
-    vi.stubGlobal('fetch', vi.fn(async (_url: string, init: RequestInit) => {
-      sawSignal = init.signal instanceof AbortSignal;
-      return { ok: true, json: async () => ({ hello: 'world' }) } as Response;
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        sawSignal = init.signal instanceof AbortSignal;
+        return { ok: true, json: async () => ({ hello: 'world' }) } as Response;
+      }),
+    );
     const out = await fetchJson<{ hello: string }>('https://x/y');
     expect(out.hello).toBe('world');
     expect(sawSignal).toBe(true);
   });
 
   it('throws on a non-2xx response', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 500, statusText: 'err', text: async () => 'boom' }) as Response));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          ({ ok: false, status: 500, statusText: 'err', text: async () => 'boom' }) as Response,
+      ),
+    );
     await expect(fetchJson('https://x/y')).rejects.toThrow(/500/);
   });
 });
 
 describe('fetchText', () => {
   it('returns the body text on success', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, text: async () => 'hi' }) as Response));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: true, text: async () => 'hi' }) as Response),
+    );
     expect(await fetchText('https://x/y')).toBe('hi');
   });
 });

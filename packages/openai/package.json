@@ -6,9 +6,23 @@
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "exports": { ".": "./src/index.ts" },
-  "files": ["dist", "src", "README.md"],
-  "keywords": ["companybrain", "openai", "tools", "function-calling", "agents", "memory", "rag"],
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "keywords": [
+    "companybrain",
+    "openai",
+    "tools",
+    "function-calling",
+    "agents",
+    "memory",
+    "rag"
+  ],
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",

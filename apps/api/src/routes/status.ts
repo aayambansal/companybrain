@@ -24,7 +24,11 @@ app.get('/', async (c) => {
       (SELECT count(*)::int FROM chunks WHERE org_id = ${auth.orgId}) AS chunks,
       (SELECT count(*)::int FROM spaces WHERE org_id = ${auth.orgId}) AS spaces
   `;
-  return c.json({ ...base, org: auth.orgId, counts: counts[0] ?? { documents: 0, chunks: 0, spaces: 0 } });
+  return c.json({
+    ...base,
+    org: auth.orgId,
+    counts: counts[0] ?? { documents: 0, chunks: 0, spaces: 0 },
+  });
 });
 
 export default app;

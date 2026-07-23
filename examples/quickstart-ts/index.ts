@@ -36,7 +36,9 @@ async function main(): Promise<void> {
   if (citations.length > 0) {
     console.log('citations:');
     for (const c of citations) {
-      console.log(`  [${c.index}] ${c.title ?? 'Untitled'}${c.sourceUrl ? ` (${c.sourceUrl})` : ''}`);
+      console.log(
+        `  [${c.index}] ${c.title ?? 'Untitled'}${c.sourceUrl ? ` (${c.sourceUrl})` : ''}`,
+      );
     }
   }
 }

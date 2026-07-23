@@ -8,7 +8,15 @@ import { Page } from '@/components/app-shell';
 import { Button, Textarea, Badge, StatusDot, Skeleton, EmptyState, cx } from '@/components/ui';
 import { useToast } from '@/components/toast';
 import { timeAgo, hostname } from '@/lib/format';
-import { IconSearch, IconSparkle, IconArrowRight, IconMemory, IconLayers, IconSpaces, IconHash } from '@/components/icons';
+import {
+  IconSearch,
+  IconSparkle,
+  IconArrowRight,
+  IconMemory,
+  IconLayers,
+  IconSpaces,
+  IconHash,
+} from '@/components/icons';
 
 export default function OverviewPage() {
   const router = useRouter();
@@ -77,7 +85,11 @@ export default function OverviewPage() {
   // Read text/markdown files in the browser and add each as a memory.
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
-    const readable = Array.from(files).filter((f) => /\.(md|markdown|txt|text|csv|log|json|mdx|rst)$/i.test(f.name) || f.type.startsWith('text/'));
+    const readable = Array.from(files).filter(
+      (f) =>
+        /\.(md|markdown|txt|text|csv|log|json|mdx|rst)$/i.test(f.name) ||
+        f.type.startsWith('text/'),
+    );
     if (readable.length === 0) {
       toast('error', 'Only text and markdown files can be added here.');
       return;
@@ -102,7 +114,10 @@ export default function OverviewPage() {
       }
     }
     setUploading(false);
-    toast(ok > 0 ? 'success' : 'error', ok > 0 ? `Added ${ok} file${ok === 1 ? '' : 's'}.` : 'Could not add those files.');
+    toast(
+      ok > 0 ? 'success' : 'error',
+      ok > 0 ? `Added ${ok} file${ok === 1 ? '' : 's'}.` : 'Could not add those files.',
+    );
     if (ok > 0) load();
   }
 
@@ -111,7 +126,11 @@ export default function OverviewPage() {
   return (
     <Page
       title="Overview"
-      subtitle={status ? `${status.embedding.provider} embeddings, ${status.llm.available ? status.llm.provider + ' llm' : 'no llm'}` : undefined}
+      subtitle={
+        status
+          ? `${status.embedding.provider} embeddings, ${status.llm.available ? status.llm.provider + ' llm' : 'no llm'}`
+          : undefined
+      }
     >
       {/* Search bar */}
       <form onSubmit={search} className="mb-5">
@@ -144,7 +163,10 @@ export default function OverviewPage() {
       {/* Topics: background organization at a glance */}
       {topics.length > 0 && (
         <div className="mb-6 flex flex-wrap items-center gap-2">
-          <Link href="/topics" className="mr-1 flex items-center gap-1 font-mono text-[12px] text-ink-faint hover:text-ink">
+          <Link
+            href="/topics"
+            className="mr-1 flex items-center gap-1 font-mono text-[12px] text-ink-faint hover:text-ink"
+          >
             <IconHash size={13} /> topics
           </Link>
           {topics.map((t) => (
@@ -165,7 +187,10 @@ export default function OverviewPage() {
         <section>
           <div className="mb-2.5 flex items-center justify-between">
             <h2 className="font-mono text-sm text-ink-muted">Recent</h2>
-            <Link href="/memories" className="flex items-center gap-1 text-[13px] text-ink-faint hover:text-ink">
+            <Link
+              href="/memories"
+              className="flex items-center gap-1 text-[13px] text-ink-faint hover:text-ink"
+            >
               All memories <IconArrowRight size={13} />
             </Link>
           </div>
@@ -191,7 +216,9 @@ export default function OverviewPage() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <p className="truncate font-medium text-ink">{m.title ?? 'Untitled'}</p>
-                      <span className="shrink-0 font-mono text-[11px] text-ink-faint">{timeAgo(m.createdAt)}</span>
+                      <span className="shrink-0 font-mono text-[11px] text-ink-faint">
+                        {timeAgo(m.createdAt)}
+                      </span>
                     </div>
                     <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-ink-muted">
                       {m.content?.slice(0, 200)}
@@ -216,7 +243,10 @@ export default function OverviewPage() {
         {/* Quick capture */}
         <section className="space-y-5">
           <div
-            className={cx('card p-4 transition-colors', dragOver && 'border-[var(--color-primary-line)] bg-[var(--color-primary-soft)]')}
+            className={cx(
+              'card p-4 transition-colors',
+              dragOver && 'border-[var(--color-primary-line)] bg-[var(--color-primary-soft)]',
+            )}
             onDragOver={(e) => {
               e.preventDefault();
               setDragOver(true);
@@ -254,7 +284,13 @@ export default function OverviewPage() {
                   }}
                 />
               </label>
-              <Button variant="primary" size="sm" onClick={capture} loading={saving} disabled={!note.trim()}>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={capture}
+                loading={saving}
+                disabled={!note.trim()}
+              >
                 Save memory
               </Button>
             </div>
@@ -263,12 +299,18 @@ export default function OverviewPage() {
           <div className="card p-4">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-mono text-sm text-ink-muted">What&apos;s new</h2>
-              <button onClick={loadDigest} disabled={digestBusy} className="text-[12px] text-ink-faint hover:text-ink disabled:opacity-50">
+              <button
+                onClick={loadDigest}
+                disabled={digestBusy}
+                className="text-[12px] text-ink-faint hover:text-ink disabled:opacity-50"
+              >
                 {digestBusy ? 'Summarizing…' : digest ? 'Refresh' : 'Summarize recent'}
               </button>
             </div>
             {digest === null ? (
-              <p className="text-[13px] text-ink-faint">A quick brief of what recently landed in your brain.</p>
+              <p className="text-[13px] text-ink-faint">
+                A quick brief of what recently landed in your brain.
+              </p>
             ) : (
               <div className="space-y-1.5 text-[13px] leading-relaxed text-ink">
                 {digest.split(/\r?\n/).map((line, i) => {
@@ -277,7 +319,9 @@ export default function OverviewPage() {
                   const bullet = /^[-*]\s+/.test(t);
                   return (
                     <div key={i} className={bullet ? 'flex gap-2' : 'font-medium text-ink-muted'}>
-                      {bullet && <span className="mt-1.5 size-1 shrink-0 rounded-full bg-[var(--color-primary)]" />}
+                      {bullet && (
+                        <span className="mt-1.5 size-1 shrink-0 rounded-full bg-[var(--color-primary)]" />
+                      )}
                       <span>{t.replace(/^[-*]\s+|^#+\s+/, '')}</span>
                     </div>
                   );
@@ -299,10 +343,17 @@ export default function OverviewPage() {
                       className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
                     >
                       <span className="flex items-center gap-2">
-                        <span className={cx('size-1.5 rounded-full', s.isDefault ? 'bg-[var(--color-primary)]' : 'bg-ink-faint')} />
+                        <span
+                          className={cx(
+                            'size-1.5 rounded-full',
+                            s.isDefault ? 'bg-[var(--color-primary)]' : 'bg-ink-faint',
+                          )}
+                        />
                         {s.name}
                       </span>
-                      <span className="font-mono text-[11px] text-ink-faint">{s.documentCount ?? 0}</span>
+                      <span className="font-mono text-[11px] text-ink-faint">
+                        {s.documentCount ?? 0}
+                      </span>
                     </Link>
                   </li>
                 ))}
@@ -333,7 +384,12 @@ function Stat({
         <span className="text-[11px] uppercase tracking-wide">{label}</span>
       </div>
       <p className="mt-1.5 font-mono text-2xl font-semibold text-ink">
-        {text ?? (value === undefined ? <span className="text-ink-faint">—</span> : value.toLocaleString())}
+        {text ??
+          (value === undefined ? (
+            <span className="text-ink-faint">—</span>
+          ) : (
+            value.toLocaleString()
+          ))}
       </p>
     </div>
   );

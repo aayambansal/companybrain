@@ -13,7 +13,9 @@ export class NoopLlmProvider implements LlmProvider {
   readonly model = 'none';
   readonly available = false;
   async complete(_opts: CompleteOptions): Promise<string> {
-    throw new Error('No LLM provider configured. Set LLM_PROVIDER to anthropic, openai, or ollama.');
+    throw new Error(
+      'No LLM provider configured. Set LLM_PROVIDER to anthropic, openai, or ollama.',
+    );
   }
 }
 

@@ -11,7 +11,9 @@ interface ConfluencePage {
 /** Pure: turn a Confluence page (storage HTML) into a SourceDocument. */
 export function confluencePageDoc(page: ConfluencePage, baseUrl: string): SourceDocument {
   const html = page.body?.storage?.value ?? '';
-  const webui = page._links?.webui ? baseUrl.replace(/\/$/, '') + '/wiki' + page._links.webui : undefined;
+  const webui = page._links?.webui
+    ? baseUrl.replace(/\/$/, '') + '/wiki' + page._links.webui
+    : undefined;
   return {
     sourceId: page.id,
     sourceType: 'confluence_page',
@@ -34,15 +36,37 @@ export const confluenceConnector: Connector = {
   category: 'docs',
   auth: 'apiKey',
   configSchema: [
-    { key: 'baseUrl', label: 'Base URL', type: 'url', required: true, placeholder: 'https://your-domain.atlassian.net', help: 'Your Atlassian site URL.' },
-    { key: 'email', label: 'Account email', type: 'string', required: true, placeholder: 'you@company.com' },
-    { key: 'apiToken', label: 'API token', type: 'password', required: true, help: 'Create at id.atlassian.com > Security > API tokens.' },
+    {
+      key: 'baseUrl',
+      label: 'Base URL',
+      type: 'url',
+      required: true,
+      placeholder: 'https://your-domain.atlassian.net',
+      help: 'Your Atlassian site URL.',
+    },
+    {
+      key: 'email',
+      label: 'Account email',
+      type: 'string',
+      required: true,
+      placeholder: 'you@company.com',
+    },
+    {
+      key: 'apiToken',
+      label: 'API token',
+      type: 'password',
+      required: true,
+      help: 'Create at id.atlassian.com > Security > API tokens.',
+    },
   ],
   async *pull(ctx) {
-    const baseUrl = String(ctx.config.baseUrl ?? '').trim().replace(/\/$/, '');
+    const baseUrl = String(ctx.config.baseUrl ?? '')
+      .trim()
+      .replace(/\/$/, '');
     const email = String(ctx.config.email ?? '').trim();
     const apiToken = String(ctx.config.apiToken ?? '').trim();
-    if (!baseUrl || !email || !apiToken) throw new Error('confluence connector: baseUrl, email, and apiToken are required');
+    if (!baseUrl || !email || !apiToken)
+      throw new Error('confluence connector: baseUrl, email, and apiToken are required');
     const headers = { authorization: basicAuth(email, apiToken) };
 
     let start = 0;

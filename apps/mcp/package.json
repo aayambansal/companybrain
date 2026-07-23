@@ -9,14 +9,24 @@
   "bin": {
     "companybrain-mcp": "./dist/index.js"
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
-  "keywords": ["companybrain", "mcp", "model-context-protocol", "memory", "rag", "ai"],
+  "keywords": [
+    "companybrain",
+    "mcp",
+    "model-context-protocol",
+    "memory",
+    "rag",
+    "ai"
+  ],
   "dependencies": {
     "@companybrain/sdk": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.0.0",

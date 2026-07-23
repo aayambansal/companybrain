@@ -8,7 +8,8 @@ export class GoogleEmbeddingProvider implements EmbeddingProvider {
   private apiKey: string;
 
   constructor(opts: { apiKey: string; model?: string }) {
-    if (!opts.apiKey) throw new Error('GOOGLE_API_KEY is required for the google embedding provider.');
+    if (!opts.apiKey)
+      throw new Error('GOOGLE_API_KEY is required for the google embedding provider.');
     this.apiKey = opts.apiKey;
     this.model = opts.model ?? 'text-embedding-004';
   }

@@ -46,7 +46,8 @@ app.post('/', async (c) => {
   const auth = c.get('auth');
   const body = await c.req.json().catch(() => ({}));
   const parsed = createSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   const engine = getEngine();
   const d = parsed.data;
   const [conn] = await engine.db
@@ -93,7 +94,10 @@ app.post('/:id/sync', async (c) => {
   const registry = getConnectorRegistry();
   const runner = registry.getRunner();
   if (!runner) {
-    return c.json({ error: 'no_runner', message: 'No connector runner is registered on this server.' }, 501);
+    return c.json(
+      { error: 'no_runner', message: 'No connector runner is registered on this server.' },
+      501,
+    );
   }
 
   const [run] = await engine.db.insert(syncRuns).values({ connectionId: conn.id }).returning();

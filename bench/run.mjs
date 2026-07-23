@@ -34,7 +34,11 @@ function headers(json = false) {
 }
 
 async function api(method, path, body) {
-  const res = await fetch(API + path, { method, headers: headers(body !== undefined), body: body ? JSON.stringify(body) : undefined });
+  const res = await fetch(API + path, {
+    method,
+    headers: headers(body !== undefined),
+    body: body ? JSON.stringify(body) : undefined,
+  });
   if (!res.ok) throw new Error(`${method} ${path} -> ${res.status} ${await res.text()}`);
   return res.json();
 }
@@ -47,15 +51,24 @@ async function main() {
   try {
     await fetch(API + '/health').then((r) => r.json());
   } catch {
-    console.error(`Cannot reach CompanyBrain at ${API}. Start it first (npx companybrain / pnpm dev).`);
+    console.error(
+      `Cannot reach CompanyBrain at ${API}. Start it first (npx companybrain / pnpm dev).`,
+    );
     process.exit(1);
   }
 
-  console.log(`\ncorpus: ${corpus.length} docs   probes: ${probes.length}   mode: ${MODE}   k: ${K}   space: ${SPACE}\n`);
+  console.log(
+    `\ncorpus: ${corpus.length} docs   probes: ${probes.length}   mode: ${MODE}   k: ${K}   space: ${SPACE}\n`,
+  );
 
   process.stdout.write('ingesting… ');
   for (const doc of corpus) {
-    await api('POST', '/v1/memories', { title: doc.title, content: doc.content, space: SPACE, dedupe: true });
+    await api('POST', '/v1/memories', {
+      title: doc.title,
+      content: doc.content,
+      space: SPACE,
+      dedupe: true,
+    });
   }
   console.log('done');
 
@@ -65,7 +78,12 @@ async function main() {
 
   for (const probe of probes) {
     const t0 = performance.now();
-    const res = await api('POST', '/v1/search', { q: probe.q, mode: MODE, space: SPACE, limit: Math.max(K, 10) });
+    const res = await api('POST', '/v1/search', {
+      q: probe.q,
+      mode: MODE,
+      space: SPACE,
+      limit: Math.max(K, 10),
+    });
     latencies.push(performance.now() - t0);
     const titles = res.hits.map((h) => h.document.title);
     const rank = titles.indexOf(probe.expect); // 0-based rank of the expected doc

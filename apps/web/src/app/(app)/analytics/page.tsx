@@ -52,7 +52,11 @@ export default function AnalyticsPage() {
       </div>
 
       {empty ? (
-        <EmptyState title="no data yet" description="Add memories or connect a source, then come back." icon={<IconMemory size={28} />} />
+        <EmptyState
+          title="no data yet"
+          description="Add memories or connect a source, then come back."
+          icon={<IconMemory size={28} />}
+        />
       ) : (
         <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
           {/* Activity */}
@@ -63,11 +67,20 @@ export default function AnalyticsPage() {
                 <p className="text-[13px] text-ink-faint">No recent activity.</p>
               ) : (
                 data.activity.map((a) => (
-                  <div key={a.day} className="group flex flex-1 flex-col items-center justify-end gap-1.5" title={`${a.day}: ${a.count}`}>
-                    <span className="font-mono text-[10px] text-ink-faint opacity-0 group-hover:opacity-100">{a.count}</span>
+                  <div
+                    key={a.day}
+                    className="group flex flex-1 flex-col items-center justify-end gap-1.5"
+                    title={`${a.day}: ${a.count}`}
+                  >
+                    <span className="font-mono text-[10px] text-ink-faint opacity-0 group-hover:opacity-100">
+                      {a.count}
+                    </span>
                     <div
                       className="w-full rounded-t bg-[var(--color-primary)] transition-all"
-                      style={{ height: `${Math.max(4, (a.count / maxDay) * 100)}%`, opacity: 0.55 + 0.45 * (a.count / maxDay) }}
+                      style={{
+                        height: `${Math.max(4, (a.count / maxDay) * 100)}%`,
+                        opacity: 0.55 + 0.45 * (a.count / maxDay),
+                      }}
                     />
                     <span className="font-mono text-[9px] text-ink-faint">{a.day.slice(5)}</span>
                   </div>
@@ -82,7 +95,17 @@ export default function AnalyticsPage() {
             <ul className="space-y-2.5">
               {data.byStatus.map((s) => (
                 <li key={s.status} className="flex items-center justify-between text-sm">
-                  <Badge tone={s.status === 'indexed' ? 'success' : s.status === 'failed' ? 'danger' : 'neutral'}>{s.status}</Badge>
+                  <Badge
+                    tone={
+                      s.status === 'indexed'
+                        ? 'success'
+                        : s.status === 'failed'
+                          ? 'danger'
+                          : 'neutral'
+                    }
+                  >
+                    {s.status}
+                  </Badge>
                   <span className="font-mono text-ink">{s.count.toLocaleString()}</span>
                 </li>
               ))}
@@ -100,7 +123,10 @@ export default function AnalyticsPage() {
                     <span className="font-mono text-ink-faint">{c.count}</span>
                   </div>
                   <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
-                    <div className="h-full rounded-full bg-[var(--color-primary)]" style={{ width: `${(c.count / maxConn) * 100}%` }} />
+                    <div
+                      className="h-full rounded-full bg-[var(--color-primary)]"
+                      style={{ width: `${(c.count / maxConn) * 100}%` }}
+                    />
                   </div>
                 </li>
               ))}
@@ -111,14 +137,20 @@ export default function AnalyticsPage() {
           <section className="card p-5">
             <h2 className="mb-4 font-mono text-sm text-ink-muted">Top tags</h2>
             {data.topTags.length === 0 ? (
-              <p className="text-[13px] text-ink-faint">No tags yet. Connect an LLM to auto-tag on ingest.</p>
+              <p className="text-[13px] text-ink-faint">
+                No tags yet. Connect an LLM to auto-tag on ingest.
+              </p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {data.topTags.map((t) => (
                   <span
                     key={t.tag}
-                    className={cx('inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[12px]')}
-                    style={{ background: `color-mix(in oklch, var(--color-primary-soft), transparent ${100 - Math.round((t.count / maxTag) * 100)}%)` }}
+                    className={cx(
+                      'inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[12px]',
+                    )}
+                    style={{
+                      background: `color-mix(in oklch, var(--color-primary-soft), transparent ${100 - Math.round((t.count / maxTag) * 100)}%)`,
+                    }}
                   >
                     <span className="text-ink-muted">{t.tag}</span>
                     <span className="font-mono text-ink-faint">{t.count}</span>

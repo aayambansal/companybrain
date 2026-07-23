@@ -17,21 +17,50 @@ interface StoredProviders {
 }
 
 const EMBEDDING_OPTIONS = [
-  { provider: 'local', label: 'Local (zero-config, no key)', needsKey: false, models: ['cb-hash-embed-v1'] },
-  { provider: 'openai', label: 'OpenAI', needsKey: true, models: ['text-embedding-3-small', 'text-embedding-3-large'] },
-  { provider: 'ollama', label: 'Ollama (local server)', needsKey: false, models: ['nomic-embed-text', 'mxbai-embed-large'] },
+  {
+    provider: 'local',
+    label: 'Local (zero-config, no key)',
+    needsKey: false,
+    models: ['cb-hash-embed-v1'],
+  },
+  {
+    provider: 'openai',
+    label: 'OpenAI',
+    needsKey: true,
+    models: ['text-embedding-3-small', 'text-embedding-3-large'],
+  },
+  {
+    provider: 'ollama',
+    label: 'Ollama (local server)',
+    needsKey: false,
+    models: ['nomic-embed-text', 'mxbai-embed-large'],
+  },
   { provider: 'google', label: 'Google', needsKey: true, models: ['text-embedding-004'] },
 ];
 const LLM_OPTIONS = [
   { provider: 'none', label: 'None (extractive answers)', needsKey: false, models: ['none'] },
-  { provider: 'anthropic', label: 'Anthropic Claude', needsKey: true, models: ['claude-sonnet-5', 'claude-opus-4-8', 'claude-haiku-4-5-20251001'] },
+  {
+    provider: 'anthropic',
+    label: 'Anthropic Claude',
+    needsKey: true,
+    models: ['claude-sonnet-5', 'claude-opus-4-8', 'claude-haiku-4-5-20251001'],
+  },
   { provider: 'openai', label: 'OpenAI', needsKey: true, models: ['gpt-4o-mini', 'gpt-4o'] },
-  { provider: 'ollama', label: 'Ollama (local server)', needsKey: false, models: ['llama3.1', 'qwen2.5'] },
+  {
+    provider: 'ollama',
+    label: 'Ollama (local server)',
+    needsKey: false,
+    models: ['llama3.1', 'qwen2.5'],
+  },
 ];
 
 async function readStored(orgId: string): Promise<StoredProviders> {
   const engine = getEngine();
-  const [org] = await engine.db.select({ settings: organizations.settings }).from(organizations).where(eq(organizations.id, orgId)).limit(1);
+  const [org] = await engine.db
+    .select({ settings: organizations.settings })
+    .from(organizations)
+    .where(eq(organizations.id, orgId))
+    .limit(1);
   const providers = (org?.settings as Record<string, unknown> | undefined)?.providers;
   return (providers as StoredProviders) ?? {};
 }
@@ -60,7 +89,10 @@ function toLlmConfig(p: StoredProvider) {
 export async function applyProviders(orgId: string): Promise<void> {
   const engine = getEngine();
   const stored = await readStored(orgId);
-  const update: { embedding?: ReturnType<typeof toEmbeddingConfig>; llm?: ReturnType<typeof toLlmConfig> } = {};
+  const update: {
+    embedding?: ReturnType<typeof toEmbeddingConfig>;
+    llm?: ReturnType<typeof toLlmConfig>;
+  } = {};
   if (stored.embedding?.provider) update.embedding = toEmbeddingConfig(stored.embedding);
   if (stored.llm?.provider) update.llm = toLlmConfig(stored.llm);
   if (update.embedding || update.llm) engine.configureProviders(update);
@@ -88,15 +120,20 @@ app.get('/', async (c) => {
 });
 
 const putSchema = z.object({
-  embedding: z.object({ provider: z.string(), model: z.string().optional(), apiKey: z.string().optional() }).optional(),
-  llm: z.object({ provider: z.string(), model: z.string().optional(), apiKey: z.string().optional() }).optional(),
+  embedding: z
+    .object({ provider: z.string(), model: z.string().optional(), apiKey: z.string().optional() })
+    .optional(),
+  llm: z
+    .object({ provider: z.string(), model: z.string().optional(), apiKey: z.string().optional() })
+    .optional(),
 });
 
 app.put('/', async (c) => {
   const auth = c.get('auth');
   const body = await c.req.json().catch(() => ({}));
   const parsed = putSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   const engine = getEngine();
 
   const current = await readStored(auth.orgId);
@@ -111,16 +148,25 @@ app.put('/', async (c) => {
     next.llm = { ...parsed.data.llm, apiKey: key };
   }
 
-  const [org] = await engine.db.select({ settings: organizations.settings }).from(organizations).where(eq(organizations.id, auth.orgId)).limit(1);
+  const [org] = await engine.db
+    .select({ settings: organizations.settings })
+    .from(organizations)
+    .where(eq(organizations.id, auth.orgId))
+    .limit(1);
   const settings = { ...((org?.settings as Record<string, unknown>) ?? {}), providers: next };
-  await engine.db.update(organizations).set({ settings, updatedAt: new Date() }).where(eq(organizations.id, auth.orgId));
+  await engine.db
+    .update(organizations)
+    .set({ settings, updatedAt: new Date() })
+    .where(eq(organizations.id, auth.orgId));
 
   await applyProviders(auth.orgId);
   return c.json({
     ok: true,
     embedding: { provider: engine.embedder.name, model: engine.embedder.model },
     llm: { provider: engine.llm.name, model: engine.llm.model, available: engine.llm.available },
-    note: parsed.data.embedding ? 'Embedding provider changed. Re-index existing memories for comparable scores.' : undefined,
+    note: parsed.data.embedding
+      ? 'Embedding provider changed. Re-index existing memories for comparable scores.'
+      : undefined,
   });
 });
 
@@ -138,7 +184,10 @@ app.post('/test', async (c) => {
   }
   if (engine.llm.available) {
     try {
-      await engine.llm.complete({ messages: [{ role: 'user', content: 'Reply with the word ok.' }], maxTokens: 5 });
+      await engine.llm.complete({
+        messages: [{ role: 'user', content: 'Reply with the word ok.' }],
+        maxTokens: 5,
+      });
       result.llm = 'ok';
     } catch (e) {
       result.llm = `error: ${String((e as Error).message ?? e).slice(0, 200)}`;

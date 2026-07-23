@@ -34,7 +34,8 @@ export function companyBrainOpenAITools(): OpenAIFunctionTool[] {
       type: 'function',
       function: {
         name: 'search_memory',
-        description: 'Search the company knowledge base for passages relevant to a query. Returns ranked snippets with sources.',
+        description:
+          'Search the company knowledge base for passages relevant to a query. Returns ranked snippets with sources.',
         parameters: {
           type: 'object',
           properties: {
@@ -50,7 +51,8 @@ export function companyBrainOpenAITools(): OpenAIFunctionTool[] {
       type: 'function',
       function: {
         name: 'ask_memory',
-        description: 'Ask the company knowledge base a question and get a grounded answer with citations.',
+        description:
+          'Ask the company knowledge base a question and get a grounded answer with citations.',
         parameters: {
           type: 'object',
           properties: {
@@ -98,11 +100,22 @@ export async function runCompanyBrainTool(
         space: args.space ? String(args.space) : undefined,
         mode: 'hybrid',
       });
-      return hits.map((h) => ({ title: h.document.title, content: h.content, score: Number(h.score.toFixed(3)), source: h.document.sourceUrl }));
+      return hits.map((h) => ({
+        title: h.document.title,
+        content: h.content,
+        score: Number(h.score.toFixed(3)),
+        source: h.document.sourceUrl,
+      }));
     }
     case 'ask_memory': {
-      const res = await client.chat({ message: String(args.question ?? ''), space: args.space ? String(args.space) : undefined });
-      return { answer: res.message, citations: res.citations.map((c) => ({ title: c.title, source: c.sourceUrl })) };
+      const res = await client.chat({
+        message: String(args.question ?? ''),
+        space: args.space ? String(args.space) : undefined,
+      });
+      return {
+        answer: res.message,
+        citations: res.citations.map((c) => ({ title: c.title, source: c.sourceUrl })),
+      };
     }
     case 'add_memory': {
       const memory = await client.memories.add({

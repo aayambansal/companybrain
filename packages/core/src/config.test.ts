@@ -2,9 +2,17 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { loadConfig } from './config.js';
 
 const KEYS = [
-  'EMBEDDING_PROVIDER', 'EMBEDDING_MODEL', 'LLM_PROVIDER', 'LLM_MODEL',
-  'ENRICH_ON_INGEST', 'TEMPORAL_RESOLUTION', 'TEMPORAL_CANDIDATES',
-  'HYDE_SAMPLES', 'RRF_VECTOR_WEIGHT', 'RRF_KEYWORD_WEIGHT', 'CHUNK_TARGET_TOKENS',
+  'EMBEDDING_PROVIDER',
+  'EMBEDDING_MODEL',
+  'LLM_PROVIDER',
+  'LLM_MODEL',
+  'ENRICH_ON_INGEST',
+  'TEMPORAL_RESOLUTION',
+  'TEMPORAL_CANDIDATES',
+  'HYDE_SAMPLES',
+  'RRF_VECTOR_WEIGHT',
+  'RRF_KEYWORD_WEIGHT',
+  'CHUNK_TARGET_TOKENS',
 ];
 
 let saved: Record<string, string | undefined>;

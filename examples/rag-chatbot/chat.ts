@@ -34,7 +34,9 @@ for await (const line of rl) {
       if (sources.length > 0) {
         console.log('Sources:');
         for (const s of sources) {
-          console.log(`  [${s.index}] ${s.title ?? 'Untitled'}${s.sourceUrl ? ` (${s.sourceUrl})` : ''}`);
+          console.log(
+            `  [${s.index}] ${s.title ?? 'Untitled'}${s.sourceUrl ? ` (${s.sourceUrl})` : ''}`,
+          );
         }
       }
     } catch (err) {

@@ -6,7 +6,20 @@ import { parseJiraIssues, adfToText } from './jira.js';
 describe('parseLinearIssues', () => {
   it('maps issues with identifier + description', () => {
     const docs = parseLinearIssues({
-      data: { issues: { nodes: [{ id: '1', identifier: 'ENG-12', title: 'Fix login', description: 'It breaks on Safari', url: 'https://linear.app/x/ENG-12', updatedAt: '2026-01-01T00:00:00Z' }] } },
+      data: {
+        issues: {
+          nodes: [
+            {
+              id: '1',
+              identifier: 'ENG-12',
+              title: 'Fix login',
+              description: 'It breaks on Safari',
+              url: 'https://linear.app/x/ENG-12',
+              updatedAt: '2026-01-01T00:00:00Z',
+            },
+          ],
+        },
+      },
     });
     expect(docs).toHaveLength(1);
     expect(docs[0]!.title).toBe('ENG-12: Fix login');
@@ -18,7 +31,12 @@ describe('parseLinearIssues', () => {
 describe('confluencePageDoc', () => {
   it('converts storage HTML to text and builds a webui link', () => {
     const doc = confluencePageDoc(
-      { id: '99', title: 'Runbook', body: { storage: { value: '<p>Restart the <b>API</b> pod.</p>' } }, _links: { webui: '/spaces/OPS/pages/99' } },
+      {
+        id: '99',
+        title: 'Runbook',
+        body: { storage: { value: '<p>Restart the <b>API</b> pod.</p>' } },
+        _links: { webui: '/spaces/OPS/pages/99' },
+      },
       'https://acme.atlassian.net',
     );
     expect(doc.title).toBe('Runbook');
@@ -30,7 +48,10 @@ describe('confluencePageDoc', () => {
 describe('adfToText', () => {
   it('flattens ADF nodes and plain strings', () => {
     expect(adfToText('plain')).toBe('plain');
-    const adf = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello world' }] }] };
+    const adf = {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello world' }] }],
+    };
     expect(adfToText(adf).trim()).toBe('Hello world');
   });
 });
@@ -38,7 +59,21 @@ describe('adfToText', () => {
 describe('parseJiraIssues', () => {
   it('maps issues with key and ADF description', () => {
     const docs = parseJiraIssues(
-      { issues: [{ id: '5', key: 'ENG-7', fields: { summary: 'Ship it', description: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'ASAP' }] }] } } }] },
+      {
+        issues: [
+          {
+            id: '5',
+            key: 'ENG-7',
+            fields: {
+              summary: 'Ship it',
+              description: {
+                type: 'doc',
+                content: [{ type: 'paragraph', content: [{ type: 'text', text: 'ASAP' }] }],
+              },
+            },
+          },
+        ],
+      },
       'https://acme.atlassian.net',
     );
     expect(docs[0]!.title).toBe('ENG-7: Ship it');

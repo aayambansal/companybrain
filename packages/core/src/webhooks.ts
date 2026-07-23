@@ -22,14 +22,21 @@ export function signWebhook(secret: string, body: string): string {
 export async function dispatchWebhooks(db: Database, evt: WebhookEvent): Promise<void> {
   let hooks;
   try {
-    hooks = await db.select().from(webhooks).where(and(eq(webhooks.orgId, evt.orgId), eq(webhooks.active, true)));
+    hooks = await db
+      .select()
+      .from(webhooks)
+      .where(and(eq(webhooks.orgId, evt.orgId), eq(webhooks.active, true)));
   } catch {
     return; // table may not exist yet on very old schemas
   }
   const targets = hooks.filter((h) => (h.events ?? []).includes(evt.event));
   if (targets.length === 0) return;
 
-  const body = JSON.stringify({ event: evt.event, createdAt: new Date().toISOString(), data: evt.data });
+  const body = JSON.stringify({
+    event: evt.event,
+    createdAt: new Date().toISOString(),
+    data: evt.data,
+  });
   await Promise.allSettled(
     targets.map(async (h) => {
       const headers: Record<string, string> = {
@@ -50,7 +57,10 @@ export async function dispatchWebhooks(db: Database, evt: WebhookEvent): Promise
       } catch {
         status = 0;
       }
-      await db.update(webhooks).set({ lastStatus: status, lastDeliveredAt: new Date() }).where(eq(webhooks.id, h.id));
+      await db
+        .update(webhooks)
+        .set({ lastStatus: status, lastDeliveredAt: new Date() })
+        .where(eq(webhooks.id, h.id));
     }),
   );
 }

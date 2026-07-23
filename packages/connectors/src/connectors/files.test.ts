@@ -2,7 +2,12 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { walkFiles, resolveExtensions, fileToSourceDocument, DEFAULT_FILE_EXTENSIONS } from './files.js';
+import {
+  walkFiles,
+  resolveExtensions,
+  fileToSourceDocument,
+  DEFAULT_FILE_EXTENSIONS,
+} from './files.js';
 
 let root: string;
 

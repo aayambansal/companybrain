@@ -34,7 +34,13 @@ export const frontConnector: Connector = {
   category: 'chat',
   auth: 'apiKey',
   configSchema: [
-    { key: 'apiToken', label: 'API token', type: 'password', required: true, help: 'Create under Front > Settings > Developers > API tokens.' },
+    {
+      key: 'apiToken',
+      label: 'API token',
+      type: 'password',
+      required: true,
+      help: 'Create under Front > Settings > Developers > API tokens.',
+    },
   ],
   async *pull(ctx) {
     const apiToken = String(ctx.config.apiToken ?? '').trim();
@@ -44,7 +50,10 @@ export const frontConnector: Connector = {
     let url: string | undefined = 'https://api2.frontapp.com/conversations?limit=100';
     while (url) {
       if (ctx.signal?.aborted) return;
-      const res: FrontConversationsResponse = await fetchJson<FrontConversationsResponse>(url, { headers, signal: ctx.signal });
+      const res: FrontConversationsResponse = await fetchJson<FrontConversationsResponse>(url, {
+        headers,
+        signal: ctx.signal,
+      });
       for (const conv of res._results ?? []) yield frontConversationDoc(conv);
       url = res._pagination?.next ?? undefined;
     }

@@ -62,7 +62,10 @@ async function test() {
       return;
     }
     if (!data.counts) {
-      showResult('err', 'Reached the server, but the request was not authorized. Set an API key if this instance runs in multi-user mode.');
+      showResult(
+        'err',
+        'Reached the server, but the request was not authorized. Set an API key if this instance runs in multi-user mode.',
+      );
       return;
     }
     const lines = [

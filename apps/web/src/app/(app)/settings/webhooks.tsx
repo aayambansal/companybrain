@@ -77,18 +77,32 @@ export function WebhooksSection() {
   return (
     <section>
       <h2 className="mb-1 font-mono text-sm text-ink-muted">Webhooks</h2>
-      <p className="mb-3 text-[13px] text-ink-faint">Get a signed POST when a memory is created. Verify with the x-companybrain-signature header.</p>
+      <p className="mb-3 text-[13px] text-ink-faint">
+        Get a signed POST when a memory is created. Verify with the x-companybrain-signature header.
+      </p>
 
       <form onSubmit={create} className="mb-4 flex flex-wrap gap-2">
-        <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://your-app.com/webhooks/companybrain" className="min-w-56 flex-1" />
-        <Input value={secret} onChange={(e) => setSecret(e.target.value)} placeholder="signing secret (optional)" className="w-56" />
+        <Input
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="https://your-app.com/webhooks/companybrain"
+          className="min-w-56 flex-1"
+        />
+        <Input
+          value={secret}
+          onChange={(e) => setSecret(e.target.value)}
+          placeholder="signing secret (optional)"
+          className="w-56"
+        />
         <Button variant="primary" size="md" type="submit" loading={busy} disabled={!url.trim()}>
           <IconPlus size={15} /> Add
         </Button>
       </form>
 
       {hooks === null ? null : hooks.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-border px-4 py-5 text-center text-[13px] text-ink-faint">No webhooks yet.</p>
+        <p className="rounded-lg border border-dashed border-border px-4 py-5 text-center text-[13px] text-ink-faint">
+          No webhooks yet.
+        </p>
       ) : (
         <ul className="card divide-y divide-border">
           {hooks.map((h) => (
@@ -110,7 +124,11 @@ export function WebhooksSection() {
                 <Button variant="ghost" size="sm" onClick={() => test(h)}>
                   Test
                 </Button>
-                <button onClick={() => remove(h)} className="rounded-md p-2 text-ink-faint transition-colors hover:bg-surface-2 hover:text-[var(--color-danger)]" title="Delete">
+                <button
+                  onClick={() => remove(h)}
+                  className="rounded-md p-2 text-ink-faint transition-colors hover:bg-surface-2 hover:text-[var(--color-danger)]"
+                  title="Delete"
+                >
                   <IconTrash size={15} />
                 </button>
               </div>

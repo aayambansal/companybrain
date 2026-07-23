@@ -64,7 +64,11 @@ export class CompanyBrain {
   readonly apiKeys: ApiKeysResource;
 
   constructor(options: CompanyBrainOptions = {}) {
-    this.apiUrl = (options.apiUrl ?? envVar('COMPANYBRAIN_API_URL') ?? 'http://localhost:3333').replace(/\/$/, '');
+    this.apiUrl = (
+      options.apiUrl ??
+      envVar('COMPANYBRAIN_API_URL') ??
+      'http://localhost:3333'
+    ).replace(/\/$/, '');
     this.apiKey = options.apiKey ?? envVar('COMPANYBRAIN_API_KEY');
     this.headers = options.headers ?? {};
     this.fetchImpl = options.fetch ?? globalThis.fetch;
@@ -78,7 +82,11 @@ export class CompanyBrain {
   }
 
   /** Low-level request helper. */
-  async request<T>(method: string, path: string, opts: { query?: Record<string, unknown>; body?: unknown } = {}): Promise<T> {
+  async request<T>(
+    method: string,
+    path: string,
+    opts: { query?: Record<string, unknown>; body?: unknown } = {},
+  ): Promise<T> {
     const url = new URL(this.apiUrl + path);
     if (opts.query) {
       for (const [k, v] of Object.entries(opts.query)) {
@@ -99,7 +107,12 @@ export class CompanyBrain {
     const data = text ? safeJson(text) : undefined;
     if (!res.ok) {
       const err = (data ?? {}) as { error?: string; message?: string; issues?: unknown };
-      throw new CompanyBrainError(err.message ?? err.error ?? `Request failed (${res.status})`, res.status, err.error, err.issues);
+      throw new CompanyBrainError(
+        err.message ?? err.error ?? `Request failed (${res.status})`,
+        res.status,
+        err.error,
+        err.issues,
+      );
     }
     return data as T;
   }
@@ -126,7 +139,9 @@ export class CompanyBrain {
   }
 
   /** Summarize what recently landed in the brain. */
-  digest(opts: { space?: string; spaceId?: string; limit?: number } = {}): Promise<{ digest: DigestResponse }> {
+  digest(
+    opts: { space?: string; spaceId?: string; limit?: number } = {},
+  ): Promise<{ digest: DigestResponse }> {
     return this.request<{ digest: DigestResponse }>('GET', '/v1/digest', {
       query: opts as Record<string, unknown>,
     });
@@ -138,7 +153,8 @@ export class CompanyBrain {
     const headers: Record<string, string> = { ...this.headers, 'Content-Type': 'application/json' };
     if (this.apiKey) headers['Authorization'] = `Bearer ${this.apiKey}`;
     const res = await this.fetchImpl(url, { method: 'POST', headers, body: JSON.stringify(input) });
-    if (!res.ok || !res.body) throw new CompanyBrainError(`chat stream failed (${res.status})`, res.status);
+    if (!res.ok || !res.body)
+      throw new CompanyBrainError(`chat stream failed (${res.status})`, res.status);
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
@@ -177,10 +193,14 @@ function safeJson(text: string): unknown {
 class MemoriesResource {
   constructor(private cb: CompanyBrain) {}
   async add(input: AddMemoryInput): Promise<Memory> {
-    const { memory } = await this.cb.request<{ memory: Memory }>('POST', '/v1/memories', { body: input });
+    const { memory } = await this.cb.request<{ memory: Memory }>('POST', '/v1/memories', {
+      body: input,
+    });
     return memory;
   }
-  async list(opts: { limit?: number; offset?: number; spaceId?: string; connector?: string } = {}): Promise<{ memories: Memory[]; total: number }> {
+  async list(
+    opts: { limit?: number; offset?: number; spaceId?: string; connector?: string } = {},
+  ): Promise<{ memories: Memory[]; total: number }> {
     return this.cb.request('GET', '/v1/memories', { query: opts });
   }
   async get(id: string): Promise<Memory> {
@@ -188,7 +208,9 @@ class MemoriesResource {
     return memory;
   }
   async update(id: string, patch: Partial<AddMemoryInput> & { spaceId?: string }): Promise<Memory> {
-    const { memory } = await this.cb.request<{ memory: Memory }>('PATCH', `/v1/memories/${id}`, { body: patch });
+    const { memory } = await this.cb.request<{ memory: Memory }>('PATCH', `/v1/memories/${id}`, {
+      body: patch,
+    });
     return memory;
   }
   async delete(id: string): Promise<boolean> {
@@ -200,7 +222,14 @@ class MemoriesResource {
     return this.cb.request('GET', `/v1/memories/${id}/related`, { query: limit ? { limit } : {} });
   }
   /** Prior content versions of this memory (temporal history), newest first. */
-  async versions(id: string): Promise<{ versions: { version: number; title: string | null; content: string | null; createdAt: string }[] }> {
+  async versions(id: string): Promise<{
+    versions: {
+      version: number;
+      title: string | null;
+      content: string | null;
+      createdAt: string;
+    }[];
+  }> {
     return this.cb.request('GET', `/v1/memories/${id}/versions`);
   }
 }
@@ -211,8 +240,16 @@ class SpacesResource {
     const { spaces } = await this.cb.request<{ spaces: Space[] }>('GET', '/v1/spaces');
     return spaces;
   }
-  async create(input: { name: string; slug?: string; description?: string; icon?: string; color?: string }): Promise<Space> {
-    const { space } = await this.cb.request<{ space: Space }>('POST', '/v1/spaces', { body: input });
+  async create(input: {
+    name: string;
+    slug?: string;
+    description?: string;
+    icon?: string;
+    color?: string;
+  }): Promise<Space> {
+    const { space } = await this.cb.request<{ space: Space }>('POST', '/v1/spaces', {
+      body: input,
+    });
     return space;
   }
   async delete(id: string): Promise<boolean> {
@@ -229,7 +266,13 @@ class ConnectionsResource {
   list(): Promise<{ connections: unknown[] }> {
     return this.cb.request('GET', '/v1/connections');
   }
-  create(input: { connector: string; name: string; spaceId?: string; config?: Record<string, unknown>; credentials?: Record<string, unknown> }): Promise<{ connection: unknown }> {
+  create(input: {
+    connector: string;
+    name: string;
+    spaceId?: string;
+    config?: Record<string, unknown>;
+    credentials?: Record<string, unknown>;
+  }): Promise<{ connection: unknown }> {
     return this.cb.request('POST', '/v1/connections', { body: input });
   }
   sync(id: string): Promise<{ started: boolean; syncRunId: string }> {
@@ -244,7 +287,11 @@ class ApiKeysResource {
     return keys;
   }
   async create(name: string): Promise<ApiKey & { secret: string }> {
-    const { key } = await this.cb.request<{ key: ApiKey & { secret: string } }>('POST', '/v1/api-keys', { body: { name } });
+    const { key } = await this.cb.request<{ key: ApiKey & { secret: string } }>(
+      'POST',
+      '/v1/api-keys',
+      { body: { name } },
+    );
     return key;
   }
   async revoke(id: string): Promise<boolean> {

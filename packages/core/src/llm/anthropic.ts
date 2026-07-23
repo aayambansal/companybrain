@@ -29,12 +29,18 @@ export class AnthropicProvider implements LlmProvider {
     };
   }
 
-  private buildBody(opts: CompleteOptions, extra: Record<string, unknown> = {}): Record<string, unknown> {
+  private buildBody(
+    opts: CompleteOptions,
+    extra: Record<string, unknown> = {},
+  ): Record<string, unknown> {
     const body: Record<string, unknown> = {
       model: this.model,
       max_tokens: opts.maxTokens ?? 1024,
       system: opts.system,
-      messages: opts.messages.map((m) => ({ role: m.role === 'system' ? 'user' : m.role, content: m.content })),
+      messages: opts.messages.map((m) => ({
+        role: m.role === 'system' ? 'user' : m.role,
+        content: m.content,
+      })),
       ...extra,
     };
     if (!this.tempUnsupported) body.temperature = opts.temperature ?? 0.2;
@@ -81,7 +87,10 @@ export class AnthropicProvider implements LlmProvider {
           {
             role: 'user',
             content: [
-              { type: 'image', source: { type: 'base64', media_type: image.mediaType, data: image.base64 } },
+              {
+                type: 'image',
+                source: { type: 'base64', media_type: image.mediaType, data: image.base64 },
+              },
               { type: 'text', text: prompt ?? IMAGE_PROMPT },
             ],
           },
@@ -90,7 +99,10 @@ export class AnthropicProvider implements LlmProvider {
     });
     if (!res.ok) throw new Error(`Anthropic vision failed: ${res.status} ${await res.text()}`);
     const json = (await res.json()) as { content: { type: string; text?: string }[] };
-    return json.content.filter((c) => c.type === 'text').map((c) => c.text ?? '').join('');
+    return json.content
+      .filter((c) => c.type === 'text')
+      .map((c) => c.text ?? '')
+      .join('');
   }
 
   async complete(opts: CompleteOptions): Promise<string> {

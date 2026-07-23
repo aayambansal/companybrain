@@ -15,7 +15,9 @@ export function adfToText(node: unknown): string {
   if (typeof n.text === 'string') return n.text;
   const inner = Array.isArray(n.content) ? n.content.map(adfToText).join('') : '';
   // Block-level nodes get a trailing newline for readability.
-  return ['paragraph', 'heading', 'listItem', 'blockquote'].includes(n.type ?? '') ? inner + '\n' : inner;
+  return ['paragraph', 'heading', 'listItem', 'blockquote'].includes(n.type ?? '')
+    ? inner + '\n'
+    : inner;
 }
 
 /** Pure: map a Jira search response into SourceDocuments. */
@@ -46,16 +48,38 @@ export const jiraConnector: Connector = {
   category: 'code',
   auth: 'apiKey',
   configSchema: [
-    { key: 'baseUrl', label: 'Base URL', type: 'url', required: true, placeholder: 'https://your-domain.atlassian.net' },
-    { key: 'email', label: 'Account email', type: 'string', required: true, placeholder: 'you@company.com' },
+    {
+      key: 'baseUrl',
+      label: 'Base URL',
+      type: 'url',
+      required: true,
+      placeholder: 'https://your-domain.atlassian.net',
+    },
+    {
+      key: 'email',
+      label: 'Account email',
+      type: 'string',
+      required: true,
+      placeholder: 'you@company.com',
+    },
     { key: 'apiToken', label: 'API token', type: 'password', required: true },
-    { key: 'jql', label: 'JQL filter', type: 'string', required: false, placeholder: 'project = ENG ORDER BY updated DESC', help: 'Optional. Defaults to recently updated issues.' },
+    {
+      key: 'jql',
+      label: 'JQL filter',
+      type: 'string',
+      required: false,
+      placeholder: 'project = ENG ORDER BY updated DESC',
+      help: 'Optional. Defaults to recently updated issues.',
+    },
   ],
   async *pull(ctx) {
-    const baseUrl = String(ctx.config.baseUrl ?? '').trim().replace(/\/$/, '');
+    const baseUrl = String(ctx.config.baseUrl ?? '')
+      .trim()
+      .replace(/\/$/, '');
     const email = String(ctx.config.email ?? '').trim();
     const apiToken = String(ctx.config.apiToken ?? '').trim();
-    if (!baseUrl || !email || !apiToken) throw new Error('jira connector: baseUrl, email, and apiToken are required');
+    if (!baseUrl || !email || !apiToken)
+      throw new Error('jira connector: baseUrl, email, and apiToken are required');
     const jql = String(ctx.config.jql ?? 'ORDER BY updated DESC');
     const headers = { authorization: basicAuth(email, apiToken) };
 
@@ -63,7 +87,12 @@ export const jiraConnector: Connector = {
     const maxResults = 50;
     for (;;) {
       if (ctx.signal?.aborted) return;
-      const params = new URLSearchParams({ jql, startAt: String(startAt), maxResults: String(maxResults), fields: 'summary,description' });
+      const params = new URLSearchParams({
+        jql,
+        startAt: String(startAt),
+        maxResults: String(maxResults),
+        fields: 'summary,description',
+      });
       const res = await fetchJson<{ issues?: JiraIssue[]; total?: number }>(
         `${baseUrl}/rest/api/3/search?${params}`,
         { headers, signal: ctx.signal },

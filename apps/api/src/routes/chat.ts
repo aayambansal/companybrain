@@ -19,7 +19,8 @@ app.post('/', async (c) => {
   const auth = c.get('auth');
   const body = await c.req.json().catch(() => ({}));
   const parsed = chatSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   const d = parsed.data;
   const engine = getEngine();
   const res = await engine.chat(auth.orgId, d.message, {
@@ -36,7 +37,8 @@ app.post('/stream', async (c) => {
   const auth = c.get('auth');
   const body = await c.req.json().catch(() => ({}));
   const parsed = chatSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   const d = parsed.data;
   const engine = getEngine();
 
@@ -50,14 +52,24 @@ app.post('/stream', async (c) => {
     });
     await stream.writeSSE({
       event: 'citations',
-      data: JSON.stringify(hits.map((h, i) => ({ index: i + 1, documentId: h.documentId, title: h.document.title, sourceUrl: h.document.sourceUrl }))),
+      data: JSON.stringify(
+        hits.map((h, i) => ({
+          index: i + 1,
+          documentId: h.documentId,
+          title: h.document.title,
+          sourceUrl: h.document.sourceUrl,
+        })),
+      ),
     });
 
     const llm = engine.llm;
     if (llm.available && llm.stream && hits.length > 0) {
-      const context = hits.map((h, i) => `[${i + 1}] ${h.document.title ?? 'Untitled'}\n${h.content}`).join('\n\n');
+      const context = hits
+        .map((h, i) => `[${i + 1}] ${h.document.title ?? 'Untitled'}\n${h.content}`)
+        .join('\n\n');
       for await (const token of llm.stream({
-        system: 'You are CompanyBrain. Answer only from the context. Cite passages inline as [n]. Be concise.',
+        system:
+          'You are CompanyBrain. Answer only from the context. Cite passages inline as [n]. Be concise.',
         messages: [
           ...(d.history ?? []),
           { role: 'user', content: `Context:\n\n${context}\n\n---\nQuestion: ${d.message}` },

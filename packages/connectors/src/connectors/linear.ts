@@ -11,7 +11,9 @@ interface LinearIssue {
 }
 
 /** Pure: map a Linear GraphQL issues response into SourceDocuments. */
-export function parseLinearIssues(json: { data?: { issues?: { nodes?: LinearIssue[] } } }): SourceDocument[] {
+export function parseLinearIssues(json: {
+  data?: { issues?: { nodes?: LinearIssue[] } };
+}): SourceDocument[] {
   const nodes = json.data?.issues?.nodes ?? [];
   return nodes.map((n) => ({
     sourceId: n.id,
@@ -39,7 +41,14 @@ export const linearConnector: Connector = {
   category: 'code',
   auth: 'apiKey',
   configSchema: [
-    { key: 'apiKey', label: 'API key', type: 'password', required: true, placeholder: 'lin_api_...', help: 'A Linear personal API key (Settings > API).' },
+    {
+      key: 'apiKey',
+      label: 'API key',
+      type: 'password',
+      required: true,
+      placeholder: 'lin_api_...',
+      help: 'A Linear personal API key (Settings > API).',
+    },
   ],
   async *pull(ctx) {
     const apiKey = String(ctx.config.apiKey ?? '').trim();
@@ -47,7 +56,12 @@ export const linearConnector: Connector = {
     let after: string | undefined;
     do {
       const res = await fetchJson<{
-        data?: { issues?: { nodes?: LinearIssue[]; pageInfo?: { hasNextPage: boolean; endCursor: string } } };
+        data?: {
+          issues?: {
+            nodes?: LinearIssue[];
+            pageInfo?: { hasNextPage: boolean; endCursor: string };
+          };
+        };
       }>('https://api.linear.app/graphql', {
         method: 'POST',
         headers: { authorization: apiKey },

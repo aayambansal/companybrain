@@ -87,7 +87,8 @@ export function parseFathomExport(raw: string): FathomCall[] {
 export const fathomConnector: Connector = {
   id: 'fathom',
   displayName: 'Fathom',
-  description: 'Index your Fathom call recordings, one searchable memory per call (summary, action items, transcript).',
+  description:
+    'Index your Fathom call recordings, one searchable memory per call (summary, action items, transcript).',
   category: 'chat',
   auth: 'path',
   configSchema: [
@@ -102,7 +103,8 @@ export const fathomConnector: Connector = {
   ],
   async *pull(ctx) {
     const path = String(ctx.config.path ?? '').trim();
-    if (!path || !existsSync(path)) throw new Error(`fathom connector: export file does not exist: ${path}`);
+    if (!path || !existsSync(path))
+      throw new Error(`fathom connector: export file does not exist: ${path}`);
     const calls = parseFathomExport(readFileSync(path, 'utf8'));
     ctx.log?.('parsed fathom export', { path: basename(path), calls: calls.length });
     let i = 0;

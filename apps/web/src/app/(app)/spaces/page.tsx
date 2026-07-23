@@ -71,17 +71,34 @@ export default function SpacesPage() {
         <form onSubmit={create} className="card mb-5 space-y-3 p-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Name" htmlFor="sp-name">
-              <Input id="sp-name" autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Engineering" />
+              <Input
+                id="sp-name"
+                autoFocus
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Engineering"
+              />
             </Field>
             <Field label="Description" htmlFor="sp-desc">
-              <Input id="sp-desc" value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Optional" />
+              <Input
+                id="sp-desc"
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+                placeholder="Optional"
+              />
             </Field>
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="ghost" size="sm" type="button" onClick={() => setCreating(false)}>
               Cancel
             </Button>
-            <Button variant="primary" size="sm" type="submit" loading={busy} disabled={!name.trim()}>
+            <Button
+              variant="primary"
+              size="sm"
+              type="submit"
+              loading={busy}
+              disabled={!name.trim()}
+            >
               Create
             </Button>
           </div>
@@ -95,11 +112,18 @@ export default function SpacesPage() {
           ))}
         </div>
       ) : spaces.length === 0 ? (
-        <EmptyState title="no spaces" description="Create one to start organizing." icon={<IconSpaces size={28} />} />
+        <EmptyState
+          title="no spaces"
+          description="Create one to start organizing."
+          icon={<IconSpaces size={28} />}
+        />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {spaces.map((s) => (
-            <div key={s.id} className="group card flex flex-col p-4 transition-colors hover:border-border-strong">
+            <div
+              key={s.id}
+              className="group card flex flex-col p-4 transition-colors hover:border-border-strong"
+            >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
                   <span className="grid size-8 place-items-center rounded-md bg-[var(--color-primary-soft)] font-mono text-[13px] text-[var(--color-primary)]">
@@ -122,10 +146,17 @@ export default function SpacesPage() {
                   </button>
                 )}
               </div>
-              {s.description && <p className="mt-2 line-clamp-2 text-[13px] text-ink-muted">{s.description}</p>}
+              {s.description && (
+                <p className="mt-2 line-clamp-2 text-[13px] text-ink-muted">{s.description}</p>
+              )}
               <div className="mt-auto flex items-center justify-between pt-3">
-                <span className="font-mono text-[12px] text-ink-faint">{s.documentCount ?? 0} memories</span>
-                <Link href={`/memories?spaceId=${s.id}`} className="flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink">
+                <span className="font-mono text-[12px] text-ink-faint">
+                  {s.documentCount ?? 0} memories
+                </span>
+                <Link
+                  href={`/memories?spaceId=${s.id}`}
+                  className="flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
+                >
                   Open <IconArrowRight size={12} />
                 </Link>
               </div>

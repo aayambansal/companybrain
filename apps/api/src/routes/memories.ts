@@ -39,7 +39,11 @@ app.post('/', async (c) => {
   let sourceType = d.sourceType;
   if (d.image) {
     const img = parseDataUrl(d.image);
-    if (!img) return c.json({ error: 'invalid_image', message: 'image must be a data URL: data:image/png;base64,...' }, 400);
+    if (!img)
+      return c.json(
+        { error: 'invalid_image', message: 'image must be a data URL: data:image/png;base64,...' },
+        400,
+      );
     try {
       const described = await engine.describeImage(img);
       content = [d.content, described].filter(Boolean).join('\n\n');
@@ -50,7 +54,11 @@ app.post('/', async (c) => {
   }
   if (d.audio) {
     const clip = parseDataUrl(d.audio);
-    if (!clip) return c.json({ error: 'invalid_audio', message: 'audio must be a data URL: data:audio/mpeg;base64,...' }, 400);
+    if (!clip)
+      return c.json(
+        { error: 'invalid_audio', message: 'audio must be a data URL: data:audio/mpeg;base64,...' },
+        400,
+      );
     try {
       const transcript = await engine.transcribeAudio(clip);
       content = [content, transcript].filter(Boolean).join('\n\n');
@@ -61,7 +69,11 @@ app.post('/', async (c) => {
   }
   if (d.video) {
     const clip = parseDataUrl(d.video);
-    if (!clip) return c.json({ error: 'invalid_video', message: 'video must be a data URL: data:video/mp4;base64,...' }, 400);
+    if (!clip)
+      return c.json(
+        { error: 'invalid_video', message: 'video must be a data URL: data:video/mp4;base64,...' },
+        400,
+      );
     try {
       const result = await engine.describeVideo(clip);
       content = [content, result.text].filter(Boolean).join('\n\n');
@@ -70,7 +82,11 @@ app.post('/', async (c) => {
       return c.json({ error: 'no_video', message: String((e as Error).message ?? e) }, 422);
     }
   }
-  if (!content) return c.json({ error: 'invalid_request', message: 'content, image, audio, or video is required' }, 400);
+  if (!content)
+    return c.json(
+      { error: 'invalid_request', message: 'content, image, audio, or video is required' },
+      400,
+    );
 
   const memory = await engine.addMemory({
     orgId: auth.orgId,
@@ -95,7 +111,13 @@ app.get('/', async (c) => {
   const offset = Number.parseInt(c.req.query('offset') ?? '0', 10) || 0;
   const spaceId = c.req.query('spaceId') || undefined;
   const connector = c.req.query('connector') || undefined;
-  const { memories, total } = await engine.listMemories({ orgId: auth.orgId, spaceId, connector, limit, offset });
+  const { memories, total } = await engine.listMemories({
+    orgId: auth.orgId,
+    spaceId,
+    connector,
+    limit,
+    offset,
+  });
   return c.json({ memories, total, limit, offset });
 });
 
@@ -136,7 +158,8 @@ app.patch('/:id', async (c) => {
   const auth = c.get('auth');
   const body = await c.req.json().catch(() => ({}));
   const parsed = patchSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   const engine = getEngine();
   const memory = await engine.updateMemory(auth.orgId, c.req.param('id'), parsed.data);
   if (!memory) return c.json({ error: 'not_found' }, 404);

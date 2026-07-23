@@ -1,7 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { CompanyBrain, CompanyBrainError } from './index.js';
 
-function mockFetch(handler: (url: string, init: RequestInit) => { status?: number; body: unknown }) {
+function mockFetch(
+  handler: (url: string, init: RequestInit) => { status?: number; body: unknown },
+) {
   return vi.fn(async (url: string | URL, init?: RequestInit) => {
     const { status = 200, body } = handler(url.toString(), init ?? {});
     return {
@@ -66,14 +68,20 @@ describe('CompanyBrain SDK', () => {
   });
 
   it('throws a typed error on non-2xx', async () => {
-    const fetchImpl = mockFetch(() => ({ status: 401, body: { error: 'unauthorized', message: 'nope' } }));
+    const fetchImpl = mockFetch(() => ({
+      status: 401,
+      body: { error: 'unauthorized', message: 'nope' },
+    }));
     const cb = new CompanyBrain({ fetch: fetchImpl });
     await expect(cb.memories.list()).rejects.toBeInstanceOf(CompanyBrainError);
     await expect(cb.memories.list()).rejects.toMatchObject({ status: 401, code: 'unauthorized' });
   });
 
   it('normalizes the base url (no trailing slash)', () => {
-    const cb = new CompanyBrain({ apiUrl: 'http://localhost:3333/', fetch: mockFetch(() => ({ body: {} })) });
+    const cb = new CompanyBrain({
+      apiUrl: 'http://localhost:3333/',
+      fetch: mockFetch(() => ({ body: {} })),
+    });
     expect(cb.apiUrl).toBe('http://localhost:3333');
   });
 });
@@ -115,7 +123,9 @@ describe('CompanyBrain SDK chatStream', () => {
   });
 
   it('throws a typed error when the stream response is not ok', async () => {
-    const fetchImpl = vi.fn(async () => ({ ok: false, status: 500, body: null }) as unknown as Response) as unknown as typeof fetch;
+    const fetchImpl = vi.fn(
+      async () => ({ ok: false, status: 500, body: null }) as unknown as Response,
+    ) as unknown as typeof fetch;
     const cb = new CompanyBrain({ fetch: fetchImpl });
     await expect(async () => {
       for await (const _ of cb.chatStream({ message: 'hi' })) void _;

@@ -28,7 +28,10 @@ describe('chunkText', () => {
   });
 
   it('produces overlap between consecutive chunks', () => {
-    const sentences = Array.from({ length: 40 }, (_, i) => `Sentence number ${i} has some content.`).join(' ');
+    const sentences = Array.from(
+      { length: 40 },
+      (_, i) => `Sentence number ${i} has some content.`,
+    ).join(' ');
     const chunks = chunkText(sentences, { targetTokens: 40, overlapTokens: 15, maxTokens: 80 });
     expect(chunks.length).toBeGreaterThan(1);
   });

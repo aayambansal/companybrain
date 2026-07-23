@@ -5,14 +5,26 @@ import type { LlmProvider } from './llm/types.js';
 
 function hit(id: string, title: string, content: string): SearchHit {
   return {
-    chunkId: id, documentId: id, spaceId: 's', score: 1, scores: { fused: 1 },
-    content, chunkIndex: 0,
+    chunkId: id,
+    documentId: id,
+    spaceId: 's',
+    score: 1,
+    scores: { fused: 1 },
+    content,
+    chunkIndex: 0,
     document: { id, title, sourceUrl: null, connector: 'api', tags: [] },
     metadata: {},
   };
 }
 function stub(available: boolean, reply = ''): LlmProvider {
-  return { name: 'stub', model: 'stub', available, async complete() { return reply; } } as unknown as LlmProvider;
+  return {
+    name: 'stub',
+    model: 'stub',
+    available,
+    async complete() {
+      return reply;
+    },
+  } as unknown as LlmProvider;
 }
 
 describe('extractTitle', () => {
@@ -36,7 +48,11 @@ describe('generatePlaybook', () => {
   const hits = [hit('a', 'Release process', 'We ship on Thursdays.')];
 
   it('uses the LLM output and extracts its title', async () => {
-    const r = await generatePlaybook(stub(true, '# Shipping\n\n## Overview\nWe ship Thursdays [1].'), 'Shipping', hits);
+    const r = await generatePlaybook(
+      stub(true, '# Shipping\n\n## Overview\nWe ship Thursdays [1].'),
+      'Shipping',
+      hits,
+    );
     expect(r.title).toBe('Shipping');
     expect(r.content).toContain('We ship Thursdays [1].');
     expect(r.citations).toHaveLength(1);

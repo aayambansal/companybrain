@@ -111,11 +111,23 @@ function SearchInner() {
             ))}
           </div>
         ) : failed ? (
-          <EmptyState title="search failed" description="Something went wrong reaching the index. Check the connection and try again." icon={<IconSearch size={28} />} />
+          <EmptyState
+            title="search failed"
+            description="Something went wrong reaching the index. Check the connection and try again."
+            icon={<IconSearch size={28} />}
+          />
         ) : !res ? (
-          <EmptyState title="type a query" description="Try a question, a phrase, or a keyword." icon={<IconSearch size={28} />} />
+          <EmptyState
+            title="type a query"
+            description="Try a question, a phrase, or a keyword."
+            icon={<IconSearch size={28} />}
+          />
         ) : res.hits.length === 0 ? (
-          <EmptyState title="no matches" description={`Nothing indexed matched "${res.query}".`} icon={<IconSearch size={28} />} />
+          <EmptyState
+            title="no matches"
+            description={`Nothing indexed matched "${res.query}".`}
+            icon={<IconSearch size={28} />}
+          />
         ) : (
           <ul className="space-y-3">
             {res.hits.map((h) => (
@@ -130,15 +142,23 @@ function SearchInner() {
 
 /** Wrap case-insensitive query-term matches in the text with a subtle mark. */
 function highlight(text: string, query: string): React.ReactNode {
-  const terms = Array.from(new Set(query.toLowerCase().split(/\s+/).filter((t) => t.length > 1))).map((t) =>
-    t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
-  );
+  const terms = Array.from(
+    new Set(
+      query
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((t) => t.length > 1),
+    ),
+  ).map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   if (terms.length === 0) return text;
   const re = new RegExp(`(${terms.join('|')})`, 'gi');
   const parts = text.split(re);
   return parts.map((part, i) =>
     i % 2 === 1 ? (
-      <mark key={i} className="rounded bg-[var(--color-primary-soft)] px-0.5 text-[var(--color-primary-strong)]">
+      <mark
+        key={i}
+        className="rounded bg-[var(--color-primary-soft)] px-0.5 text-[var(--color-primary-strong)]"
+      >
         {part}
       </mark>
     ) : (
@@ -152,23 +172,35 @@ function Hit({ hit, query }: { hit: SearchHit; query: string }) {
   return (
     <li className="rounded-lg border border-border bg-surface p-4 transition-colors hover:border-border-strong">
       <div className="flex items-start justify-between gap-3">
-        <Link href={`/memories/${hit.documentId}`} className="font-medium text-ink hover:text-[var(--color-primary)]">
+        <Link
+          href={`/memories/${hit.documentId}`}
+          className="font-medium text-ink hover:text-[var(--color-primary)]"
+        >
           {hit.document.title ?? 'Untitled'}
         </Link>
         <div className="flex shrink-0 items-center gap-2">
           <div className="h-1 w-16 overflow-hidden rounded-full bg-surface-2">
-            <div className="h-full rounded-full bg-[var(--color-primary)]" style={{ width: `${pct}%` }} />
+            <div
+              className="h-full rounded-full bg-[var(--color-primary)]"
+              style={{ width: `${pct}%` }}
+            />
           </div>
           <span className="font-mono text-[11px] text-ink-faint">{pct}</span>
         </div>
       </div>
-      <p className="mt-2 line-clamp-3 text-[13px] leading-relaxed text-ink-muted">{highlight(hit.content, query)}</p>
+      <p className="mt-2 line-clamp-3 text-[13px] leading-relaxed text-ink-muted">
+        {highlight(hit.content, query)}
+      </p>
       <div className="mt-2.5 flex flex-wrap items-center gap-2">
         <Badge tone="neutral" mono>
           {hit.document.connector}
         </Badge>
-        {hit.scores.vector !== undefined && <Badge tone="primary">vec {hit.scores.vector.toFixed(2)}</Badge>}
-        {hit.scores.keyword !== undefined && <Badge tone="info">kw {hit.scores.keyword.toFixed(2)}</Badge>}
+        {hit.scores.vector !== undefined && (
+          <Badge tone="primary">vec {hit.scores.vector.toFixed(2)}</Badge>
+        )}
+        {hit.scores.keyword !== undefined && (
+          <Badge tone="info">kw {hit.scores.keyword.toFixed(2)}</Badge>
+        )}
         {hit.document.sourceUrl && (
           <a
             href={hit.document.sourceUrl}
@@ -186,7 +218,13 @@ function Hit({ hit, query }: { hit: SearchHit; query: string }) {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<Page title="Search"><Skeleton className="h-12 w-full" /></Page>}>
+    <Suspense
+      fallback={
+        <Page title="Search">
+          <Skeleton className="h-12 w-full" />
+        </Page>
+      }
+    >
       <SearchInner />
     </Suspense>
   );

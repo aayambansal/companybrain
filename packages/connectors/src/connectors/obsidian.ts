@@ -67,7 +67,11 @@ function extractWikiLinks(body: string): string[] {
 }
 
 function unquote(value: string): string {
-  return value.trim().replace(/^['"]|['"]$/g, '').replace(/^#/, '').trim();
+  return value
+    .trim()
+    .replace(/^['"]|['"]$/g, '')
+    .replace(/^#/, '')
+    .trim();
 }
 
 export const obsidianConnector: Connector = {

@@ -1,14 +1,50 @@
 [
-  { "title": "Release process", "content": "We cut releases every Thursday. Tag main, run the release workflow, then announce in the #engineering channel. Hotfixes can ship any day with a lead's approval." },
-  { "title": "Deploy rollback", "content": "To roll back a bad deploy, re-run the release workflow with the previous git tag. Page the on-call engineer if customer traffic is affected." },
-  { "title": "On-call rotation", "content": "On-call rotates weekly, handed off Mondays at 10am. The on-call engineer owns pages, incident response, and the incident retro. Escalate to the team lead after 30 minutes." },
-  { "title": "Expense policy", "content": "Expenses under 100 dollars need no pre-approval. Submit receipts in the finance portal within 30 days. Travel over 500 dollars requires a manager sign-off first." },
-  { "title": "Onboarding checklist", "content": "New hires get a laptop on day one, access to Slack and the code repos by day two, and a buddy for their first month. Complete the security training within two weeks." },
-  { "title": "Billing system", "content": "The billing system runs on Stripe. Ada owns it. Invoices generate on the first of the month. Failed payments retry three times over ten days before the account is paused." },
-  { "title": "Data retention", "content": "Customer logs are kept for 90 days, then deleted. Backups of the primary database are retained for one year in encrypted cold storage." },
-  { "title": "Support SLA", "content": "Enterprise customers get a four-hour first-response SLA during business hours. Standard customers get one business day. Critical outages are acknowledged within 30 minutes regardless of tier." },
-  { "title": "Coffee machine", "content": "The office espresso machine is on the third floor kitchen. Descale it monthly. Beans are restocked every Friday." },
-  { "title": "VPN access", "content": "Request VPN access through the IT portal. Approvals take up to one business day. The VPN is required to reach staging and internal admin tools." },
-  { "title": "Code review", "content": "Every pull request needs one approval before merge. Reviews should happen within one business day. Large changes should be split into reviewable chunks." },
-  { "title": "Incident retro", "content": "After any incident we run a blameless retro within three business days. The output is a written timeline, root cause, and action items with owners and due dates." }
+  {
+    "title": "Release process",
+    "content": "We cut releases every Thursday. Tag main, run the release workflow, then announce in the #engineering channel. Hotfixes can ship any day with a lead's approval."
+  },
+  {
+    "title": "Deploy rollback",
+    "content": "To roll back a bad deploy, re-run the release workflow with the previous git tag. Page the on-call engineer if customer traffic is affected."
+  },
+  {
+    "title": "On-call rotation",
+    "content": "On-call rotates weekly, handed off Mondays at 10am. The on-call engineer owns pages, incident response, and the incident retro. Escalate to the team lead after 30 minutes."
+  },
+  {
+    "title": "Expense policy",
+    "content": "Expenses under 100 dollars need no pre-approval. Submit receipts in the finance portal within 30 days. Travel over 500 dollars requires a manager sign-off first."
+  },
+  {
+    "title": "Onboarding checklist",
+    "content": "New hires get a laptop on day one, access to Slack and the code repos by day two, and a buddy for their first month. Complete the security training within two weeks."
+  },
+  {
+    "title": "Billing system",
+    "content": "The billing system runs on Stripe. Ada owns it. Invoices generate on the first of the month. Failed payments retry three times over ten days before the account is paused."
+  },
+  {
+    "title": "Data retention",
+    "content": "Customer logs are kept for 90 days, then deleted. Backups of the primary database are retained for one year in encrypted cold storage."
+  },
+  {
+    "title": "Support SLA",
+    "content": "Enterprise customers get a four-hour first-response SLA during business hours. Standard customers get one business day. Critical outages are acknowledged within 30 minutes regardless of tier."
+  },
+  {
+    "title": "Coffee machine",
+    "content": "The office espresso machine is on the third floor kitchen. Descale it monthly. Beans are restocked every Friday."
+  },
+  {
+    "title": "VPN access",
+    "content": "Request VPN access through the IT portal. Approvals take up to one business day. The VPN is required to reach staging and internal admin tools."
+  },
+  {
+    "title": "Code review",
+    "content": "Every pull request needs one approval before merge. Reviews should happen within one business day. Large changes should be split into reviewable chunks."
+  },
+  {
+    "title": "Incident retro",
+    "content": "After any incident we run a blameless retro within three business days. The output is a written timeline, root cause, and action items with owners and due dates."
+  }
 ]

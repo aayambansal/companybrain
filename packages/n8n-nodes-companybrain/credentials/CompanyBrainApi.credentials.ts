@@ -18,7 +18,8 @@ export class CompanyBrainApi implements ICredentialType {
       type: 'string',
       typeOptions: { password: true },
       default: '',
-      description: 'A CompanyBrain API key (cb_...). Leave blank if the server runs in single-user mode.',
+      description:
+        'A CompanyBrain API key (cb_...). Leave blank if the server runs in single-user mode.',
     },
   ];
 }

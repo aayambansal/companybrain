@@ -39,7 +39,9 @@ export default function SettingsPage() {
     if (!newName.trim()) return;
     setCreating(true);
     try {
-      const r = await api.post<{ key: ApiKey & { secret: string } }>('/v1/api-keys', { name: newName.trim() });
+      const r = await api.post<{ key: ApiKey & { secret: string } }>('/v1/api-keys', {
+        name: newName.trim(),
+      });
       setReveal(r.key.secret);
       setNewName('');
       load();
@@ -69,14 +71,23 @@ export default function SettingsPage() {
           <h2 className="mb-3 font-mono text-sm text-ink-muted">Workspace</h2>
           <div className="card divide-y divide-border">
             <Row label="Organization" value={me?.org?.name ?? '—'} />
-            <Row label="You" value={me ? `${me.user?.name ?? me.user?.email} · ${me.user?.role}` : '—'} />
+            <Row
+              label="You"
+              value={me ? `${me.user?.name ?? me.user?.email} · ${me.user?.role}` : '—'}
+            />
             <Row
               label="Embeddings"
               value={status ? `${status.embedding.provider} · ${status.embedding.model}` : '—'}
             />
             <Row
               label="Language model"
-              value={status ? (status.llm.available ? `${status.llm.provider} · ${status.llm.model}` : 'not configured') : '—'}
+              value={
+                status
+                  ? status.llm.available
+                    ? `${status.llm.provider} · ${status.llm.model}`
+                    : 'not configured'
+                  : '—'
+              }
             />
             <Row label="Version" value={status ? `v${status.version}` : '—'} mono />
           </div>
@@ -99,7 +110,9 @@ export default function SettingsPage() {
 
           {reveal && (
             <div className="card mb-4 border-[var(--color-primary-line)] bg-[var(--color-primary-soft)] p-4">
-              <p className="text-[13px] text-ink">Copy this key now. It is shown once and not stored in plaintext.</p>
+              <p className="text-[13px] text-ink">
+                Copy this key now. It is shown once and not stored in plaintext.
+              </p>
               <div className="mt-2 flex items-center gap-2">
                 <code className="flex-1 overflow-x-auto rounded-md bg-bg px-3 py-2 font-mono text-[13px] text-[var(--color-primary-strong)]">
                   {reveal}
@@ -122,8 +135,18 @@ export default function SettingsPage() {
           )}
 
           <form onSubmit={createKey} className="mb-4 flex gap-2">
-            <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Key name, e.g. production" />
-            <Button variant="primary" size="md" type="submit" loading={creating} disabled={!newName.trim()}>
+            <Input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Key name, e.g. production"
+            />
+            <Button
+              variant="primary"
+              size="md"
+              type="submit"
+              loading={creating}
+              disabled={!newName.trim()}
+            >
               <IconPlus size={15} /> New key
             </Button>
           </form>
@@ -142,7 +165,11 @@ export default function SettingsPage() {
                   <li key={k.id} className="flex items-center justify-between px-4 py-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className={`font-medium ${revoked ? 'text-ink-faint line-through' : 'text-ink'}`}>{k.name}</span>
+                        <span
+                          className={`font-medium ${revoked ? 'text-ink-faint line-through' : 'text-ink'}`}
+                        >
+                          {k.name}
+                        </span>
                         <code className="font-mono text-[11px] text-ink-faint">{k.prefix}…</code>
                         {revoked && <Badge tone="danger">revoked</Badge>}
                       </div>

@@ -70,7 +70,10 @@ export const raindropConnector: Connector = {
       if (ctx.signal?.aborted) return;
       const url = `https://api.raindrop.io/rest/v1/raindrops/${encodeURIComponent(collection)}?perpage=${PER_PAGE}&page=${page}`;
       ctx.log?.('fetching raindrop bookmarks', { collection, page });
-      const res = await fetchJson<{ items?: RaindropItem[]; count?: number }>(url, { headers, signal: ctx.signal });
+      const res = await fetchJson<{ items?: RaindropItem[]; count?: number }>(url, {
+        headers,
+        signal: ctx.signal,
+      });
       const items = res.items ?? [];
       for (const item of items) {
         if (ctx.signal?.aborted) return;

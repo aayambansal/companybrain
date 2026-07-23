@@ -19,13 +19,19 @@ function mockClient() {
 }
 
 // Exercise the mapping directly, without LangChain's callback-manager wrapper.
-type Retrieve = { _getRelevantDocuments: (q: string) => Promise<Array<{ pageContent: string; metadata: Record<string, unknown> }>> };
+type Retrieve = {
+  _getRelevantDocuments: (
+    q: string,
+  ) => Promise<Array<{ pageContent: string; metadata: Record<string, unknown> }>>;
+};
 
 describe('CompanyBrainRetriever', () => {
   it('maps search hits to documents with metadata and passes options through', async () => {
     const client = mockClient();
     const retriever = new CompanyBrainRetriever({ client, k: 3, space: 'eng' });
-    const docs = await (retriever as unknown as Retrieve)._getRelevantDocuments('how do we release?');
+    const docs = await (retriever as unknown as Retrieve)._getRelevantDocuments(
+      'how do we release?',
+    );
     expect(docs).toHaveLength(1);
     expect(docs[0]!.pageContent).toBe('ship thursdays');
     expect(docs[0]!.metadata).toMatchObject({
@@ -45,6 +51,8 @@ describe('CompanyBrainRetriever', () => {
     const client = mockClient();
     const retriever = new CompanyBrainRetriever({ client });
     await (retriever as unknown as Retrieve)._getRelevantDocuments('q');
-    expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ limit: 6, mode: 'hybrid' }));
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 6, mode: 'hybrid' }),
+    );
   });
 });

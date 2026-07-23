@@ -35,7 +35,12 @@ export function ProvidersSection() {
   }, []);
 
   async function reindex() {
-    if (!confirm('Re-embed every memory with the current embedding provider? This runs in the background.')) return;
+    if (
+      !confirm(
+        'Re-embed every memory with the current embedding provider? This runs in the background.',
+      )
+    )
+      return;
     setReindexing(true);
     try {
       const r = await api.post<{ documents: number }>('/v1/reindex');
@@ -53,7 +58,8 @@ export function ProvidersSection() {
         <IconSparkle size={15} className="text-[var(--color-primary)]" /> Providers
       </h2>
       <p className="mb-3 text-[13px] text-ink-faint">
-        Bring your own keys. The language model powers chat; embeddings power search. Local runs with no key.
+        Bring your own keys. The language model powers chat; embeddings power search. Local runs
+        with no key.
       </p>
       {data === null ? (
         <Skeleton className="h-40 w-full" />
@@ -77,7 +83,9 @@ export function ProvidersSection() {
             warn="Changing this does not re-embed existing memories. Re-index for comparable scores."
           />
           <div className="flex items-center justify-between rounded-lg border border-dashed border-border px-4 py-3">
-            <p className="text-[13px] text-ink-muted">Re-embed every memory with the current embedding provider.</p>
+            <p className="text-[13px] text-ink-muted">
+              Re-embed every memory with the current embedding provider.
+            </p>
             <Button variant="secondary" size="sm" onClick={reindex} loading={reindexing}>
               Re-index all
             </Button>
@@ -156,7 +164,9 @@ function ProviderCard({
         <h3 className="text-sm font-medium text-ink">{title}</h3>
         <div className="flex items-center gap-2">
           {kind === 'llm' && (
-            <Badge tone={current.available ? 'success' : 'neutral'}>{current.available ? 'active' : 'off'}</Badge>
+            <Badge tone={current.available ? 'success' : 'neutral'}>
+              {current.available ? 'active' : 'off'}
+            </Badge>
           )}
           {current.hasKey && <Badge tone="primary">key set</Badge>}
         </div>
@@ -183,7 +193,10 @@ function ProviderCard({
       </div>
       {needsKey && (
         <div className="mt-3">
-          <Field label="API key" hint={current.hasKey ? 'A key is saved. Leave blank to keep it.' : undefined}>
+          <Field
+            label="API key"
+            hint={current.hasKey ? 'A key is saved. Leave blank to keep it.' : undefined}
+          >
             <Input
               type="password"
               autoComplete="off"

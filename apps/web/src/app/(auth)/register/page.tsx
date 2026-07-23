@@ -34,8 +34,10 @@ export default function RegisterPage() {
       await api.post('/v1/auth/register', payload);
       router.replace('/');
     } catch (err) {
-      if (err instanceof ApiError && err.status === 409) setError('That email is already registered.');
-      else if (err instanceof ApiError && err.status === 400) setError('Password must be at least 8 characters.');
+      if (err instanceof ApiError && err.status === 409)
+        setError('That email is already registered.');
+      else if (err instanceof ApiError && err.status === 400)
+        setError('Password must be at least 8 characters.');
       else setError('Could not create the workspace.');
       setLoading(false);
     }
@@ -55,10 +57,20 @@ export default function RegisterPage() {
       <form onSubmit={submit} className="card space-y-4 p-6">
         <div className="grid grid-cols-2 gap-3">
           <Field label="Your name" htmlFor="name">
-            <Input id="name" value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Ada" />
+            <Input
+              id="name"
+              value={form.name}
+              onChange={(e) => set('name', e.target.value)}
+              placeholder="Ada"
+            />
           </Field>
           <Field label="Workspace" htmlFor="org">
-            <Input id="org" value={form.orgName} onChange={(e) => set('orgName', e.target.value)} placeholder="Acme" />
+            <Input
+              id="org"
+              value={form.orgName}
+              onChange={(e) => set('orgName', e.target.value)}
+              placeholder="Acme"
+            />
           </Field>
         </div>
         <Field label="Email" htmlFor="email">

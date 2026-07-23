@@ -27,8 +27,18 @@ export class CompanyBrain implements INodeType {
         type: 'options',
         noDataExpression: true,
         options: [
-          { name: 'Search', value: 'search', description: 'Hybrid search over your memory', action: 'Search memory' },
-          { name: 'Ask', value: 'ask', description: 'RAG answer with citations', action: 'Ask memory' },
+          {
+            name: 'Search',
+            value: 'search',
+            description: 'Hybrid search over your memory',
+            action: 'Search memory',
+          },
+          {
+            name: 'Ask',
+            value: 'ask',
+            description: 'RAG answer with citations',
+            action: 'Ask memory',
+          },
           { name: 'Add', value: 'add', description: 'Store a new memory', action: 'Add a memory' },
         ],
         default: 'search',
@@ -90,10 +100,19 @@ export class CompanyBrain implements INodeType {
       let body: Record<string, unknown> = {};
       if (operation === 'search') {
         path = '/v1/search';
-        body = { q: this.getNodeParameter('query', i) as string, mode: 'hybrid', space, limit: this.getNodeParameter('limit', i, 6) as number };
+        body = {
+          q: this.getNodeParameter('query', i) as string,
+          mode: 'hybrid',
+          space,
+          limit: this.getNodeParameter('limit', i, 6) as number,
+        };
       } else if (operation === 'ask') {
         path = '/v1/chat';
-        body = { message: this.getNodeParameter('query', i) as string, space, limit: this.getNodeParameter('limit', i, 6) as number };
+        body = {
+          message: this.getNodeParameter('query', i) as string,
+          space,
+          limit: this.getNodeParameter('limit', i, 6) as number,
+        };
       } else {
         path = '/v1/memories';
         body = {
