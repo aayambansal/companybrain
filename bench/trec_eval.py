@@ -2,10 +2,12 @@
 """
 Score a CompanyBrain BEIR run with pytrec_eval (the standard TREC evaluator).
 
-    python3 bench/trec_eval.py <dataset> <mode> [beir_dir]
+    python3 bench/trec_eval.py <run_tag> <mode> [beir_dir] [qrels_dataset]
 
-Reads <beir_dir>/<dataset>/qrels/test.tsv and <beir_dir>/<dataset>_<mode>.run.json
-and prints nDCG@10, Recall@10, Recall@100, MRR (recip_rank), and MAP.
+Reads <beir_dir>/<run_tag>_<mode>.run.json and scores it against
+<beir_dir>/<qrels_dataset>/qrels/test.tsv (qrels_dataset defaults to run_tag,
+so A/B variants like "nfcorpus_large" can be scored against the base dataset's
+qrels by passing qrels_dataset=nfcorpus). Prints nDCG@10, Recall@10/@100, MRR, MAP.
 """
 import json
 import sys
@@ -27,10 +29,11 @@ def load_qrels(path):
 
 
 def main():
-    dataset, mode = sys.argv[1], sys.argv[2]
+    run_tag, mode = sys.argv[1], sys.argv[2]
     beir_dir = sys.argv[3] if len(sys.argv) > 3 else os.path.join("bench", "beir")
-    qrels = load_qrels(os.path.join(beir_dir, dataset, "qrels", "test.tsv"))
-    with open(os.path.join(beir_dir, f"{dataset}_{mode}.run.json")) as f:
+    qrels_dataset = sys.argv[4] if len(sys.argv) > 4 else run_tag
+    qrels = load_qrels(os.path.join(beir_dir, qrels_dataset, "qrels", "test.tsv"))
+    with open(os.path.join(beir_dir, f"{run_tag}_{mode}.run.json")) as f:
         run = json.load(f)
 
     evaluator = pytrec_eval.RelevanceEvaluator(
@@ -45,7 +48,7 @@ def main():
     print(
         json.dumps(
             {
-                "dataset": dataset,
+                "run": run_tag,
                 "mode": mode,
                 "queries": n,
                 "ndcg@10": round(avg("ndcg_cut_10"), 4),

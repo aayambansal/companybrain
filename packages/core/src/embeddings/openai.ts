@@ -14,23 +14,34 @@ export class OpenAIEmbeddingProvider implements EmbeddingProvider {
   private apiKey: string;
   private baseUrl: string;
 
-  constructor(opts: { apiKey: string; model?: string; baseUrl?: string }) {
+  /** Whether this model supports the `dimensions` param (text-embedding-3-*). */
+  private readonly supportsDimensions: boolean;
+
+  constructor(opts: { apiKey: string; model?: string; baseUrl?: string; dimensions?: number }) {
     if (!opts.apiKey) throw new Error('OPENAI_API_KEY is required for the openai embedding provider.');
     this.apiKey = opts.apiKey;
     this.model = opts.model ?? 'text-embedding-3-small';
-    this.dimensions = MODEL_DIMS[this.model] ?? 1536;
+    this.supportsDimensions = this.model.startsWith('text-embedding-3');
+    // text-embedding-3-* can emit a shortened (Matryoshka) vector via `dimensions`,
+    // so a larger, more accurate model can still fit the fixed storage width.
+    const native = MODEL_DIMS[this.model] ?? 1536;
+    this.dimensions = this.supportsDimensions ? (opts.dimensions ?? native) : native;
     this.baseUrl = opts.baseUrl ?? 'https://api.openai.com/v1';
   }
 
   async embed(texts: string[]): Promise<number[][]> {
     if (texts.length === 0) return [];
+    const body: Record<string, unknown> = { model: this.model, input: texts };
+    // Request the reduced width directly (a proper re-normalized reduction), rather
+    // than truncating a 3072-d vector down to storage width after the fact.
+    if (this.supportsDimensions) body.dimensions = this.dimensions;
     const res = await fetch(`${this.baseUrl}/embeddings`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ model: this.model, input: texts }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) {
       throw new Error(`OpenAI embeddings failed: ${res.status} ${await res.text()}`);

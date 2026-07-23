@@ -23,7 +23,12 @@ if (!dataset) throw new Error('usage: tsx bench/beir.mts <dataset>');
 const BEIR_DIR = process.env.BEIR_DIR ?? join(process.cwd(), 'bench', 'beir');
 const ORG_ID = process.env.ORG_ID ?? '';
 const CONCURRENCY = Number(process.env.CONCURRENCY ?? '24');
-const SPACE = `beir_${dataset}`;
+// VARIANT suffixes the space and run-file names so A/B configs (e.g. different
+// embedding models) can be evaluated without clobbering each other.
+const VARIANT = process.env.VARIANT ? `_${process.env.VARIANT}` : '';
+const SPACE = `beir_${dataset}${VARIANT}`;
+const RUN_TAG = `${dataset}${VARIANT}`;
+const SKIP_INGEST = process.env.SKIP_INGEST === '1';
 const MODES = ['keyword', 'semantic', 'hybrid'] as const;
 const dir = join(BEIR_DIR, dataset);
 
@@ -72,6 +77,9 @@ async function main() {
 
   // Fresh ingest: clear the space, then index each doc as title + text.
   const spaceId = await engine.resolveSpaceId(ORG_ID, { spaceSlug: SPACE });
+  if (SKIP_INGEST) {
+    console.log(`  SKIP_INGEST: reusing existing space ${SPACE}`);
+  } else {
   await engine.client.sql`DELETE FROM documents WHERE space_id = ${spaceId}`;
 
   let done = 0;
@@ -95,8 +103,8 @@ async function main() {
     }
   });
   if (failed) console.error(`  WARNING: ${failed} docs failed to ingest`);
-  const ingestMs = Date.now() - t0;
-  console.log(`  ingest done in ${(ingestMs / 1000).toFixed(1)}s`);
+  console.log(`  ingest done in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+  }
 
   // Map documentId -> BEIR corpus id for scoring.
   const rows = await engine.client.sql<{ id: string; source_id: string }[]>`
@@ -130,7 +138,7 @@ async function main() {
     }
     lat.sort((a, b) => a - b);
     const p50 = lat[Math.floor(lat.length * 0.5)] ?? 0;
-    const outPath = join(BEIR_DIR, `${dataset}_${mode}.run.json`);
+    const outPath = join(BEIR_DIR, `${RUN_TAG}_${mode}.run.json`);
     writeFileSync(outPath, JSON.stringify(run));
     console.log(`  [${mode}] ${queries.length} queries, p50 ${p50}ms -> ${outPath}`);
   }

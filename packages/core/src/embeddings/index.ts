@@ -14,7 +14,11 @@ export function createEmbeddingProvider(config: EngineConfig): EmbeddingProvider
   const e = config.embedding;
   switch (e.provider) {
     case 'openai':
-      return new OpenAIEmbeddingProvider({ apiKey: e.openaiApiKey ?? '', model: e.model });
+      return new OpenAIEmbeddingProvider({
+        apiKey: e.openaiApiKey ?? '',
+        model: e.model,
+        dimensions: STORAGE_DIMENSIONS,
+      });
     case 'ollama':
       return new OllamaEmbeddingProvider({ model: e.model, baseUrl: e.ollamaBaseUrl });
     case 'google':
