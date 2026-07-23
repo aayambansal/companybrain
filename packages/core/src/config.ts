@@ -32,6 +32,12 @@ export interface EngineConfig {
     /** Run LLM enrichment (summary + auto-tags + facts) on ingest when an LLM is set. */
     enabled: boolean;
   };
+  temporal: {
+    /** On ingest, ask the LLM whether the new memory supersedes similar older ones. */
+    enabled: boolean;
+    /** How many similar prior memories to weigh as supersession candidates. */
+    candidates: number;
+  };
 }
 
 function env(key: string, fallback = ''): string {
@@ -73,6 +79,10 @@ export function loadConfig(overrides: Partial<EngineConfig> = {}): EngineConfig 
     },
     enrich: {
       enabled: env('ENRICH_ON_INGEST', 'true') !== 'false',
+    },
+    temporal: {
+      enabled: env('TEMPORAL_RESOLUTION', 'false') === 'true',
+      candidates: intEnv('TEMPORAL_CANDIDATES', 5),
     },
   };
   return { ...base, ...overrides };

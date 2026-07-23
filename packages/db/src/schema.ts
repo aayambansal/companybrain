@@ -190,6 +190,9 @@ export const documents = pgTable(
     status: documentStatus('status').default('pending').notNull(),
     error: text('error'),
     tokenCount: integer('token_count'),
+    // Temporal reasoning: set when a newer document supersedes this one.
+    supersededBy: uuid('superseded_by'),
+    supersededAt: timestamp('superseded_at', { withTimezone: true }),
     sourceCreatedAt: timestamp('source_created_at', { withTimezone: true }),
     sourceUpdatedAt: timestamp('source_updated_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
