@@ -163,8 +163,12 @@ Design notes: [docs/architecture.md](./docs/architecture.md).
 | Box                   | `box`      | `[core]`    |
 | ClickUp               | `clickup`  | `[core]`    |
 | Todoist               | `todoist`  | `[core]`    |
+| GitBook               | `gitbook`  | `[core]`    |
+| Coda                  | `coda`     | `[core]`    |
+| HubSpot               | `hubspot`  | `[core]`    |
+| Front                 | `front`    | `[core]`    |
 
-Thirty-two connectors and counting. Configure and sync them from the dashboard under Connections. See
+Thirty-six connectors and counting. Configure and sync them from the dashboard under Connections. See
 [docs/connectors.md](./docs/connectors.md) to write your own.
 
 ## Clients
