@@ -34,8 +34,8 @@ Both are MIT licensed. The goal here is a fair map, not a scoreboard.
 - **Framework wrappers**: Supermemory ships many (LangChain, LangGraph, Vercel AI SDK, OpenAI
   Agents, Mastra, Agno, n8n). CompanyBrain ships LangChain and the Vercel AI SDK, with more
   landing.
-- **Published benchmarks**: Supermemory has MemoryBench and public numbers. CompanyBrain is
-  building an eval harness.
+- **Published benchmarks**: both now ship a reproducible eval harness. CompanyBrain's is in
+  `bench/` (Recall@k / MRR / latency); Supermemory has MemoryBench with more datasets.
 - **Temporal reasoning**: contradiction resolution and expiry of stale facts are deeper in
   Supermemory today.
 
