@@ -8,6 +8,9 @@ import { githubConnector } from './github.js';
 import { notionConnector } from './notion.js';
 import { slackConnector } from './slack.js';
 import { googleDocsConnector } from './googledocs.js';
+import { linearConnector } from './linear.js';
+import { confluenceConnector } from './confluence.js';
+import { jiraConnector } from './jira.js';
 
 /** Every built-in connector, in a stable order. */
 export const connectors: Connector[] = [
@@ -20,6 +23,9 @@ export const connectors: Connector[] = [
   notionConnector,
   slackConnector,
   googleDocsConnector,
+  linearConnector,
+  confluenceConnector,
+  jiraConnector,
 ];
 
 /** Look up a connector by its stable id. */
@@ -43,3 +49,6 @@ export { githubConnector, selectIndexablePaths } from './github.js';
 export { notionConnector, blocksToText, notionPageTitle } from './notion.js';
 export { slackConnector, slackMessageDoc } from './slack.js';
 export { googleDocsConnector, extractGoogleDocId } from './googledocs.js';
+export { linearConnector, parseLinearIssues } from './linear.js';
+export { confluenceConnector, confluencePageDoc } from './confluence.js';
+export { jiraConnector, parseJiraIssues, adfToText } from './jira.js';

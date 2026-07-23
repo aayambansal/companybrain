@@ -132,13 +132,16 @@ Design notes: [docs/architecture.md](./docs/architecture.md).
 | Raw text / API        | `api`      | `[core]`    |
 | Web page / URL        | `web`      | `[core]`    |
 | Sitemap crawl         | `sitemap`  | `[core]`    |
-| Markdown / files      | `files`    | `[core]`    |
+| Markdown / files / PDF | `files`   | `[core]`    |
 | Obsidian vault        | `obsidian` | `[core]`    |
 | RSS / Atom            | `rss`      | `[core]`    |
 | Notion                | `notion`   | `[core]`    |
 | Slack                 | `slack`    | `[core]`    |
 | GitHub                | `github`   | `[core]`    |
-| Google Docs (shared)  | `googledocs`| `[core]`    |
+| Google Docs (shared)  | `googledocs`| `[core]`   |
+| Linear                | `linear`   | `[core]`    |
+| Confluence            | `confluence`| `[core]`   |
+| Jira                  | `jira`     | `[core]`    |
 
 Configure and sync them from the dashboard under Connections. See
 [docs/connectors.md](./docs/connectors.md) to write your own.
