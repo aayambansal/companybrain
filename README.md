@@ -167,8 +167,12 @@ Design notes: [docs/architecture.md](./docs/architecture.md).
 | Coda                  | `coda`     | `[core]`    |
 | HubSpot               | `hubspot`  | `[core]`    |
 | Front                 | `front`    | `[core]`    |
+| Bitbucket             | `bitbucket`| `[core]`    |
+| Sentry                | `sentry`   | `[core]`    |
+| Freshdesk             | `freshdesk`| `[core]`    |
+| Pipedrive             | `pipedrive`| `[core]`    |
 
-Thirty-six connectors and counting. Configure and sync them from the dashboard under Connections. See
+Forty connectors and counting. Configure and sync them from the dashboard under Connections. See
 [docs/connectors.md](./docs/connectors.md) to write your own.
 
 ## Clients

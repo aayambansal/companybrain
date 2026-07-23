@@ -34,6 +34,10 @@ import { gitbookConnector } from './gitbook.js';
 import { codaConnector } from './coda.js';
 import { hubspotConnector } from './hubspot.js';
 import { frontConnector } from './front.js';
+import { bitbucketConnector } from './bitbucket.js';
+import { sentryConnector } from './sentry.js';
+import { freshdeskConnector } from './freshdesk.js';
+import { pipedriveConnector } from './pipedrive.js';
 import { raindropConnector } from './raindrop.js';
 
 /** Every built-in connector, in a stable order. */
@@ -74,6 +78,10 @@ export const connectors: Connector[] = [
   codaConnector,
   hubspotConnector,
   frontConnector,
+  bitbucketConnector,
+  sentryConnector,
+  freshdeskConnector,
+  pipedriveConnector,
 ];
 
 /** Look up a connector by its stable id. */
@@ -124,3 +132,7 @@ export { gitbookConnector, flattenPages, gitbookPageDoc } from './gitbook.js';
 export { codaConnector, codaPageDoc } from './coda.js';
 export { hubspotConnector, hubspotNoteDoc } from './hubspot.js';
 export { frontConnector, frontConversationDoc } from './front.js';
+export { bitbucketConnector, bitbucketIssueDoc } from './bitbucket.js';
+export { sentryConnector, sentryIssueDoc } from './sentry.js';
+export { freshdeskConnector, freshdeskTicketDoc } from './freshdesk.js';
+export { pipedriveConnector, pipedriveNoteDoc } from './pipedrive.js';
