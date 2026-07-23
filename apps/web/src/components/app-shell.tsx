@@ -115,6 +115,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={active ? 'page' : undefined}
                 className={`group flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors ${
                   active
                     ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]'
@@ -140,6 +141,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <button
                 onClick={logout}
                 title="Sign out"
+                aria-label="Sign out"
                 className="rounded-md p-1.5 text-ink-faint transition-colors hover:bg-surface-2 hover:text-ink"
               >
                 <IconLogout size={16} />
@@ -159,7 +161,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </Link>
           {me.authMode !== 'single' && (
-            <button onClick={logout} className="text-ink-faint">
+            <button onClick={logout} aria-label="Sign out" className="text-ink-faint">
               <IconLogout size={18} />
             </button>
           )}
@@ -173,6 +175,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={active ? 'page' : undefined}
                 className={`shrink-0 rounded-md px-3 py-1.5 text-[13px] ${
                   active ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]' : 'text-ink-muted'
                 }`}
