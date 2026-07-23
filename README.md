@@ -135,9 +135,9 @@ Design notes: [docs/architecture.md](./docs/architecture.md).
 | Markdown / files      | `files`    | `[core]`    |
 | Obsidian vault        | `obsidian` | `[core]`    |
 | RSS / Atom            | `rss`      | `[core]`    |
-| Notion                | `notion`   | `[planned]` |
-| Slack                 | `slack`    | `[planned]` |
-| GitHub                | `github`   | `[planned]` |
+| Notion                | `notion`   | `[core]`    |
+| Slack                 | `slack`    | `[core]`    |
+| GitHub                | `github`   | `[core]`    |
 | Google Docs / Drive   | `google`   | `[planned]` |
 
 Configure and sync them from the dashboard under Connections. See
