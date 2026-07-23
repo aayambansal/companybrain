@@ -18,6 +18,7 @@ import { llmRerank, llmRerankPointwise } from './search/rerank.js';
 import { hypotheticalDocuments, blendVectors } from './search/hyde.js';
 import { generateAnswer } from './chat.js';
 import { generatePlaybook, type PlaybookResult } from './playbook.js';
+import { generateDigest, type DigestResult } from './digest.js';
 import { buildTopics, type Topic, type TopicRow } from './topics.js';
 import { enrichDocument } from './enrich.js';
 import { judgeSupersession, type SupersedeCandidate } from './temporal.js';
@@ -673,6 +674,25 @@ export class MemoryEngine {
       limit: opts.limit ?? 12,
     });
     return generatePlaybook(this.llm, opts.topic, hits);
+  }
+
+  /**
+   * A digest of recent activity: gather the newest memories and summarize what
+   * changed. Answers "what's new" the way a playbook answers "what do we know".
+   */
+  async digest(
+    orgId: string,
+    opts: { spaceId?: string; spaceSlug?: string; limit?: number } = {},
+  ): Promise<DigestResult> {
+    const spaceId =
+      opts.spaceId ?? (opts.spaceSlug ? await this.getOrCreateSpaceBySlug(orgId, opts.spaceSlug) : undefined);
+    const { memories } = await this.listMemories({
+      orgId,
+      spaceId,
+      limit: Math.min(opts.limit ?? 15, 50),
+      offset: 0,
+    });
+    return generateDigest(this.llm, memories);
   }
 
   // ── Internals ─────────────────────────────────────────────────────────────
