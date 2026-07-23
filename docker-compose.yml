@@ -1,0 +1,66 @@
+# ─────────────────────────────────────────────────────────────
+#  CompanyBrain — one-command self-host
+#
+#    cp .env.example .env      # (optional — defaults work)
+#    docker compose up -d
+#    open http://localhost:3000
+#
+#  Brings up: Postgres+pgvector, the API, the web dashboard.
+# ─────────────────────────────────────────────────────────────
+name: companybrain
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-companybrain}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-companybrain}
+      POSTGRES_DB: ${POSTGRES_DB:-companybrain}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-companybrain} -d ${POSTGRES_DB:-companybrain}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER:-companybrain}:${POSTGRES_PASSWORD:-companybrain}@db:5432/${POSTGRES_DB:-companybrain}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-please-0000000000000000000000000000000000000000}
+      API_HOST: 0.0.0.0
+      API_PORT: 3333
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-local}
+      LLM_PROVIDER: ${LLM_PROVIDER:-none}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    ports:
+      - "${API_PORT:-3333}:3333"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3333}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+
+volumes:
+  pgdata:
