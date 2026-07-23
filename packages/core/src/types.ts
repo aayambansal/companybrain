@@ -59,6 +59,12 @@ export interface SearchQuery {
   minScore?: number;
   /** Reorder the top results with the configured LLM (no-op if none). */
   rerank?: boolean;
+  /**
+   * Hypothetical Document Embeddings: generate a hypothetical answer with the
+   * LLM, embed it, and blend it with the query vector before searching. Improves
+   * dense recall on short or specialized queries. No-op without an LLM.
+   */
+  hyde?: boolean;
 }
 
 export interface SearchHit {

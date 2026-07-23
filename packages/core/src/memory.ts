@@ -15,6 +15,7 @@ import { describeVideo, type VideoOptions, type VideoResult } from './video.js';
 import { indexDocument, findBySource } from './ingest.js';
 import { hybridSearch } from './search/hybrid.js';
 import { llmRerank } from './search/rerank.js';
+import { hypotheticalDocument, blendVectors } from './search/hyde.js';
 import { generateAnswer } from './chat.js';
 import { enrichDocument } from './enrich.js';
 import { judgeSupersession, type SupersedeCandidate } from './temporal.js';
@@ -517,7 +518,15 @@ export class MemoryEngine {
     const spaceId = query.spaceId ?? (query.spaceSlug ? await this.resolveSpaceId(orgId, { spaceSlug: query.spaceSlug }) : undefined);
     const mode = query.mode ?? 'hybrid';
     const needsVector = mode === 'hybrid' || mode === 'semantic';
-    const queryEmbedding = needsVector ? await this.embedder.embedQuery(query.q) : [];
+    let queryEmbedding = needsVector ? await this.embedder.embedQuery(query.q) : [];
+    // HyDE: blend the query vector with the embedding of a hypothetical answer.
+    if (query.hyde && needsVector && this.llm.available) {
+      const hypo = await hypotheticalDocument(this.llm, query.q);
+      if (hypo) {
+        const hydeEmbedding = await this.embedder.embedQuery(hypo);
+        queryEmbedding = blendVectors([queryEmbedding, hydeEmbedding]);
+      }
+    }
     let hits = await hybridSearch(this.client.sql, {
       orgId,
       spaceId,
