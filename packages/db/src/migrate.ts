@@ -58,7 +58,7 @@ export async function runMigrations(opts: MigrateOptions = {}): Promise<string[]
         await tx`INSERT INTO __cb_migrations (name) VALUES (${file})`;
       });
       applied.push(file);
-      log(`applied ${file} ✓`);
+      log(`applied ${file}`);
     }
 
     if (applied.length === 0) log('database is up to date.');

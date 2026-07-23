@@ -39,7 +39,7 @@ export async function seed(connectionString = process.env.DATABASE_URL): Promise
         slug: 'general',
         description: 'Default space for company knowledge.',
         isDefault: true,
-        icon: '🧠',
+        icon: 'brain',
       })
       .returning();
 
@@ -60,12 +60,12 @@ export async function seed(connectionString = process.env.DATABASE_URL): Promise
       prefix: apiKey.prefix,
     });
 
-    console.log('✔ Seeded demo data:');
+    console.log('Seeded demo data:');
     console.log(`  org:      ${org.name} (${org.id})`);
     console.log(`  space:    ${space?.name} (${space?.id})`);
     console.log(`  user:     admin@acme.test / companybrain`);
     console.log(`  API key:  ${apiKey.key}`);
-    console.log('  ⚠  Save the API key now — it is not stored in plaintext.');
+    console.log('  Note: save the API key now. It is not stored in plaintext.');
   } finally {
     await close();
   }
