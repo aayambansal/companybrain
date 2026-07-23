@@ -75,7 +75,11 @@ export default function ChatPage() {
             }
             update((a) => ({ ...a, citations }));
           } else if (event === 'token') {
-            update((a) => ({ ...a, content: a.content + data }));
+            try {
+              update((a) => ({ ...a, content: a.content + (JSON.parse(data) as string) }));
+            } catch {
+              /* ignore a malformed token frame */
+            }
             scrollDown();
           }
         }

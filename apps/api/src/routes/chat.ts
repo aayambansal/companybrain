@@ -63,7 +63,9 @@ app.post('/stream', async (c) => {
           { role: 'user', content: `Context:\n\n${context}\n\n---\nQuestion: ${d.message}` },
         ],
       })) {
-        await stream.writeSSE({ event: 'token', data: token });
+        // JSON-encode so significant whitespace and newlines in tokens survive
+        // the SSE line framing (same as the playbooks stream).
+        await stream.writeSSE({ event: 'token', data: JSON.stringify(token) });
       }
     } else {
       const res = await engine.chat(auth.orgId, d.message, {
@@ -72,7 +74,7 @@ app.post('/stream', async (c) => {
         limit: d.limit,
         history: d.history,
       });
-      await stream.writeSSE({ event: 'token', data: res.message });
+      await stream.writeSSE({ event: 'token', data: JSON.stringify(res.message) });
     }
     await stream.writeSSE({ event: 'done', data: '1' });
   });
