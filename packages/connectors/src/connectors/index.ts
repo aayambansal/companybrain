@@ -39,6 +39,7 @@ import { sentryConnector } from './sentry.js';
 import { freshdeskConnector } from './freshdesk.js';
 import { pipedriveConnector } from './pipedrive.js';
 import { raindropConnector } from './raindrop.js';
+import { wisprFlowConnector } from './wisprflow.js';
 
 /** Every built-in connector, in a stable order. */
 export const connectors: Connector[] = [
@@ -82,6 +83,7 @@ export const connectors: Connector[] = [
   sentryConnector,
   freshdeskConnector,
   pipedriveConnector,
+  wisprFlowConnector,
 ];
 
 /** Look up a connector by its stable id. */
@@ -136,3 +138,4 @@ export { bitbucketConnector, bitbucketIssueDoc } from './bitbucket.js';
 export { sentryConnector, sentryIssueDoc } from './sentry.js';
 export { freshdeskConnector, freshdeskTicketDoc } from './freshdesk.js';
 export { pipedriveConnector, pipedriveNoteDoc } from './pipedrive.js';
+export { wisprFlowConnector, wisprFlowEntryDoc, parseWisprFlowExport } from './wisprflow.js';
