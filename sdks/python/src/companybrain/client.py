@@ -287,6 +287,17 @@ class MemoriesResource:
     def delete(self, memory_id: str) -> bool:
         return self._client.request("DELETE", f"/v1/memories/{memory_id}")["deleted"]
 
+    def related(self, memory_id: str, *, limit: Optional[int] = None) -> Dict[str, Any]:
+        """Memories semantically similar to this one."""
+        params: Dict[str, Any] = {}
+        if limit is not None:
+            params["limit"] = limit
+        return self._client.request("GET", f"/v1/memories/{memory_id}/related", params=params)
+
+    def versions(self, memory_id: str) -> Dict[str, Any]:
+        """Prior content versions of this memory (temporal history)."""
+        return self._client.request("GET", f"/v1/memories/{memory_id}/versions")
+
 
 class SpacesResource:
     def __init__(self, client: CompanyBrain) -> None:

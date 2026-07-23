@@ -195,6 +195,14 @@ class MemoriesResource {
     const { deleted } = await this.cb.request<{ deleted: boolean }>('DELETE', `/v1/memories/${id}`);
     return deleted;
   }
+  /** Memories semantically similar to this one ("see also"). */
+  async related(id: string, limit?: number): Promise<{ related: unknown[] }> {
+    return this.cb.request('GET', `/v1/memories/${id}/related`, { query: limit ? { limit } : {} });
+  }
+  /** Prior content versions of this memory (temporal history), newest first. */
+  async versions(id: string): Promise<{ versions: { version: number; title: string | null; content: string | null; createdAt: string }[] }> {
+    return this.cb.request('GET', `/v1/memories/${id}/versions`);
+  }
 }
 
 class SpacesResource {
