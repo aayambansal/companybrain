@@ -27,21 +27,25 @@ Both are MIT licensed. The goal here is a fair map, not a scoreboard.
 | Webhooks | signed real-time events on ingest |
 | Spaces / scoping | named collections + tags |
 
+## Recently closed
+
+- **Image ingestion**: CompanyBrain now OCRs and captions images with a vision LLM (Anthropic or
+  OpenAI), alongside PDF and YouTube transcripts.
+- **Framework wrappers**: LangChain (retriever), Vercel AI SDK (tools), and an n8n community node.
+- **Benchmarks**: a reproducible harness in `bench/` (Recall@k / MRR / latency).
+- **Webhooks**: signed real-time events on ingest.
+
 ## Where Supermemory is still ahead (our roadmap)
 
-- **Multimodal depth**: image OCR and video transcription. CompanyBrain does PDF and YouTube
-  transcripts today; OCR/video are on the roadmap.
-- **Framework wrappers**: Supermemory ships many (LangChain, LangGraph, Vercel AI SDK, OpenAI
-  Agents, Mastra, Agno, n8n). CompanyBrain ships LangChain and the Vercel AI SDK, with more
-  landing.
-- **Published benchmarks**: both now ship a reproducible eval harness. CompanyBrain's is in
-  `bench/` (Recall@k / MRR / latency); Supermemory has MemoryBench with more datasets.
+- **Video transcription**: CompanyBrain handles PDF, images, and YouTube transcripts; general
+  video/audio transcription is on the roadmap.
+- **More framework wrappers**: OpenAI Agents SDK, Mastra, Agno.
 - **Temporal reasoning**: contradiction resolution and expiry of stale facts are deeper in
   Supermemory today.
 
 ## The short version
 
-If you want the widest set of connectors, the simplest self-host (one command, no sign-in), and
-full control of your data and providers, CompanyBrain is the stronger fit today. If you need
-image/video ingestion or published memory benchmarks right now, Supermemory has a head start on
-those specific fronts — both of which are on our roadmap.
+For the widest connector set (32 vs ~6), the simplest self-host (one command, no sign-in), image
++ document ingestion, framework wrappers, webhooks, published benchmarks, and full control of your
+data and providers, CompanyBrain is the stronger fit today. Supermemory still leads on general
+video transcription and the depth of its temporal-reasoning layer, both on our roadmap.
