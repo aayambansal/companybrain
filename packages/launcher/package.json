@@ -7,11 +7,21 @@
   "bin": {
     "companybrain": "./bin/companybrain.mjs"
   },
-  "files": ["bin", "README.md"],
+  "files": [
+    "bin",
+    "README.md"
+  ],
   "engines": {
     "node": ">=18"
   },
-  "keywords": ["companybrain", "memory", "rag", "self-hosted", "installer", "mcp"],
+  "keywords": [
+    "companybrain",
+    "memory",
+    "rag",
+    "self-hosted",
+    "installer",
+    "mcp"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/aayambansal/companybrain.git",

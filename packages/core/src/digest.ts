@@ -40,7 +40,11 @@ export async function generateDigest(llm: LlmProvider, memories: Memory[]): Prom
   }
   if (!llm.available) {
     const list = memories.map((m) => `- ${m.title ?? 'Untitled'}`).join('\n');
-    return { summary: `## Recently added\n\n${list}`, memories: memoryRefs, count: memories.length };
+    return {
+      summary: `## Recently added\n\n${list}`,
+      memories: memoryRefs,
+      count: memories.length,
+    };
   }
   const items = memories.map((m) => ({
     title: m.title,

@@ -4,8 +4,13 @@ import type { SearchHit } from './types.js';
 
 function hit(id: string, title: string, content: string): SearchHit {
   return {
-    chunkId: `c-${id}`, documentId: id, spaceId: 's', score: 1, scores: { fused: 1 },
-    content, chunkIndex: 0,
+    chunkId: `c-${id}`,
+    documentId: id,
+    spaceId: 's',
+    score: 1,
+    scores: { fused: 1 },
+    content,
+    chunkIndex: 0,
     document: { id, title, sourceUrl: null, connector: 'api', tags: [] },
     metadata: {},
   };
@@ -13,7 +18,10 @@ function hit(id: string, title: string, content: string): SearchHit {
 
 describe('buildContext', () => {
   it('numbers passages with their titles and content', () => {
-    const ctx = buildContext([hit('a', 'Release', 'ships thursday'), hit('b', 'Rollback', 're-run workflow')]);
+    const ctx = buildContext([
+      hit('a', 'Release', 'ships thursday'),
+      hit('b', 'Rollback', 're-run workflow'),
+    ]);
     expect(ctx).toContain('[1] Release\nships thursday');
     expect(ctx).toContain('[2] Rollback\nre-run workflow');
   });
@@ -36,7 +44,12 @@ describe('extractiveAnswer', () => {
   });
 
   it('stitches the top passages with citations when hits exist', () => {
-    const hits = [hit('a', 'A', 'first'), hit('b', 'B', 'second'), hit('c', 'C', 'third'), hit('d', 'D', 'fourth')];
+    const hits = [
+      hit('a', 'A', 'first'),
+      hit('b', 'B', 'second'),
+      hit('c', 'C', 'third'),
+      hit('d', 'D', 'fourth'),
+    ];
     const r = extractiveAnswer('q', hits);
     expect(r.message).toContain('first');
     expect(r.citations).toHaveLength(3); // capped at top 3

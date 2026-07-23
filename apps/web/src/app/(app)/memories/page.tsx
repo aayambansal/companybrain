@@ -90,7 +90,9 @@ function MemoriesInner() {
         {spaces.map((s) => (
           <FilterChip key={s.id} active={activeSpace === s.id} onClick={() => pickSpace(s.id)}>
             {s.name}
-            {s.documentCount !== undefined && <span className="ml-1.5 font-mono text-[10px] opacity-60">{s.documentCount}</span>}
+            {s.documentCount !== undefined && (
+              <span className="ml-1.5 font-mono text-[10px] opacity-60">{s.documentCount}</span>
+            )}
           </FilterChip>
         ))}
       </div>
@@ -144,7 +146,16 @@ function MemoriesInner() {
                       : 'border-border bg-surface text-transparent hover:border-border-strong hover:text-ink-faint',
                   )}
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M5 12l4 4 10-10" />
                   </svg>
                 </button>
@@ -154,9 +165,13 @@ function MemoriesInner() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <p className="truncate font-medium text-ink">{m.title ?? 'Untitled'}</p>
-                    <span className="shrink-0 font-mono text-[11px] text-ink-faint">{timeAgo(m.createdAt)}</span>
+                    <span className="shrink-0 font-mono text-[11px] text-ink-faint">
+                      {timeAgo(m.createdAt)}
+                    </span>
                   </div>
-                  <p className="mt-1 line-clamp-1 text-[13px] text-ink-muted">{m.content?.slice(0, 180)}</p>
+                  <p className="mt-1 line-clamp-1 text-[13px] text-ink-muted">
+                    {m.content?.slice(0, 180)}
+                  </p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <span className="flex items-center gap-1.5 text-[11px] text-ink-faint">
                       <StatusDot status={m.status} />
@@ -179,13 +194,23 @@ function MemoriesInner() {
 
           {pages > 1 && (
             <div className="mt-6 flex items-center justify-center gap-3">
-              <Button variant="ghost" size="sm" disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={offset === 0}
+                onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
+              >
                 Previous
               </Button>
               <span className="font-mono text-[12px] text-ink-faint">
                 {currentPage} / {pages}
               </span>
-              <Button variant="ghost" size="sm" disabled={currentPage >= pages} onClick={() => setOffset(offset + PAGE_SIZE)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={currentPage >= pages}
+                onClick={() => setOffset(offset + PAGE_SIZE)}
+              >
                 Next
               </Button>
             </div>
@@ -196,13 +221,23 @@ function MemoriesInner() {
   );
 }
 
-function FilterChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       onClick={onClick}
       className={cx(
         'rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors',
-        active ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]' : 'text-ink-muted hover:bg-surface-2 hover:text-ink',
+        active
+          ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]'
+          : 'text-ink-muted hover:bg-surface-2 hover:text-ink',
       )}
     >
       {children}
@@ -212,7 +247,13 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
 
 export default function MemoriesPage() {
   return (
-    <Suspense fallback={<Page title="Memories"><Skeleton className="h-16 w-full" /></Page>}>
+    <Suspense
+      fallback={
+        <Page title="Memories">
+          <Skeleton className="h-16 w-full" />
+        </Page>
+      }
+    >
       <MemoriesInner />
     </Suspense>
   );

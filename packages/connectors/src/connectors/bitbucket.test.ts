@@ -6,7 +6,7 @@ describe('bitbucketIssueDoc', () => {
     const doc = bitbucketIssueDoc({
       id: 17,
       title: 'Add Bitbucket connector',
-      content: { raw: 'Index a repo\'s issues into the brain.' },
+      content: { raw: "Index a repo's issues into the brain." },
       links: { html: { href: 'https://bitbucket.org/acme/web/issues/17' } },
       updated_on: '2024-05-02T08:15:00.000Z',
     });
@@ -14,7 +14,7 @@ describe('bitbucketIssueDoc', () => {
     expect(doc.sourceType).toBe('bitbucket_issue');
     expect(doc.sourceUrl).toBe('https://bitbucket.org/acme/web/issues/17');
     expect(doc.title).toBe('#17 Add Bitbucket connector');
-    expect(doc.content).toBe('Add Bitbucket connector\n\nIndex a repo\'s issues into the brain.');
+    expect(doc.content).toBe("Add Bitbucket connector\n\nIndex a repo's issues into the brain.");
     expect(doc.tags).toEqual(['bitbucket']);
     expect(doc.sourceUpdatedAt).toBeInstanceOf(Date);
     expect(doc.sourceUpdatedAt?.toISOString()).toBe('2024-05-02T08:15:00.000Z');

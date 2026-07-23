@@ -47,7 +47,7 @@ export function redditPostToDoc(child: RedditChild): SourceDocument | null {
 export const redditConnector: Connector = {
   id: 'reddit',
   displayName: 'Reddit',
-  description: 'Index posts from a subreddit or a user via Reddit\'s public JSON API.',
+  description: "Index posts from a subreddit or a user via Reddit's public JSON API.",
   category: 'web',
   auth: 'none',
   configSchema: [
@@ -104,7 +104,9 @@ export const redditConnector: Connector = {
       ? `https://www.reddit.com/user/${encodeURIComponent(user)}/submitted.json?${params}`
       : `https://www.reddit.com/r/${encodeURIComponent(subreddit)}/${encodeURIComponent(sort)}.json?${params}`;
     ctx.log?.('fetching reddit', { subreddit, user, sort, limit });
-    const res = await fetchJson<{ data?: { children?: RedditChild[] } }>(url, { signal: ctx.signal });
+    const res = await fetchJson<{ data?: { children?: RedditChild[] } }>(url, {
+      signal: ctx.signal,
+    });
     for (const child of res.data?.children ?? []) {
       if (ctx.signal?.aborted) return;
       const doc = redditPostToDoc(child);

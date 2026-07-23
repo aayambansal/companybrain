@@ -18,7 +18,11 @@ interface SyncStats {
  * failures downgrade to `partial` when anything still synced, else `error`; a
  * clean run is `success`. `synced` = documents added + skipped (already current).
  */
-export function resolveSyncStatus(opts: { fatal: boolean; failed: number; synced: number }): SyncStatus {
+export function resolveSyncStatus(opts: {
+  fatal: boolean;
+  failed: number;
+  synced: number;
+}): SyncStatus {
   if (opts.fatal || opts.failed > 0) return opts.synced > 0 ? 'partial' : 'error';
   return 'success';
 }

@@ -56,7 +56,11 @@ async function downloadText(
     return res.text();
   }
   const url = `${GRAPH_BASE}/items/${item.id}/content`;
-  const res = await fetch(url, { headers: { ...headers, accept: '*/*' }, signal, redirect: 'follow' });
+  const res = await fetch(url, {
+    headers: { ...headers, accept: '*/*' },
+    signal,
+    redirect: 'follow',
+  });
   if (!res.ok) throw new Error(`GET ${url} -> ${res.status} ${res.statusText}`);
   return res.text();
 }
@@ -64,17 +68,34 @@ async function downloadText(
 export const oneDriveConnector: Connector = {
   id: 'onedrive',
   displayName: 'OneDrive',
-  description: 'Index text and markdown files from OneDrive via Microsoft Graph with an OAuth access token.',
+  description:
+    'Index text and markdown files from OneDrive via Microsoft Graph with an OAuth access token.',
   category: 'files',
   auth: 'oauth',
   configSchema: [
-    { key: 'accessToken', label: 'OAuth access token', type: 'password', required: true, placeholder: 'eyJ0....', help: 'A Microsoft Graph OAuth 2.0 access token with the Files.Read scope.' },
-    { key: 'folder', label: 'Folder path', type: 'string', required: false, placeholder: 'Documents/Notes', help: 'Optional folder path relative to the drive root. Defaults to the root.' },
+    {
+      key: 'accessToken',
+      label: 'OAuth access token',
+      type: 'password',
+      required: true,
+      placeholder: 'eyJ0....',
+      help: 'A Microsoft Graph OAuth 2.0 access token with the Files.Read scope.',
+    },
+    {
+      key: 'folder',
+      label: 'Folder path',
+      type: 'string',
+      required: false,
+      placeholder: 'Documents/Notes',
+      help: 'Optional folder path relative to the drive root. Defaults to the root.',
+    },
   ],
   async *pull(ctx) {
     const token = String(ctx.config.accessToken ?? '').trim();
     if (!token) throw new Error('onedrive connector: config.accessToken is required');
-    const folder = String(ctx.config.folder ?? '').trim().replace(/^\/+|\/+$/g, '');
+    const folder = String(ctx.config.folder ?? '')
+      .trim()
+      .replace(/^\/+|\/+$/g, '');
     const headers = { authorization: `Bearer ${token}` };
 
     const rootChildren = folder

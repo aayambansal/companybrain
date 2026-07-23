@@ -29,7 +29,8 @@ export function parseEnrichment(text: string): Enrichment {
     return {};
   }
   const out: Enrichment = {};
-  if (typeof obj.summary === 'string' && obj.summary.trim()) out.summary = obj.summary.trim().slice(0, 600);
+  if (typeof obj.summary === 'string' && obj.summary.trim())
+    out.summary = obj.summary.trim().slice(0, 600);
   if (Array.isArray(obj.tags)) {
     const tags = obj.tags
       .map((t) => String(t).toLowerCase().trim())
@@ -37,7 +38,10 @@ export function parseEnrichment(text: string): Enrichment {
     if (tags.length) out.tags = Array.from(new Set(tags)).slice(0, 8);
   }
   if (Array.isArray(obj.facts)) {
-    const facts = obj.facts.map((f) => String(f).trim()).filter((f) => f.length > 0).slice(0, 10);
+    const facts = obj.facts
+      .map((f) => String(f).trim())
+      .filter((f) => f.length > 0)
+      .slice(0, 10);
     if (facts.length) out.facts = facts;
   }
   return out;

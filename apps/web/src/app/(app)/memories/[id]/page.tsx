@@ -54,7 +54,10 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-6 md:px-8 md:py-8">
-      <Link href="/memories" className="mb-5 inline-flex items-center gap-1.5 text-[13px] text-ink-faint hover:text-ink">
+      <Link
+        href="/memories"
+        className="mb-5 inline-flex items-center gap-1.5 text-[13px] text-ink-faint hover:text-ink"
+      >
         <IconArrowRight size={13} className="rotate-180" /> Memories
       </Link>
 
@@ -65,11 +68,17 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
           <Skeleton className="h-64 w-full" />
         </div>
       ) : memory === 'missing' ? (
-        <EmptyState title="not found" description="This memory does not exist or was deleted." icon={<IconMemory size={28} />} />
+        <EmptyState
+          title="not found"
+          description="This memory does not exist or was deleted."
+          icon={<IconMemory size={28} />}
+        />
       ) : (
         <article>
           <div className="flex items-start justify-between gap-4">
-            <h1 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink">{memory.title ?? 'Untitled'}</h1>
+            <h1 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink">
+              {memory.title ?? 'Untitled'}
+            </h1>
             <Button variant="danger" size="sm" onClick={remove} loading={deleting}>
               <IconTrash size={14} /> Delete
             </Button>
@@ -110,14 +119,18 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
 
           {memory.summary && (
             <div className="mt-6 rounded-lg border border-[var(--color-primary-line)] bg-[var(--color-primary-soft)] p-4">
-              <h2 className="mb-1.5 font-mono text-[12px] uppercase tracking-wide text-[var(--color-primary-strong)]">Summary</h2>
+              <h2 className="mb-1.5 font-mono text-[12px] uppercase tracking-wide text-[var(--color-primary-strong)]">
+                Summary
+              </h2>
               <p className="text-[14px] leading-relaxed text-ink">{memory.summary}</p>
             </div>
           )}
 
           <div className="mt-6">
             <div className="mb-2 flex items-center justify-between">
-              <h2 className="font-mono text-[12px] uppercase tracking-wide text-ink-faint">Content</h2>
+              <h2 className="font-mono text-[12px] uppercase tracking-wide text-ink-faint">
+                Content
+              </h2>
               <button
                 onClick={() => copyContent(memory.content ?? '')}
                 className="text-[12px] text-ink-faint transition-colors hover:text-ink"
@@ -132,7 +145,9 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
 
           {related.length > 0 && (
             <div className="mt-6">
-              <h2 className="mb-2 font-mono text-[12px] uppercase tracking-wide text-ink-faint">Related</h2>
+              <h2 className="mb-2 font-mono text-[12px] uppercase tracking-wide text-ink-faint">
+                Related
+              </h2>
               <ul className="space-y-2">
                 {related.map((h) => (
                   <li key={h.documentId}>
@@ -140,8 +155,12 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
                       href={`/memories/${h.documentId}`}
                       className="block rounded-lg border border-border bg-surface px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-hover"
                     >
-                      <p className="truncate text-[14px] font-medium text-ink">{h.document.title ?? 'Untitled'}</p>
-                      <p className="mt-1 line-clamp-1 text-[13px] text-ink-muted">{h.content.slice(0, 160)}</p>
+                      <p className="truncate text-[14px] font-medium text-ink">
+                        {h.document.title ?? 'Untitled'}
+                      </p>
+                      <p className="mt-1 line-clamp-1 text-[13px] text-ink-muted">
+                        {h.content.slice(0, 160)}
+                      </p>
                     </Link>
                   </li>
                 ))}

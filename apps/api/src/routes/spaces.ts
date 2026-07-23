@@ -41,7 +41,8 @@ app.post('/', async (c) => {
   const auth = c.get('auth');
   const body = await c.req.json().catch(() => ({}));
   const parsed = createSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   const engine = getEngine();
   const d = parsed.data;
   const [space] = await engine.db
@@ -64,7 +65,8 @@ app.patch('/:id', async (c) => {
   const auth = c.get('auth');
   const body = await c.req.json().catch(() => ({}));
   const parsed = patchSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   const engine = getEngine();
   const [space] = await engine.db
     .update(spaces)

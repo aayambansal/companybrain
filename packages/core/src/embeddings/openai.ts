@@ -18,7 +18,8 @@ export class OpenAIEmbeddingProvider implements EmbeddingProvider {
   private readonly supportsDimensions: boolean;
 
   constructor(opts: { apiKey: string; model?: string; baseUrl?: string; dimensions?: number }) {
-    if (!opts.apiKey) throw new Error('OPENAI_API_KEY is required for the openai embedding provider.');
+    if (!opts.apiKey)
+      throw new Error('OPENAI_API_KEY is required for the openai embedding provider.');
     this.apiKey = opts.apiKey;
     this.model = opts.model ?? 'text-embedding-3-small';
     this.supportsDimensions = this.model.startsWith('text-embedding-3');

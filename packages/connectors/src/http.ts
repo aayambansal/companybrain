@@ -11,14 +11,21 @@ export const DEFAULT_TIMEOUT_MS = 30_000;
  * Combine an optional caller signal with a timeout, so a request aborts on
  * either. Falls back to the timeout alone when AbortSignal.any is unavailable.
  */
-export function requestSignal(signal: AbortSignal | undefined, timeoutMs = DEFAULT_TIMEOUT_MS): AbortSignal {
+export function requestSignal(
+  signal: AbortSignal | undefined,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+): AbortSignal {
   const timeout = AbortSignal.timeout(timeoutMs);
   if (!signal) return timeout;
   return typeof AbortSignal.any === 'function' ? AbortSignal.any([signal, timeout]) : signal;
 }
 
 /** GET a URL and return the response body as text. Throws on non-2xx. */
-export async function fetchText(url: string, signal?: AbortSignal, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<string> {
+export async function fetchText(
+  url: string,
+  signal?: AbortSignal,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+): Promise<string> {
   const res = await fetch(url, {
     signal: requestSignal(signal, timeoutMs),
     redirect: 'follow',
@@ -54,7 +61,9 @@ export async function fetchJson<T = unknown>(url: string, opts: JsonRequest = {}
   });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new Error(`${opts.method ?? 'GET'} ${url} -> ${res.status} ${res.statusText} ${text.slice(0, 200)}`);
+    throw new Error(
+      `${opts.method ?? 'GET'} ${url} -> ${res.status} ${res.statusText} ${text.slice(0, 200)}`,
+    );
   }
   return (await res.json()) as T;
 }

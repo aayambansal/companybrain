@@ -16,7 +16,9 @@ describe('wisprFlowEntryDoc', () => {
     expect(doc).not.toBeNull();
     expect(doc!.sourceId).toBe('flow_42');
     expect(doc!.sourceType).toBe('wispr_flow');
-    expect(doc!.title).toBe('Remind the team the launch review is Thursday at 10am, not Wednesday.');
+    expect(doc!.title).toBe(
+      'Remind the team the launch review is Thursday at 10am, not Wednesday.',
+    );
     expect(doc!.content).toContain('launch review is Thursday');
     expect(doc!.tags).toEqual(['wispr-flow', 'slack']);
     expect(doc!.metadata?.app).toBe('Slack');

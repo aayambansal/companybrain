@@ -24,7 +24,10 @@ export function loadApiEnv(): ApiEnv {
     host: process.env.API_HOST ?? '0.0.0.0',
     port: Number.parseInt(process.env.API_PORT ?? '3333', 10),
     jwtSecret: process.env.JWT_SECRET ?? 'dev-insecure-secret-change-me',
-    corsOrigins: corsRaw.split(',').map((s) => s.trim()).filter(Boolean),
+    corsOrigins: corsRaw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
     version: process.env.COMPANYBRAIN_VERSION ?? '0.1.0',
     authMode,
     accessToken: process.env.ACCESS_TOKEN || undefined,

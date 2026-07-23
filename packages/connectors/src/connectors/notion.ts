@@ -17,7 +17,10 @@ export function notionPageTitle(page: { properties?: Record<string, unknown> }):
   for (const value of Object.values(props)) {
     const v = value as { type?: string; title?: RichText[] };
     if (v?.type === 'title' && Array.isArray(v.title)) {
-      const t = v.title.map((r) => r.plain_text ?? '').join('').trim();
+      const t = v.title
+        .map((r) => r.plain_text ?? '')
+        .join('')
+        .trim();
       if (t) return t;
     }
   }
@@ -76,7 +79,14 @@ export const notionConnector: Connector = {
   category: 'docs',
   auth: 'apiKey',
   configSchema: [
-    { key: 'token', label: 'Integration token', type: 'password', required: true, placeholder: 'secret_...', help: 'Create an internal integration in Notion and share pages with it.' },
+    {
+      key: 'token',
+      label: 'Integration token',
+      type: 'password',
+      required: true,
+      placeholder: 'secret_...',
+      help: 'Create an internal integration in Notion and share pages with it.',
+    },
   ],
   async *pull(ctx) {
     const token = String(ctx.config.token ?? '').trim();
@@ -86,13 +96,22 @@ export const notionConnector: Connector = {
     let cursor: string | undefined;
     do {
       const search = await fetchJson<{
-        results: { id: string; url?: string; properties?: Record<string, unknown>; last_edited_time?: string }[];
+        results: {
+          id: string;
+          url?: string;
+          properties?: Record<string, unknown>;
+          last_edited_time?: string;
+        }[];
         next_cursor: string | null;
         has_more: boolean;
       }>('https://api.notion.com/v1/search', {
         method: 'POST',
         headers: h,
-        body: { filter: { value: 'page', property: 'object' }, page_size: 50, start_cursor: cursor },
+        body: {
+          filter: { value: 'page', property: 'object' },
+          page_size: 50,
+          start_cursor: cursor,
+        },
         signal: ctx.signal,
       });
 

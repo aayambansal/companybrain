@@ -66,7 +66,10 @@ export const STORAGE_DIMENSIONS = 1536;
 
 export function loadConfig(overrides: Partial<EngineConfig> = {}): EngineConfig {
   const base: EngineConfig = {
-    databaseUrl: env('DATABASE_URL', 'postgres://companybrain:companybrain@localhost:5432/companybrain'),
+    databaseUrl: env(
+      'DATABASE_URL',
+      'postgres://companybrain:companybrain@localhost:5432/companybrain',
+    ),
     embedding: {
       provider: (env('EMBEDDING_PROVIDER', 'local') as EmbeddingProviderName) || 'local',
       model: env('EMBEDDING_MODEL', 'text-embedding-3-small'),

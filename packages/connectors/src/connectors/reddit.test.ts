@@ -45,7 +45,9 @@ describe('redditPostToDoc', () => {
     });
     expect(doc).not.toBeNull();
     expect(doc!.content).toBe('A great article about databases');
-    expect(doc!.sourceUrl).toBe('https://www.reddit.com/r/databases/comments/link1/a_great_article/');
+    expect(doc!.sourceUrl).toBe(
+      'https://www.reddit.com/r/databases/comments/link1/a_great_article/',
+    );
     expect(doc!.metadata?.url).toBe('https://example.com/databases');
     expect(doc!.tags).toEqual(['reddit', 'databases']);
   });

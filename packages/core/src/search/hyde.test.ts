@@ -5,8 +5,12 @@ import type { LlmProvider } from '../llm/types.js';
 function stubLlm(available: boolean): LlmProvider {
   let n = 0;
   return {
-    name: 'stub', model: 'stub', available,
-    async complete() { return `passage ${n++}`; },
+    name: 'stub',
+    model: 'stub',
+    available,
+    async complete() {
+      return `passage ${n++}`;
+    },
   } as unknown as LlmProvider;
 }
 
@@ -30,7 +34,12 @@ describe('hypotheticalDocuments', () => {
 
 describe('blendVectors', () => {
   it('averages equal-length vectors element-wise', () => {
-    expect(blendVectors([[1, 3], [3, 5]])).toEqual([2, 4]);
+    expect(
+      blendVectors([
+        [1, 3],
+        [3, 5],
+      ]),
+    ).toEqual([2, 4]);
   });
 
   it('ignores empty vectors', () => {
@@ -39,6 +48,11 @@ describe('blendVectors', () => {
   });
 
   it('skips mismatched-length vectors rather than corrupting the sum', () => {
-    expect(blendVectors([[1, 1], [9, 9, 9]])).toEqual([1, 1]);
+    expect(
+      blendVectors([
+        [1, 1],
+        [9, 9, 9],
+      ]),
+    ).toEqual([1, 1]);
   });
 });

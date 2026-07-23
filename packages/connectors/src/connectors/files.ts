@@ -69,7 +69,10 @@ export function fileToSourceDocument(root: string, rel: string): SourceDocument 
 }
 
 /** Like fileToSourceDocument, but extracts text from binary formats (PDF). */
-export async function fileToSourceDocumentAsync(root: string, rel: string): Promise<SourceDocument> {
+export async function fileToSourceDocumentAsync(
+  root: string,
+  rel: string,
+): Promise<SourceDocument> {
   if (extname(rel).toLowerCase() !== '.pdf') return fileToSourceDocument(root, rel);
   const full = join(root, rel);
   const stat = statSync(full);

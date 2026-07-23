@@ -29,7 +29,9 @@ async function main() {
       const rows = await engine.db
         .select({ id: organizations.id, settings: organizations.settings })
         .from(organizations);
-      const withProviders = rows.find((r) => (r.settings as Record<string, unknown> | undefined)?.providers);
+      const withProviders = rows.find(
+        (r) => (r.settings as Record<string, unknown> | undefined)?.providers,
+      );
       if (withProviders) await applyProviders(withProviders.id);
     }
   } catch (err) {

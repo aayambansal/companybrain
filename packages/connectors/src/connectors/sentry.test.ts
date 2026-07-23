@@ -15,7 +15,9 @@ describe('sentryIssueDoc', () => {
     expect(doc.sourceType).toBe('sentry_issue');
     expect(doc.sourceUrl).toBe('https://sentry.io/organizations/acme/issues/99/');
     expect(doc.title).toBe('TypeError: cannot read property');
-    expect(doc.content).toBe('TypeError: cannot read property\n\napp/main in render\n\nseen 42 times');
+    expect(doc.content).toBe(
+      'TypeError: cannot read property\n\napp/main in render\n\nseen 42 times',
+    );
     expect(doc.tags).toEqual(['sentry']);
     expect(doc.sourceUpdatedAt).toBeInstanceOf(Date);
     expect(doc.sourceUpdatedAt?.toISOString()).toBe('2024-06-01T10:00:00.000Z');

@@ -20,7 +20,9 @@ export default function ChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   function scrollDown() {
-    requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight }));
+    requestAnimationFrame(() =>
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight }),
+    );
   }
 
   async function ask(e?: React.FormEvent) {
@@ -30,7 +32,11 @@ export default function ChatPage() {
     setInput('');
     setBusy(true);
     const history = turns.map((t) => ({ role: t.role, content: t.content }));
-    setTurns((t) => [...t, { role: 'user', content: q }, { role: 'assistant', content: '', streaming: true }]);
+    setTurns((t) => [
+      ...t,
+      { role: 'user', content: q },
+      { role: 'assistant', content: '', streaming: true },
+    ]);
     scrollDown();
 
     try {
@@ -90,7 +96,11 @@ export default function ChatPage() {
         const copy = t.slice();
         const last = copy[copy.length - 1];
         if (last && last.role === 'assistant')
-          copy[copy.length - 1] = { ...last, content: 'Something went wrong reaching the brain.', streaming: false };
+          copy[copy.length - 1] = {
+            ...last,
+            content: 'Something went wrong reaching the brain.',
+            streaming: false,
+          };
         return copy;
       });
     } finally {
@@ -104,7 +114,10 @@ export default function ChatPage() {
       <div className="flex items-center justify-between py-5">
         <h1 className="font-display text-2xl font-semibold tracking-[-0.02em]">Ask</h1>
         {turns.length > 0 && (
-          <button onClick={() => setTurns([])} className="text-[13px] text-ink-faint hover:text-ink">
+          <button
+            onClick={() => setTurns([])}
+            className="text-[13px] text-ink-faint hover:text-ink"
+          >
             New thread
           </button>
         )}
@@ -119,18 +132,20 @@ export default function ChatPage() {
               icon={<IconChat size={28} />}
             />
             <div className="mx-auto mt-6 flex max-w-md flex-col gap-2">
-              {['What did we decide about the release process?', 'Summarize what we know about onboarding', 'Who owns the billing system?'].map(
-                (s) => (
-                  <button
-                    key={s}
-                    onClick={() => setInput(s)}
-                    className="flex items-center justify-between rounded-lg border border-border bg-surface px-3.5 py-2.5 text-left text-[13px] text-ink-muted transition-colors hover:border-border-strong hover:text-ink"
-                  >
-                    {s}
-                    <IconArrowRight size={14} className="text-ink-faint" />
-                  </button>
-                ),
-              )}
+              {[
+                'What did we decide about the release process?',
+                'Summarize what we know about onboarding',
+                'Who owns the billing system?',
+              ].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setInput(s)}
+                  className="flex items-center justify-between rounded-lg border border-border bg-surface px-3.5 py-2.5 text-left text-[13px] text-ink-muted transition-colors hover:border-border-strong hover:text-ink"
+                >
+                  {s}
+                  <IconArrowRight size={14} className="text-ink-faint" />
+                </button>
+              ))}
             </div>
           </div>
         ) : (
@@ -153,7 +168,13 @@ export default function ChatPage() {
             placeholder="Ask anything about your knowledge"
             className="max-h-40 min-h-9 resize-none border-0 bg-transparent px-2 py-1.5 focus:border-0"
           />
-          <Button variant="primary" size="md" onClick={() => ask()} loading={busy} disabled={!input.trim()}>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => ask()}
+            loading={busy}
+            disabled={!input.trim()}
+          >
             <IconSparkle size={15} />
           </Button>
         </div>
@@ -166,7 +187,9 @@ function Message({ turn }: { turn: Turn }) {
   if (turn.role === 'user') {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[80%] rounded-2xl rounded-br-md bg-surface-2 px-4 py-2.5 text-[15px] text-ink">{turn.content}</div>
+        <div className="max-w-[80%] rounded-2xl rounded-br-md bg-surface-2 px-4 py-2.5 text-[15px] text-ink">
+          {turn.content}
+        </div>
       </div>
     );
   }
@@ -178,7 +201,9 @@ function Message({ turn }: { turn: Turn }) {
       <div className="min-w-0 flex-1">
         <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink">
           {turn.content}
-          {turn.streaming && <span className="ml-0.5 inline-block h-4 w-1.5 translate-y-0.5 animate-pulse bg-[var(--color-primary)]" />}
+          {turn.streaming && (
+            <span className="ml-0.5 inline-block h-4 w-1.5 translate-y-0.5 animate-pulse bg-[var(--color-primary)]" />
+          )}
         </div>
         {turn.citations && turn.citations.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
@@ -189,7 +214,9 @@ function Message({ turn }: { turn: Turn }) {
                 title={c.snippet}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2 py-1 text-[12px] text-ink-muted transition-colors hover:border-border-strong hover:text-ink"
               >
-                <span className="font-mono text-[10px] text-[var(--color-primary)]">[{c.index}]</span>
+                <span className="font-mono text-[10px] text-[var(--color-primary)]">
+                  [{c.index}]
+                </span>
                 <span className="max-w-40 truncate">{c.title ?? 'Untitled'}</span>
               </Link>
             ))}

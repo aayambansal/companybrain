@@ -5,7 +5,8 @@ describe('hubspotNoteDoc', () => {
   const note = {
     id: 123456,
     properties: {
-      hs_note_body: '<p>Called the customer &amp; agreed to a <a href="https://acme.com/renew">renewal</a>.</p>',
+      hs_note_body:
+        '<p>Called the customer &amp; agreed to a <a href="https://acme.com/renew">renewal</a>.</p>',
       hs_timestamp: '2024-01-16T03:20:00Z',
     },
   };
@@ -27,7 +28,10 @@ describe('hubspotNoteDoc', () => {
   });
 
   it('parses an epoch-millis timestamp string', () => {
-    const doc = hubspotNoteDoc({ id: 1, properties: { hs_note_body: 'Hi', hs_timestamp: '1705375200000' } });
+    const doc = hubspotNoteDoc({
+      id: 1,
+      properties: { hs_note_body: 'Hi', hs_timestamp: '1705375200000' },
+    });
     expect(doc.sourceCreatedAt?.toISOString()).toBe('2024-01-16T03:20:00.000Z');
   });
 

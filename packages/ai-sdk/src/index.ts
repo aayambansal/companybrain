@@ -34,7 +34,12 @@ export function companyBrainTools(client: CompanyBrain, options: CompanyBrainToo
         limit: z.number().int().min(1).max(20).optional().describe('How many passages to return'),
       }),
       execute: async ({ query, limit }) => {
-        const { hits } = await client.search({ q: query, limit: limit ?? 6, space: options.space, mode: 'hybrid' });
+        const { hits } = await client.search({
+          q: query,
+          limit: limit ?? 6,
+          space: options.space,
+          mode: 'hybrid',
+        });
         return hits.map((h) => ({
           title: h.document.title,
           content: h.content,
@@ -46,8 +51,11 @@ export function companyBrainTools(client: CompanyBrain, options: CompanyBrainToo
     }),
 
     askMemory: tool({
-      description: 'Ask the company knowledge base a question and get a grounded answer with citations.',
-      parameters: z.object({ question: z.string().describe('The question to answer from company memory') }),
+      description:
+        'Ask the company knowledge base a question and get a grounded answer with citations.',
+      parameters: z.object({
+        question: z.string().describe('The question to answer from company memory'),
+      }),
       execute: async ({ question }) => {
         const res = await client.chat({ message: question, space: options.space });
         return {
@@ -58,7 +66,8 @@ export function companyBrainTools(client: CompanyBrain, options: CompanyBrainToo
     }),
 
     addMemory: tool({
-      description: 'Store a new fact, decision, or note in the company knowledge base so it can be recalled later.',
+      description:
+        'Store a new fact, decision, or note in the company knowledge base so it can be recalled later.',
       parameters: z.object({
         content: z.string().describe('The text to remember'),
         title: z.string().optional(),

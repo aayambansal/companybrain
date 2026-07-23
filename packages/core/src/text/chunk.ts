@@ -54,9 +54,7 @@ export function chunkText(input: string, opts: Partial<ChunkOptions> = {}): Chun
   flush();
 
   // Re-index in case overlap logic produced empties.
-  return chunks
-    .filter((c) => c.content.length > 0)
-    .map((c, i) => ({ ...c, index: i }));
+  return chunks.filter((c) => c.content.length > 0).map((c, i) => ({ ...c, index: i }));
 }
 
 /** Recursively break text into pieces that each fit under maxTokens. */

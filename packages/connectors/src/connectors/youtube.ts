@@ -38,7 +38,8 @@ export function parseTimedText(xml: string): string {
 export const youtubeConnector: Connector = {
   id: 'youtube',
   displayName: 'YouTube',
-  description: 'Index a YouTube video: its title plus its English transcript when captions are available.',
+  description:
+    'Index a YouTube video: its title plus its English transcript when captions are available.',
   category: 'web',
   auth: 'none',
   configSchema: [
@@ -61,7 +62,10 @@ export const youtubeConnector: Connector = {
 
     let transcript = '';
     try {
-      const xml = await fetchText(`https://www.youtube.com/api/timedtext?lang=en&v=${id}`, ctx.signal);
+      const xml = await fetchText(
+        `https://www.youtube.com/api/timedtext?lang=en&v=${id}`,
+        ctx.signal,
+      );
       transcript = parseTimedText(xml);
     } catch (err) {
       ctx.log?.('transcript unavailable', { id, error: String(err) });

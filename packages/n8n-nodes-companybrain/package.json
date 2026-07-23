@@ -3,7 +3,12 @@
   "version": "0.1.0",
   "description": "n8n community node for CompanyBrain — search, add, and ask your company memory in any workflow.",
   "license": "MIT",
-  "keywords": ["n8n-community-node-package", "companybrain", "memory", "rag"],
+  "keywords": [
+    "n8n-community-node-package",
+    "companybrain",
+    "memory",
+    "rag"
+  ],
   "type": "commonjs",
   "scripts": {
     "build": "tsc",
@@ -12,10 +17,16 @@
   },
   "n8n": {
     "n8nNodesApiVersion": 1,
-    "credentials": ["dist/credentials/CompanyBrainApi.credentials.js"],
-    "nodes": ["dist/nodes/CompanyBrain/CompanyBrain.node.js"]
+    "credentials": [
+      "dist/credentials/CompanyBrainApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/CompanyBrain/CompanyBrain.node.js"
+    ]
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "peerDependencies": {
     "n8n-workflow": "*"
   },

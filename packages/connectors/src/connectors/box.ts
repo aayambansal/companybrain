@@ -58,8 +58,22 @@ export const boxConnector: Connector = {
   category: 'files',
   auth: 'oauth',
   configSchema: [
-    { key: 'accessToken', label: 'OAuth access token', type: 'password', required: true, placeholder: 'eyJ0....', help: 'A Box OAuth 2.0 access token with read access.' },
-    { key: 'folderId', label: 'Folder ID', type: 'string', required: false, placeholder: '0', help: 'Optional Box folder ID to index. Defaults to the root folder (0).' },
+    {
+      key: 'accessToken',
+      label: 'OAuth access token',
+      type: 'password',
+      required: true,
+      placeholder: 'eyJ0....',
+      help: 'A Box OAuth 2.0 access token with read access.',
+    },
+    {
+      key: 'folderId',
+      label: 'Folder ID',
+      type: 'string',
+      required: false,
+      placeholder: '0',
+      help: 'Optional Box folder ID to index. Defaults to the root folder (0).',
+    },
   ],
   async *pull(ctx) {
     const token = String(ctx.config.accessToken ?? '').trim();
@@ -72,10 +86,10 @@ export const boxConnector: Connector = {
       if (ctx.signal?.aborted) return;
       const folderId = queue.shift()!;
       const params = new URLSearchParams({ fields: 'id,name,type,modified_at', limit: '1000' });
-      const page = await fetchJson<BoxItems>(
-        `${API_BASE}/folders/${folderId}/items?${params}`,
-        { headers, signal: ctx.signal },
-      );
+      const page = await fetchJson<BoxItems>(`${API_BASE}/folders/${folderId}/items?${params}`, {
+        headers,
+        signal: ctx.signal,
+      });
       for (const item of page.entries ?? []) {
         if (ctx.signal?.aborted) return;
         if (item.type === 'folder' && item.id) {

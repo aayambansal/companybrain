@@ -273,14 +273,16 @@ function cmdConfig(): void {
 async function cmdLogin(): Promise<void> {
   const current = resolveConfig();
   const rl = createInterface({ input: process.stdin, output: process.stdout });
-  const question = (q: string): Promise<string> => new Promise((resolve) => rl.question(q, resolve));
+  const question = (q: string): Promise<string> =>
+    new Promise((resolve) => rl.question(q, resolve));
 
   try {
     const url = (await question(`API URL [${current.apiUrl}]: `)).trim() || current.apiUrl;
     const key = (await question('API key: ')).trim();
     const cfg: { apiUrl: string; apiKey?: string } = { apiUrl: url };
     if (key) cfg.apiKey = key;
-    else if (current.apiKey && current.sources.apiKey === 'config file') cfg.apiKey = current.apiKey;
+    else if (current.apiKey && current.sources.apiKey === 'config file')
+      cfg.apiKey = current.apiKey;
     const path = saveConfig(cfg);
     out(ui.green('Saved ') + path);
   } finally {

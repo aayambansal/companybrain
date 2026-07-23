@@ -3,7 +3,13 @@ import { getCookie } from 'hono/cookie';
 import { verify, sign } from 'hono/jwt';
 import { and, eq, isNull, or, gt } from 'drizzle-orm';
 import { apiKeys } from '@companybrain/db';
-import { getEngine, getEnv, ensureDefaultOrg, type AuthContext, type Variables } from './context.js';
+import {
+  getEngine,
+  getEnv,
+  ensureDefaultOrg,
+  type AuthContext,
+  type Variables,
+} from './context.js';
 import { hashApiKey } from './crypto.js';
 
 export const SESSION_COOKIE = 'cb_session';
@@ -14,7 +20,11 @@ export interface SessionClaims {
   exp?: number;
 }
 
-export async function signSession(userId: string, orgId: string, ttlSeconds = 60 * 60 * 24 * 7): Promise<string> {
+export async function signSession(
+  userId: string,
+  orgId: string,
+  ttlSeconds = 60 * 60 * 24 * 7,
+): Promise<string> {
   const env = getEnv();
   const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
   return sign({ sub: userId, org: orgId, exp }, env.jwtSecret);

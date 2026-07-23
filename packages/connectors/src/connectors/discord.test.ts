@@ -25,7 +25,10 @@ describe('discordMessageDoc', () => {
   it('skips empty messages and bot noise', () => {
     expect(discordMessageDoc({ id: '1', content: '   ' }, 'chan-1')).toBeNull();
     expect(
-      discordMessageDoc({ id: '2', content: 'beep boop', author: { username: 'bot', bot: true } }, 'chan-1'),
+      discordMessageDoc(
+        { id: '2', content: 'beep boop', author: { username: 'bot', bot: true } },
+        'chan-1',
+      ),
     ).toBeNull();
   });
 });

@@ -7,7 +7,7 @@ describe('gitlabIssueDoc', () => {
       id: 4001,
       iid: 42,
       title: 'Add GitLab connector',
-      description: 'Index a project\'s issues into the brain.',
+      description: "Index a project's issues into the brain.",
       web_url: 'https://gitlab.com/group/project/-/issues/42',
       updated_at: '2024-03-01T12:30:00.000Z',
     });
@@ -15,7 +15,7 @@ describe('gitlabIssueDoc', () => {
     expect(doc.sourceType).toBe('gitlab_issue');
     expect(doc.sourceUrl).toBe('https://gitlab.com/group/project/-/issues/42');
     expect(doc.title).toBe('#42 Add GitLab connector');
-    expect(doc.content).toBe('Add GitLab connector\n\nIndex a project\'s issues into the brain.');
+    expect(doc.content).toBe("Add GitLab connector\n\nIndex a project's issues into the brain.");
     expect(doc.tags).toEqual(['gitlab']);
     expect(doc.sourceUpdatedAt).toBeInstanceOf(Date);
     expect(doc.sourceUpdatedAt?.toISOString()).toBe('2024-03-01T12:30:00.000Z');

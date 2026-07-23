@@ -3,7 +3,9 @@ import { extractYoutubeId, parseTimedText } from './youtube.js';
 
 describe('extractYoutubeId', () => {
   it('pulls the id from a watch URL', () => {
-    expect(extractYoutubeId('https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s')).toBe('dQw4w9WgXcQ');
+    expect(extractYoutubeId('https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s')).toBe(
+      'dQw4w9WgXcQ',
+    );
   });
   it('pulls the id from a youtu.be short URL', () => {
     expect(extractYoutubeId('https://youtu.be/dQw4w9WgXcQ?si=abc')).toBe('dQw4w9WgXcQ');

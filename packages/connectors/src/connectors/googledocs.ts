@@ -16,7 +16,8 @@ export function extractGoogleDocId(input: string): string | null {
 export const googleDocsConnector: Connector = {
   id: 'googledocs',
   displayName: 'Google Docs',
-  description: 'Index a Google Doc via its plain-text export. The doc must be shared so anyone with the link can view.',
+  description:
+    'Index a Google Doc via its plain-text export. The doc must be shared so anyone with the link can view.',
   category: 'docs',
   auth: 'none',
   configSchema: [
@@ -28,7 +29,13 @@ export const googleDocsConnector: Connector = {
       placeholder: 'https://docs.google.com/document/d/…/edit',
       help: 'Share the doc as "anyone with the link can view", then paste its URL.',
     },
-    { key: 'title', label: 'Title', type: 'string', required: false, help: 'Optional title override.' },
+    {
+      key: 'title',
+      label: 'Title',
+      type: 'string',
+      required: false,
+      help: 'Optional title override.',
+    },
   ],
   async *pull(ctx) {
     const id = extractGoogleDocId(String(ctx.config.url ?? ''));
@@ -40,7 +47,13 @@ export const googleDocsConnector: Connector = {
       sourceId: id,
       sourceType: 'google_doc',
       sourceUrl: `https://docs.google.com/document/d/${id}/edit`,
-      title: (ctx.config.title ? String(ctx.config.title) : '') || content.split('\n').find((l) => l.trim())?.slice(0, 120) || 'Google Doc',
+      title:
+        (ctx.config.title ? String(ctx.config.title) : '') ||
+        content
+          .split('\n')
+          .find((l) => l.trim())
+          ?.slice(0, 120) ||
+        'Google Doc',
       content,
       tags: ['google-docs'],
       metadata: { docId: id },

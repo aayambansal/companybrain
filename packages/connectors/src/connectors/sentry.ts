@@ -13,7 +13,9 @@ export interface SentryIssue {
 
 /** Pure: map a Sentry issue into a SourceDocument. Unit-testable. */
 export function sentryIssueDoc(issue: SentryIssue): SourceDocument {
-  const content = [issue.title, issue.culprit, `seen ${issue.count} times`].filter(Boolean).join('\n\n');
+  const content = [issue.title, issue.culprit, `seen ${issue.count} times`]
+    .filter(Boolean)
+    .join('\n\n');
   return {
     sourceId: issue.id,
     sourceType: 'sentry_issue',
@@ -73,7 +75,10 @@ export const sentryConnector: Connector = {
     if (!token) throw new Error('sentry connector: config.token is required');
     if (!org) throw new Error('sentry connector: config.org is required');
     if (!project) throw new Error('sentry connector: config.project is required');
-    const baseUrl = (ctx.config.baseUrl ? String(ctx.config.baseUrl) : 'https://sentry.io').replace(/\/$/, '');
+    const baseUrl = (ctx.config.baseUrl ? String(ctx.config.baseUrl) : 'https://sentry.io').replace(
+      /\/$/,
+      '',
+    );
     const headers = { authorization: `Bearer ${token}` };
 
     const url = `${baseUrl}/api/0/projects/${encodeURIComponent(org)}/${encodeURIComponent(

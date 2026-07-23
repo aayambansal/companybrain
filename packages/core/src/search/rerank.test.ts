@@ -40,7 +40,14 @@ describe('parseScores', () => {
 describe('llmRerankPointwise', () => {
   const hits = [hit('a'), hit('b'), hit('c')];
   function stub(reply: string, available = true): LlmProvider {
-    return { name: 'stub', model: 'stub', available, async complete() { return reply; } } as unknown as LlmProvider;
+    return {
+      name: 'stub',
+      model: 'stub',
+      available,
+      async complete() {
+        return reply;
+      },
+    } as unknown as LlmProvider;
   }
 
   it('sorts by score descending, original order breaking ties', async () => {
@@ -49,8 +56,14 @@ describe('llmRerankPointwise', () => {
   });
 
   it('falls back to input order when no scores parse or no LLM', async () => {
-    expect((await llmRerankPointwise(stub('nonsense'), 'q', hits)).map((h) => h.chunkId)).toEqual(['a', 'b', 'c']);
-    expect((await llmRerankPointwise(stub('0: 9', false), 'q', hits)).map((h) => h.chunkId)).toEqual(['a', 'b', 'c']);
+    expect((await llmRerankPointwise(stub('nonsense'), 'q', hits)).map((h) => h.chunkId)).toEqual([
+      'a',
+      'b',
+      'c',
+    ]);
+    expect(
+      (await llmRerankPointwise(stub('0: 9', false), 'q', hits)).map((h) => h.chunkId),
+    ).toEqual(['a', 'b', 'c']);
   });
 });
 

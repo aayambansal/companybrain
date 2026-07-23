@@ -30,8 +30,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     'inline-flex items-center justify-center font-medium select-none transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed';
   const variants: Record<ButtonVariant, string> = {
     primary: 'btn-primary',
-    secondary:
-      'bg-surface-2 text-ink border border-border-strong hover:bg-surface-hover',
+    secondary: 'bg-surface-2 text-ink border border-border-strong hover:bg-surface-hover',
     ghost: 'text-ink-muted hover:text-ink hover:bg-surface-2',
     danger:
       'bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-ink',
@@ -67,22 +66,23 @@ export const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTML
   },
 );
 
-export const Textarea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(
-  function Textarea({ className, ...rest }, ref) {
-    return (
-      <textarea
-        ref={ref}
-        className={cx(
-          'w-full rounded-md border border-border bg-bg-subtle px-3 py-2.5 text-sm text-ink leading-relaxed',
-          'placeholder:text-ink-faint transition-colors resize-y',
-          'hover:border-border-strong focus:border-[var(--color-primary-line)]',
-          className,
-        )}
-        {...rest}
-      />
-    );
-  },
-);
+export const Textarea = forwardRef<
+  HTMLTextAreaElement,
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>
+>(function Textarea({ className, ...rest }, ref) {
+  return (
+    <textarea
+      ref={ref}
+      className={cx(
+        'w-full rounded-md border border-border bg-bg-subtle px-3 py-2.5 text-sm text-ink leading-relaxed',
+        'placeholder:text-ink-faint transition-colors resize-y',
+        'hover:border-border-strong focus:border-[var(--color-primary-line)]',
+        className,
+      )}
+      {...rest}
+    />
+  );
+});
 
 export const Select = forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<HTMLSelectElement>>(
   function Select({ className, children, ...rest }, ref) {
@@ -134,10 +134,13 @@ export function Field({
 type BadgeTone = 'neutral' | 'primary' | 'success' | 'warn' | 'danger' | 'info';
 const badgeTone: Record<BadgeTone, string> = {
   neutral: 'bg-surface-2 text-ink-muted border-border',
-  primary: 'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)] border-[var(--color-primary-line)]',
-  success: 'bg-[var(--color-success-soft)] text-[var(--color-success)] border-[color-mix(in_oklch,var(--color-success),transparent_60%)]',
+  primary:
+    'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)] border-[var(--color-primary-line)]',
+  success:
+    'bg-[var(--color-success-soft)] text-[var(--color-success)] border-[color-mix(in_oklch,var(--color-success),transparent_60%)]',
   warn: 'bg-[color-mix(in_oklch,var(--color-warn),transparent_85%)] text-[var(--color-warn)] border-[color-mix(in_oklch,var(--color-warn),transparent_60%)]',
-  danger: 'bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[color-mix(in_oklch,var(--color-danger),transparent_55%)]',
+  danger:
+    'bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[color-mix(in_oklch,var(--color-danger),transparent_55%)]',
   info: 'bg-[var(--color-info-soft)] text-[var(--color-info)] border-[color-mix(in_oklch,var(--color-info),transparent_60%)]',
 };
 
@@ -178,7 +181,10 @@ export function StatusDot({ status }: { status: string }) {
   return (
     <span
       className="inline-block size-1.5 rounded-full"
-      style={{ background: tone, animation: status === 'processing' ? 'cb-pulse 1.4s ease-in-out infinite' : undefined }}
+      style={{
+        background: tone,
+        animation: status === 'processing' ? 'cb-pulse 1.4s ease-in-out infinite' : undefined,
+      }}
       title={status}
     />
   );

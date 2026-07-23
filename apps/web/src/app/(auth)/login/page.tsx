@@ -32,7 +32,11 @@ export default function LoginPage() {
       await api.post('/v1/auth/login', { email, password });
       router.replace('/');
     } catch (err) {
-      setError(err instanceof ApiError && err.status === 401 ? 'Wrong email or password.' : 'Could not sign in.');
+      setError(
+        err instanceof ApiError && err.status === 401
+          ? 'Wrong email or password.'
+          : 'Could not sign in.',
+      );
       setLoading(false);
     }
   }

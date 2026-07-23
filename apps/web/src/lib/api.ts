@@ -5,7 +5,10 @@
  * with cookie credentials (the API sets an httpOnly `cb_session` cookie on
  * login/register and allows the dashboard origin with credentials).
  */
-export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3333').replace(/\/$/, '');
+export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3333').replace(
+  /\/$/,
+  '',
+);
 
 export class ApiError extends Error {
   status: number;
@@ -29,7 +32,11 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   const data = text ? safeJson(text) : undefined;
   if (!res.ok) {
     const e = (data ?? {}) as { error?: string; message?: string };
-    throw new ApiError(e.message ?? e.error ?? `Request failed (${res.status})`, res.status, e.error);
+    throw new ApiError(
+      e.message ?? e.error ?? `Request failed (${res.status})`,
+      res.status,
+      e.error,
+    );
   }
   return data as T;
 }
@@ -43,17 +50,23 @@ function safeJson(t: string): unknown {
 }
 
 export const api = {
-  get: <T,>(p: string) => request<T>('GET', p),
-  post: <T,>(p: string, b?: unknown) => request<T>('POST', p, b),
-  put: <T,>(p: string, b?: unknown) => request<T>('PUT', p, b),
-  patch: <T,>(p: string, b?: unknown) => request<T>('PATCH', p, b),
-  del: <T,>(p: string) => request<T>('DELETE', p),
+  get: <T>(p: string) => request<T>('GET', p),
+  post: <T>(p: string, b?: unknown) => request<T>('POST', p, b),
+  put: <T>(p: string, b?: unknown) => request<T>('PUT', p, b),
+  patch: <T>(p: string, b?: unknown) => request<T>('PATCH', p, b),
+  del: <T>(p: string) => request<T>('DELETE', p),
 };
 
 // ── Types (mirror the API) ─────────────────────────────────────────────────
 export interface Me {
   org: { id: string; name: string; slug: string } | null;
-  user: { id: string; email: string | null; name: string | null; role: string; avatarUrl: string | null } | null;
+  user: {
+    id: string;
+    email: string | null;
+    name: string | null;
+    role: string;
+    avatarUrl: string | null;
+  } | null;
   via: string;
   authMode?: 'single' | 'multi';
 }
@@ -79,7 +92,13 @@ export interface SearchHit {
   scores: { vector?: number; keyword?: number; fused: number };
   content: string;
   chunkIndex: number;
-  document: { id: string; title: string | null; sourceUrl: string | null; connector: string; tags: string[] };
+  document: {
+    id: string;
+    title: string | null;
+    sourceUrl: string | null;
+    connector: string;
+    tags: string[];
+  };
 }
 export interface SearchResponse {
   query: string;

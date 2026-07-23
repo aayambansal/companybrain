@@ -75,7 +75,11 @@ export function parseSupersedeResponse(text: string, validIds: string[]): Supers
     if (!id || !valid.has(id) || seen.has(id)) continue;
     if (row.supersedes !== true) continue;
     seen.add(id);
-    out.push({ id, supersedes: true, reason: typeof row.reason === 'string' ? row.reason.slice(0, 300) : '' });
+    out.push({
+      id,
+      supersedes: true,
+      reason: typeof row.reason === 'string' ? row.reason.slice(0, 300) : '',
+    });
   }
   return out;
 }
@@ -97,7 +101,10 @@ export async function judgeSupersession(
       temperature: 0,
       maxTokens: 400,
     });
-    return parseSupersedeResponse(reply, candidates.map((c) => c.id));
+    return parseSupersedeResponse(
+      reply,
+      candidates.map((c) => c.id),
+    );
   } catch {
     return [];
   }

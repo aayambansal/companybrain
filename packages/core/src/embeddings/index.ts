@@ -7,7 +7,12 @@ import { OllamaEmbeddingProvider } from './ollama.js';
 import { GoogleEmbeddingProvider } from './google.js';
 
 export * from './types.js';
-export { LocalEmbeddingProvider, OpenAIEmbeddingProvider, OllamaEmbeddingProvider, GoogleEmbeddingProvider };
+export {
+  LocalEmbeddingProvider,
+  OpenAIEmbeddingProvider,
+  OllamaEmbeddingProvider,
+  GoogleEmbeddingProvider,
+};
 
 /** Build an embedding provider from engine config. */
 export function createEmbeddingProvider(config: EngineConfig): EmbeddingProvider {

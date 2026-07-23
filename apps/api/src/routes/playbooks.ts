@@ -1,7 +1,12 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import { z } from 'zod';
-import { buildPlaybookPrompt, buildContext, toCitations, PLAYBOOK_SYSTEM } from '@companybrain/core';
+import {
+  buildPlaybookPrompt,
+  buildContext,
+  toCitations,
+  PLAYBOOK_SYSTEM,
+} from '@companybrain/core';
 import { getEngine, type Variables } from '../context.js';
 
 const app = new Hono<{ Variables: Variables }>();
@@ -19,7 +24,8 @@ app.post('/', async (c) => {
   const auth = c.get('auth');
   const body = await c.req.json().catch(() => ({}));
   const parsed = playbookSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   const d = parsed.data;
   const engine = getEngine();
 
@@ -55,7 +61,8 @@ app.post('/stream', async (c) => {
   const auth = c.get('auth');
   const body = await c.req.json().catch(() => ({}));
   const parsed = playbookSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   const d = parsed.data;
   const engine = getEngine();
 

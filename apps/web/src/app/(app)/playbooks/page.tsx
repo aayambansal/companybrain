@@ -40,7 +40,11 @@ export default function PlaybooksPage() {
 
   function downloadMarkdown() {
     if (!playbook) return;
-    const slug = (playbook.title || 'playbook').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'playbook';
+    const slug =
+      (playbook.title || 'playbook')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '') || 'playbook';
     const url = URL.createObjectURL(new Blob([playbook.content], { type: 'text/markdown' }));
     const a = document.createElement('a');
     a.href = url;
@@ -126,7 +130,13 @@ export default function PlaybooksPage() {
           placeholder="A topic to write up — e.g. how we ship a release"
           className="h-11 flex-1 text-[15px]"
         />
-        <Button variant="primary" size="lg" onClick={() => generate()} loading={busy} disabled={!topic.trim()}>
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={() => generate()}
+          loading={busy}
+          disabled={!topic.trim()}
+        >
           <IconSparkle size={16} />
           Generate
         </Button>
@@ -179,10 +189,16 @@ export default function PlaybooksPage() {
               <button onClick={copyMarkdown} className="text-[13px] text-ink-faint hover:text-ink">
                 {copied ? 'Copied' : 'Copy'}
               </button>
-              <button onClick={downloadMarkdown} className="text-[13px] text-ink-faint hover:text-ink">
+              <button
+                onClick={downloadMarkdown}
+                className="text-[13px] text-ink-faint hover:text-ink"
+              >
                 Download .md
               </button>
-              <button onClick={() => generate()} className="text-[13px] text-ink-faint hover:text-ink">
+              <button
+                onClick={() => generate()}
+                className="text-[13px] text-ink-faint hover:text-ink"
+              >
                 Regenerate
               </button>
             </div>
@@ -191,7 +207,9 @@ export default function PlaybooksPage() {
             <Markdown source={playbook.content} />
             {playbook.citations.length > 0 && (
               <div className="mt-8 border-t border-border pt-5">
-                <p className="mb-3 font-mono text-[11px] uppercase tracking-wider text-ink-faint">Sources</p>
+                <p className="mb-3 font-mono text-[11px] uppercase tracking-wider text-ink-faint">
+                  Sources
+                </p>
                 <div className="flex flex-wrap gap-1.5">
                   {playbook.citations.map((c) => (
                     <Link
@@ -200,7 +218,9 @@ export default function PlaybooksPage() {
                       title={c.snippet}
                       className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2 py-1 text-[12px] text-ink-muted transition-colors hover:border-border-strong hover:text-ink"
                     >
-                      <span className="font-mono text-[10px] text-[var(--color-primary)]">[{c.index}]</span>
+                      <span className="font-mono text-[10px] text-[var(--color-primary)]">
+                        [{c.index}]
+                      </span>
                       <span className="max-w-40 truncate">{c.title ?? 'Untitled'}</span>
                     </Link>
                   ))}
@@ -239,7 +259,10 @@ function Markdown({ source }: { source: string }) {
     if (/^#\s+/.test(line)) {
       flush();
       out.push(
-        <h1 key={out.length} className="mb-1 font-display text-2xl font-semibold tracking-tight text-ink">
+        <h1
+          key={out.length}
+          className="mb-1 font-display text-2xl font-semibold tracking-tight text-ink"
+        >
           {line.replace(/^#\s+/, '')}
         </h1>,
       );

@@ -54,7 +54,11 @@ async function exportDriveText(
   } else {
     return null;
   }
-  const res = await fetch(url, { headers: { ...headers, accept: '*/*' }, signal, redirect: 'follow' });
+  const res = await fetch(url, {
+    headers: { ...headers, accept: '*/*' },
+    signal,
+    redirect: 'follow',
+  });
   if (!res.ok) throw new Error(`GET ${url} -> ${res.status} ${res.statusText}`);
   return res.text();
 }
@@ -66,9 +70,30 @@ export const googleDriveConnector: Connector = {
   category: 'files',
   auth: 'oauth',
   configSchema: [
-    { key: 'accessToken', label: 'OAuth access token', type: 'password', required: true, placeholder: 'ya29....', help: 'A Google OAuth 2.0 access token with the drive.readonly scope.' },
-    { key: 'query', label: 'Drive query', type: 'string', required: false, placeholder: DEFAULT_QUERY, help: 'A Google Drive v3 files.list query. Defaults to excluding folders.' },
-    { key: 'max', label: 'Max files', type: 'number', required: false, placeholder: '50', help: 'Maximum number of files to fetch.' },
+    {
+      key: 'accessToken',
+      label: 'OAuth access token',
+      type: 'password',
+      required: true,
+      placeholder: 'ya29....',
+      help: 'A Google OAuth 2.0 access token with the drive.readonly scope.',
+    },
+    {
+      key: 'query',
+      label: 'Drive query',
+      type: 'string',
+      required: false,
+      placeholder: DEFAULT_QUERY,
+      help: 'A Google Drive v3 files.list query. Defaults to excluding folders.',
+    },
+    {
+      key: 'max',
+      label: 'Max files',
+      type: 'number',
+      required: false,
+      placeholder: '50',
+      help: 'Maximum number of files to fetch.',
+    },
   ],
   async *pull(ctx) {
     const token = String(ctx.config.accessToken ?? '').trim();

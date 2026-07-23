@@ -14,7 +14,9 @@ describe('todoistTaskDoc', () => {
     expect(doc.sourceType).toBe('todoist_task');
     expect(doc.sourceUrl).toBe('https://todoist.com/showTask?id=2995104339');
     expect(doc.title).toBe('Ship the Todoist connector');
-    expect(doc.content).toBe('Ship the Todoist connector\n\nIndex tasks by content and description.');
+    expect(doc.content).toBe(
+      'Ship the Todoist connector\n\nIndex tasks by content and description.',
+    );
     expect(doc.tags).toEqual(['todoist']);
     expect(doc.sourceCreatedAt).toBeInstanceOf(Date);
     expect(doc.sourceCreatedAt?.toISOString()).toBe('2024-05-20T09:15:00.000Z');

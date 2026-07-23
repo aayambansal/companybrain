@@ -177,7 +177,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={`shrink-0 rounded-md px-3 py-1.5 text-[13px] ${
-                  active ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]' : 'text-ink-muted'
+                  active
+                    ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]'
+                    : 'text-ink-muted'
                 }`}
               >
                 {item.label}
@@ -208,7 +210,9 @@ export function Page({
     <div className="mx-auto w-full max-w-6xl px-5 py-6 md:px-8 md:py-8">
       <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink">{title}</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink">
+            {title}
+          </h1>
           {subtitle && <p className="mt-1.5 text-[15px] text-ink-muted">{subtitle}</p>}
         </div>
         {actions && <div className="flex items-center gap-2">{actions}</div>}

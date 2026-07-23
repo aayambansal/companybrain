@@ -79,7 +79,8 @@ export const telegramConnector: Connector = {
     const chatFilter = String(ctx.config.chatId ?? '').trim();
 
     const startCursor = Number(ctx.cursor);
-    let offset: number | undefined = ctx.cursor && Number.isFinite(startCursor) ? startCursor : undefined;
+    let offset: number | undefined =
+      ctx.cursor && Number.isFinite(startCursor) ? startCursor : undefined;
     for (;;) {
       if (ctx.signal?.aborted) return;
       const params = new URLSearchParams({ limit: '100' });

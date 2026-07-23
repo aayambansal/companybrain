@@ -29,7 +29,8 @@ export function gitlabIssueDoc(issue: GitLabIssue): SourceDocument {
 export const gitlabConnector: Connector = {
   id: 'gitlab',
   displayName: 'GitLab',
-  description: 'Index issues (title + description) from a GitLab project via a personal access token.',
+  description:
+    'Index issues (title + description) from a GitLab project via a personal access token.',
   category: 'code',
   auth: 'apiKey',
   configSchema: [
@@ -63,7 +64,9 @@ export const gitlabConnector: Connector = {
     const projectId = String(ctx.config.projectId ?? '').trim();
     if (!token) throw new Error('gitlab connector: config.token is required');
     if (!projectId) throw new Error('gitlab connector: config.projectId is required');
-    const baseUrl = (ctx.config.baseUrl ? String(ctx.config.baseUrl) : 'https://gitlab.com').replace(/\/$/, '');
+    const baseUrl = (
+      ctx.config.baseUrl ? String(ctx.config.baseUrl) : 'https://gitlab.com'
+    ).replace(/\/$/, '');
     const headers = { 'PRIVATE-TOKEN': token };
 
     for (let page = 1; ; page++) {

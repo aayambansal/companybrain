@@ -26,7 +26,10 @@ describe('granolaMeetingDoc', () => {
   });
 
   it('accepts participants alias and drops empty meetings', () => {
-    expect(granolaMeetingDoc({ notes: 'x', participants: ['Ann'] }, 0)?.tags).toEqual(['granola', 'ann']);
+    expect(granolaMeetingDoc({ notes: 'x', participants: ['Ann'] }, 0)?.tags).toEqual([
+      'granola',
+      'ann',
+    ]);
     expect(granolaMeetingDoc({}, 0)).toBeNull();
   });
 });

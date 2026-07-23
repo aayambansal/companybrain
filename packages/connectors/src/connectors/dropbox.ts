@@ -62,12 +62,27 @@ async function downloadText(
 export const dropboxConnector: Connector = {
   id: 'dropbox',
   displayName: 'Dropbox',
-  description: 'Index text and markdown files from Dropbox via the API v2 with an OAuth access token.',
+  description:
+    'Index text and markdown files from Dropbox via the API v2 with an OAuth access token.',
   category: 'files',
   auth: 'oauth',
   configSchema: [
-    { key: 'accessToken', label: 'OAuth access token', type: 'password', required: true, placeholder: 'sl....', help: 'A Dropbox OAuth 2.0 access token with the files.content.read scope.' },
-    { key: 'path', label: 'Folder path', type: 'string', required: false, placeholder: '/Notes', help: 'Optional folder path to index. Defaults to the root.' },
+    {
+      key: 'accessToken',
+      label: 'OAuth access token',
+      type: 'password',
+      required: true,
+      placeholder: 'sl....',
+      help: 'A Dropbox OAuth 2.0 access token with the files.content.read scope.',
+    },
+    {
+      key: 'path',
+      label: 'Folder path',
+      type: 'string',
+      required: false,
+      placeholder: '/Notes',
+      help: 'Optional folder path to index. Defaults to the root.',
+    },
   ],
   async *pull(ctx) {
     const token = String(ctx.config.accessToken ?? '').trim();

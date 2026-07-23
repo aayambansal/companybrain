@@ -7,24 +7,47 @@ export function openapiDocument(version: string): Record<string, unknown> {
     info: {
       title: 'CompanyBrain API',
       version,
-      description: 'The open-source memory layer for your company. Index everything, recall anything.',
+      description:
+        'The open-source memory layer for your company. Index everything, recall anything.',
       license: { name: 'MIT' },
     },
     servers: [{ url: '/', description: 'this server' }],
     security: bearer,
     components: {
       securitySchemes: {
-        bearerAuth: { type: 'http', scheme: 'bearer', description: 'API key (cb_...) or session JWT.' },
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          description: 'API key (cb_...) or session JWT.',
+        },
       },
     },
     paths: {
-      '/health': { get: { summary: 'Liveness', security: [], responses: { 200: { description: 'ok' } } } },
-      '/v1/status': { get: { summary: 'Build info, provider config, and org counts', responses: { 200: { description: 'status' } } } },
+      '/health': {
+        get: { summary: 'Liveness', security: [], responses: { 200: { description: 'ok' } } },
+      },
+      '/v1/status': {
+        get: {
+          summary: 'Build info, provider config, and org counts',
+          responses: { 200: { description: 'status' } },
+        },
+      },
       '/v1/auth/register': {
         post: {
           summary: 'Create an organization and its first owner',
           security: [],
-          requestBody: { content: json({ type: 'object', required: ['email', 'password'], properties: { email: { type: 'string' }, password: { type: 'string' }, name: { type: 'string' }, orgName: { type: 'string' } } }) },
+          requestBody: {
+            content: json({
+              type: 'object',
+              required: ['email', 'password'],
+              properties: {
+                email: { type: 'string' },
+                password: { type: 'string' },
+                name: { type: 'string' },
+                orgName: { type: 'string' },
+              },
+            }),
+          },
           responses: { 201: { description: 'created' }, 409: { description: 'email taken' } },
         },
       },
@@ -32,11 +55,19 @@ export function openapiDocument(version: string): Record<string, unknown> {
         post: {
           summary: 'Log in, returns a session token + sets a cookie',
           security: [],
-          requestBody: { content: json({ type: 'object', required: ['email', 'password'], properties: { email: { type: 'string' }, password: { type: 'string' } } }) },
+          requestBody: {
+            content: json({
+              type: 'object',
+              required: ['email', 'password'],
+              properties: { email: { type: 'string' }, password: { type: 'string' } },
+            }),
+          },
           responses: { 200: { description: 'ok' }, 401: { description: 'invalid credentials' } },
         },
       },
-      '/v1/auth/me': { get: { summary: 'Current org + user', responses: { 200: { description: 'ok' } } } },
+      '/v1/auth/me': {
+        get: { summary: 'Current org + user', responses: { 200: { description: 'ok' } } },
+      },
       '/v1/memories': {
         get: {
           summary: 'List memories',
@@ -50,36 +81,97 @@ export function openapiDocument(version: string): Record<string, unknown> {
         },
         post: {
           summary: 'Add a memory',
-          requestBody: { content: json({ type: 'object', required: ['content'], properties: { title: { type: 'string' }, content: { type: 'string' }, format: { type: 'string', enum: ['text', 'markdown', 'html'] }, space: { type: 'string' }, tags: { type: 'array', items: { type: 'string' } }, sourceUrl: { type: 'string' }, metadata: { type: 'object' } } }) },
+          requestBody: {
+            content: json({
+              type: 'object',
+              required: ['content'],
+              properties: {
+                title: { type: 'string' },
+                content: { type: 'string' },
+                format: { type: 'string', enum: ['text', 'markdown', 'html'] },
+                space: { type: 'string' },
+                tags: { type: 'array', items: { type: 'string' } },
+                sourceUrl: { type: 'string' },
+                metadata: { type: 'object' },
+              },
+            }),
+          },
           responses: { 201: { description: 'created' } },
         },
       },
       '/v1/memories/{id}': {
-        get: { summary: 'Get a memory', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: 'ok' }, 404: { description: 'not found' } } },
-        patch: { summary: 'Update a memory', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: 'ok' } } },
-        delete: { summary: 'Delete a memory', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: 'ok' } } },
+        get: {
+          summary: 'Get a memory',
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'ok' }, 404: { description: 'not found' } },
+        },
+        patch: {
+          summary: 'Update a memory',
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'ok' } },
+        },
+        delete: {
+          summary: 'Delete a memory',
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'ok' } },
+        },
       },
       '/v1/search': {
         get: {
           summary: 'Search memories',
           parameters: [
             { name: 'q', in: 'query', required: true, schema: { type: 'string' } },
-            { name: 'mode', in: 'query', schema: { type: 'string', enum: ['hybrid', 'semantic', 'keyword'] } },
+            {
+              name: 'mode',
+              in: 'query',
+              schema: { type: 'string', enum: ['hybrid', 'semantic', 'keyword'] },
+            },
             { name: 'space', in: 'query', schema: { type: 'string' } },
             { name: 'limit', in: 'query', schema: { type: 'integer' } },
           ],
           responses: { 200: { description: 'ranked hits' } },
         },
-        post: { summary: 'Search with a JSON body', requestBody: { content: json({ type: 'object', required: ['q'], properties: { q: { type: 'string' }, mode: { type: 'string' }, space: { type: 'string' }, limit: { type: 'integer' }, tags: { type: 'array', items: { type: 'string' } } } }) }, responses: { 200: { description: 'ranked hits' } } },
+        post: {
+          summary: 'Search with a JSON body',
+          requestBody: {
+            content: json({
+              type: 'object',
+              required: ['q'],
+              properties: {
+                q: { type: 'string' },
+                mode: { type: 'string' },
+                space: { type: 'string' },
+                limit: { type: 'integer' },
+                tags: { type: 'array', items: { type: 'string' } },
+              },
+            }),
+          },
+          responses: { 200: { description: 'ranked hits' } },
+        },
       },
       '/v1/chat': {
         post: {
           summary: 'RAG answer with citations',
-          requestBody: { content: json({ type: 'object', required: ['message'], properties: { message: { type: 'string' }, space: { type: 'string' }, limit: { type: 'integer' } } }) },
+          requestBody: {
+            content: json({
+              type: 'object',
+              required: ['message'],
+              properties: {
+                message: { type: 'string' },
+                space: { type: 'string' },
+                limit: { type: 'integer' },
+              },
+            }),
+          },
           responses: { 200: { description: 'answer' } },
         },
       },
-      '/v1/chat/stream': { post: { summary: 'RAG answer, streamed over SSE', responses: { 200: { description: 'text/event-stream' } } } },
+      '/v1/chat/stream': {
+        post: {
+          summary: 'RAG answer, streamed over SSE',
+          responses: { 200: { description: 'text/event-stream' } },
+        },
+      },
       '/v1/playbooks': {
         post: {
           summary: 'Synthesize a cited playbook from memories on a topic',
@@ -118,11 +210,25 @@ export function openapiDocument(version: string): Record<string, unknown> {
         get: { summary: 'List configured connections', responses: { 200: { description: 'ok' } } },
         post: { summary: 'Configure a connector', responses: { 201: { description: 'created' } } },
       },
-      '/v1/connections/available': { get: { summary: 'List available connector types', responses: { 200: { description: 'ok' } } } },
-      '/v1/connections/{id}/sync': { post: { summary: 'Trigger a sync', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { 202: { description: 'started' }, 501: { description: 'no runner' } } } },
+      '/v1/connections/available': {
+        get: {
+          summary: 'List available connector types',
+          responses: { 200: { description: 'ok' } },
+        },
+      },
+      '/v1/connections/{id}/sync': {
+        post: {
+          summary: 'Trigger a sync',
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { 202: { description: 'started' }, 501: { description: 'no runner' } },
+        },
+      },
       '/v1/api-keys': {
         get: { summary: 'List API keys', responses: { 200: { description: 'ok' } } },
-        post: { summary: 'Create an API key (secret shown once)', responses: { 201: { description: 'created' } } },
+        post: {
+          summary: 'Create an API key (secret shown once)',
+          responses: { 201: { description: 'created' } },
+        },
       },
     },
   };

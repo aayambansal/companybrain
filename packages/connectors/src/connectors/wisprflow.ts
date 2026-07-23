@@ -105,7 +105,9 @@ export function parseWisprFlowExport(raw: string): WisprFlowEntry[] {
       if (Array.isArray(v)) return v as WisprFlowEntry[];
     }
   }
-  throw new Error('wispr flow connector: export is not an array or a known wrapper ({ flows: [...] })');
+  throw new Error(
+    'wispr flow connector: export is not an array or a known wrapper ({ flows: [...] })',
+  );
 }
 
 export const wisprFlowConnector: Connector = {

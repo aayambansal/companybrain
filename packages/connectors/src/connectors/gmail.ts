@@ -80,9 +80,30 @@ export const gmailConnector: Connector = {
   category: 'chat',
   auth: 'oauth',
   configSchema: [
-    { key: 'accessToken', label: 'OAuth access token', type: 'password', required: true, placeholder: 'ya29....', help: 'A Google OAuth 2.0 access token with the gmail.readonly scope.' },
-    { key: 'query', label: 'Search query', type: 'string', required: false, placeholder: 'in:inbox', help: 'A Gmail search string. Defaults to in:inbox.' },
-    { key: 'max', label: 'Max messages', type: 'number', required: false, placeholder: '50', help: 'Maximum number of messages to fetch.' },
+    {
+      key: 'accessToken',
+      label: 'OAuth access token',
+      type: 'password',
+      required: true,
+      placeholder: 'ya29....',
+      help: 'A Google OAuth 2.0 access token with the gmail.readonly scope.',
+    },
+    {
+      key: 'query',
+      label: 'Search query',
+      type: 'string',
+      required: false,
+      placeholder: 'in:inbox',
+      help: 'A Gmail search string. Defaults to in:inbox.',
+    },
+    {
+      key: 'max',
+      label: 'Max messages',
+      type: 'number',
+      required: false,
+      placeholder: '50',
+      help: 'Maximum number of messages to fetch.',
+    },
   ],
   async *pull(ctx) {
     const token = String(ctx.config.accessToken ?? '').trim();

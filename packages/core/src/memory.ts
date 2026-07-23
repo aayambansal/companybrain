@@ -98,7 +98,10 @@ export class MemoryEngine {
     llm?: Partial<EngineConfig['llm']>;
   }): void {
     if (update.embedding) {
-      this.config = { ...this.config, embedding: { ...this.config.embedding, ...update.embedding } };
+      this.config = {
+        ...this.config,
+        embedding: { ...this.config.embedding, ...update.embedding },
+      };
       this.embedder = createEmbeddingProvider(this.config);
     }
     if (update.llm) {
@@ -115,7 +118,10 @@ export class MemoryEngine {
    * silently falling back to the default. With neither id nor slug, the org's
    * default space is used.
    */
-  async resolveSpaceId(orgId: string, opts: { spaceId?: string; spaceSlug?: string }): Promise<string> {
+  async resolveSpaceId(
+    orgId: string,
+    opts: { spaceId?: string; spaceSlug?: string },
+  ): Promise<string> {
     if (opts.spaceId) return opts.spaceId;
     if (opts.spaceSlug) return this.getOrCreateSpaceBySlug(orgId, opts.spaceSlug);
     return this.getOrCreateDefaultSpace(orgId);
@@ -129,10 +135,11 @@ export class MemoryEngine {
       .where(and(eq(spaces.orgId, orgId), eq(spaces.slug, slug)))
       .limit(1);
     if (existing[0]) return existing[0].id;
-    const name = slug
-      .replace(/[-_]+/g, ' ')
-      .replace(/\b\w/g, (c) => c.toUpperCase())
-      .trim() || slug;
+    const name =
+      slug
+        .replace(/[-_]+/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase())
+        .trim() || slug;
     const [created] = await this.db
       .insert(spaces)
       .values({ orgId, name, slug, isDefault: false, icon: 'brain' })
@@ -180,7 +187,13 @@ export class MemoryEngine {
       const [dupe] = await this.db
         .select({ id: documents.id })
         .from(documents)
-        .where(and(eq(documents.orgId, input.orgId), eq(documents.spaceId, spaceId), eq(documents.contentHash, hash)))
+        .where(
+          and(
+            eq(documents.orgId, input.orgId),
+            eq(documents.spaceId, spaceId),
+            eq(documents.contentHash, hash),
+          ),
+        )
         .limit(1);
       if (dupe) return this.getMemory(input.orgId, dupe.id) as Promise<Memory>;
     }
@@ -206,9 +219,17 @@ export class MemoryEngine {
     if (!doc) throw new Error('failed to insert document');
 
     await indexDocument(this.db, this.embedder, this.config, doc.id);
-    await this.enrichDocumentRow(doc.id, doc.title, normalized, input.tags ?? [], input.metadata ?? {});
+    await this.enrichDocumentRow(
+      doc.id,
+      doc.title,
+      normalized,
+      input.tags ?? [],
+      input.metadata ?? {},
+    );
     if (this.config.temporal.enabled) {
-      await this.resolveTemporal(input.orgId, spaceId, doc.id, doc.title, normalized).catch(() => {});
+      await this.resolveTemporal(input.orgId, spaceId, doc.id, doc.title, normalized).catch(
+        () => {},
+      );
     }
     void dispatchWebhooks(this.db, {
       event: 'memory.created',
@@ -259,14 +280,28 @@ export class MemoryEngine {
     if (candidateIds.length === 0) return { superseded: [] };
 
     const rows = await this.db
-      .select({ id: documents.id, title: documents.title, content: documents.content, createdAt: documents.createdAt })
+      .select({
+        id: documents.id,
+        title: documents.title,
+        content: documents.content,
+        createdAt: documents.createdAt,
+      })
       .from(documents)
       .where(and(eq(documents.orgId, orgId), inArray(documents.id, candidateIds)));
     const candidates: SupersedeCandidate[] = rows
       .filter((r) => r.content)
-      .map((r) => ({ id: r.id, title: r.title, content: r.content as string, createdAt: r.createdAt.toISOString() }));
+      .map((r) => ({
+        id: r.id,
+        title: r.title,
+        content: r.content as string,
+        createdAt: r.createdAt.toISOString(),
+      }));
 
-    const verdicts = await judgeSupersession(this.llm, { title: newTitle, content: newContent }, candidates);
+    const verdicts = await judgeSupersession(
+      this.llm,
+      { title: newTitle, content: newContent },
+      candidates,
+    );
     const superseded: { id: string; reason: string }[] = [];
     for (const v of verdicts) {
       const old = rows.find((r) => r.id === v.id);
@@ -299,7 +334,10 @@ export class MemoryEngine {
       const meta = (current?.metadata ?? {}) as Record<string, unknown>;
       await this.db
         .update(documents)
-        .set({ metadata: { ...meta, supersedes: superseded.map((s) => s.id) }, updatedAt: new Date() })
+        .set({
+          metadata: { ...meta, supersedes: superseded.map((s) => s.id) },
+          updatedAt: new Date(),
+        })
         .where(eq(documents.id, newDocId));
       void dispatchWebhooks(this.db, {
         event: 'memory.superseded',
@@ -324,7 +362,10 @@ export class MemoryEngine {
     if (!this.config.enrich.enabled || !this.llm.available) return;
     const enrichment = await enrichDocument(this.llm, { title, content });
     if (!enrichment.summary && !enrichment.tags && !enrichment.facts) return;
-    const mergedTags = Array.from(new Set([...existingTags, ...(enrichment.tags ?? [])])).slice(0, 20);
+    const mergedTags = Array.from(new Set([...existingTags, ...(enrichment.tags ?? [])])).slice(
+      0,
+      20,
+    );
     await this.db
       .update(documents)
       .set({
@@ -365,7 +406,13 @@ export class MemoryEngine {
         })
         .where(eq(documents.id, existing.id));
       await indexDocument(this.db, this.embedder, this.config, existing.id);
-      await this.enrichDocumentRow(existing.id, src.title ?? null, normalized, src.tags ?? [], src.metadata ?? {});
+      await this.enrichDocumentRow(
+        existing.id,
+        src.title ?? null,
+        normalized,
+        src.tags ?? [],
+        src.metadata ?? {},
+      );
       return { documentId: existing.id, action: 'updated' };
     }
 
@@ -391,7 +438,13 @@ export class MemoryEngine {
       .returning();
     if (!doc) throw new Error('failed to insert connector document');
     await indexDocument(this.db, this.embedder, this.config, doc.id);
-    await this.enrichDocumentRow(doc.id, src.title ?? null, normalized, src.tags ?? [], src.metadata ?? {});
+    await this.enrichDocumentRow(
+      doc.id,
+      src.title ?? null,
+      normalized,
+      src.tags ?? [],
+      src.metadata ?? {},
+    );
     return { documentId: doc.id, action: 'created' };
   }
 
@@ -429,7 +482,13 @@ export class MemoryEngine {
   async updateMemory(
     orgId: string,
     id: string,
-    patch: { title?: string; content?: string; tags?: string[]; spaceId?: string; metadata?: Record<string, unknown> },
+    patch: {
+      title?: string;
+      content?: string;
+      tags?: string[];
+      spaceId?: string;
+      metadata?: Record<string, unknown>;
+    },
   ): Promise<Memory | null> {
     const existing = await this.getMemory(orgId, id);
     if (!existing) return null;
@@ -469,11 +528,21 @@ export class MemoryEngine {
   }
 
   /** Prior versions of a memory's content, newest first. */
-  async getVersions(orgId: string, id: string): Promise<{ version: number; title: string | null; content: string | null; createdAt: string }[]> {
+  async getVersions(
+    orgId: string,
+    id: string,
+  ): Promise<
+    { version: number; title: string | null; content: string | null; createdAt: string }[]
+  > {
     const mem = await this.getMemory(orgId, id);
     if (!mem) return [];
     const rows = await this.db
-      .select({ version: memoryVersions.version, title: memoryVersions.title, content: memoryVersions.content, createdAt: memoryVersions.createdAt })
+      .select({
+        version: memoryVersions.version,
+        title: memoryVersions.title,
+        content: memoryVersions.content,
+        createdAt: memoryVersions.createdAt,
+      })
       .from(memoryVersions)
       .where(eq(memoryVersions.documentId, id))
       .orderBy(desc(memoryVersions.version));
@@ -499,7 +568,10 @@ export class MemoryEngine {
   ): Promise<{ documents: number; failed: number }> {
     const conds = [eq(documents.orgId, orgId)];
     if (opts.spaceId) conds.push(eq(documents.spaceId, opts.spaceId));
-    const rows = await this.db.select({ id: documents.id }).from(documents).where(and(...conds));
+    const rows = await this.db
+      .select({ id: documents.id })
+      .from(documents)
+      .where(and(...conds));
     let failed = 0;
     let done = 0;
     for (const r of rows) {
@@ -518,7 +590,11 @@ export class MemoryEngine {
 
   async search(orgId: string, query: SearchQuery): Promise<SearchResponse> {
     const started = Date.now();
-    const spaceId = query.spaceId ?? (query.spaceSlug ? await this.resolveSpaceId(orgId, { spaceSlug: query.spaceSlug }) : undefined);
+    const spaceId =
+      query.spaceId ??
+      (query.spaceSlug
+        ? await this.resolveSpaceId(orgId, { spaceSlug: query.spaceSlug })
+        : undefined);
     const mode = query.mode ?? 'hybrid';
     const needsVector = mode === 'hybrid' || mode === 'semantic';
     let queryEmbedding = needsVector ? await this.embedder.embedQuery(query.q) : [];
@@ -562,7 +638,9 @@ export class MemoryEngine {
   /** Transcribe audio bytes with the configured provider. Throws if none. */
   async transcribeAudio(audio: ImageInput): Promise<string> {
     if (!this.llm.supportsAudio || !this.llm.transcribeAudio) {
-      throw new Error('No audio-capable provider configured. Set LLM_PROVIDER to openai to transcribe audio.');
+      throw new Error(
+        'No audio-capable provider configured. Set LLM_PROVIDER to openai to transcribe audio.',
+      );
     }
     return this.llm.transcribeAudio(audio);
   }
@@ -624,7 +702,8 @@ export class MemoryEngine {
   ): Promise<Topic[]> {
     const sql = this.client.sql;
     const spaceId =
-      opts.spaceId ?? (opts.spaceSlug ? await this.getOrCreateSpaceBySlug(orgId, opts.spaceSlug) : null);
+      opts.spaceId ??
+      (opts.spaceSlug ? await this.getOrCreateSpaceBySlug(orgId, opts.spaceSlug) : null);
     const limit = Math.min(opts.limit ?? 24, 100);
     const rows = await sql<TopicRow[]>`
       SELECT tag,
@@ -645,7 +724,12 @@ export class MemoryEngine {
   async chat(
     orgId: string,
     message: string,
-    opts: { spaceId?: string; spaceSlug?: string; limit?: number; history?: { role: 'user' | 'assistant'; content: string }[] } = {},
+    opts: {
+      spaceId?: string;
+      spaceSlug?: string;
+      limit?: number;
+      history?: { role: 'user' | 'assistant'; content: string }[];
+    } = {},
   ): Promise<ChatResponse> {
     const { hits } = await this.search(orgId, {
       q: message,
@@ -685,7 +769,8 @@ export class MemoryEngine {
     opts: { spaceId?: string; spaceSlug?: string; limit?: number } = {},
   ): Promise<DigestResult> {
     const spaceId =
-      opts.spaceId ?? (opts.spaceSlug ? await this.getOrCreateSpaceBySlug(orgId, opts.spaceSlug) : undefined);
+      opts.spaceId ??
+      (opts.spaceSlug ? await this.getOrCreateSpaceBySlug(orgId, opts.spaceSlug) : undefined);
     const { memories } = await this.listMemories({
       orgId,
       spaceId,
@@ -724,7 +809,11 @@ function toMemory(doc: typeof documents.$inferSelect): Memory {
 
 /** Pure: derive a memory title from the first non-empty line, capped at 120 chars. */
 export function deriveTitle(content: string): string {
-  const firstLine = content.split('\n').map((l) => l.trim()).find((l) => l.length > 0) ?? '';
+  const firstLine =
+    content
+      .split('\n')
+      .map((l) => l.trim())
+      .find((l) => l.length > 0) ?? '';
   return firstLine.slice(0, 120) || 'Untitled';
 }
 

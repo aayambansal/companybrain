@@ -34,7 +34,10 @@ export class OpenAIProvider implements LlmProvider {
             role: 'user',
             content: [
               { type: 'text', text: prompt ?? IMAGE_PROMPT },
-              { type: 'image_url', image_url: { url: `data:${image.mediaType};base64,${image.base64}` } },
+              {
+                type: 'image_url',
+                image_url: { url: `data:${image.mediaType};base64,${image.base64}` },
+              },
             ],
           },
         ],

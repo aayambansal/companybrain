@@ -40,13 +40,43 @@ export const githubConnector: Connector = {
   category: 'code',
   auth: 'apiKey',
   configSchema: [
-    { key: 'repo', label: 'Repository', type: 'string', required: true, placeholder: 'owner/name', help: 'e.g. aayambansal/companybrain' },
-    { key: 'token', label: 'Personal access token', type: 'password', required: false, help: 'Required for private repos. Needs read access.' },
-    { key: 'branch', label: 'Branch', type: 'string', required: false, placeholder: 'default branch', help: 'Defaults to the repo default branch.' },
-    { key: 'extensions', label: 'File extensions', type: 'string', required: false, placeholder: 'md,mdx,txt', help: 'Comma-separated. Defaults to docs formats.' },
+    {
+      key: 'repo',
+      label: 'Repository',
+      type: 'string',
+      required: true,
+      placeholder: 'owner/name',
+      help: 'e.g. aayambansal/companybrain',
+    },
+    {
+      key: 'token',
+      label: 'Personal access token',
+      type: 'password',
+      required: false,
+      help: 'Required for private repos. Needs read access.',
+    },
+    {
+      key: 'branch',
+      label: 'Branch',
+      type: 'string',
+      required: false,
+      placeholder: 'default branch',
+      help: 'Defaults to the repo default branch.',
+    },
+    {
+      key: 'extensions',
+      label: 'File extensions',
+      type: 'string',
+      required: false,
+      placeholder: 'md,mdx,txt',
+      help: 'Comma-separated. Defaults to docs formats.',
+    },
   ],
   async *pull(ctx) {
-    const repo = String(ctx.config.repo ?? '').trim().replace(/^https?:\/\/github\.com\//, '').replace(/\.git$/, '');
+    const repo = String(ctx.config.repo ?? '')
+      .trim()
+      .replace(/^https?:\/\/github\.com\//, '')
+      .replace(/\.git$/, '');
     if (!repo.includes('/')) throw new Error('github connector: config.repo must be "owner/name"');
     const token = ctx.config.token ? String(ctx.config.token) : undefined;
     const headers = authHeaders(token);
@@ -58,7 +88,10 @@ export const githubConnector: Connector = {
 
     let branch = ctx.config.branch ? String(ctx.config.branch) : '';
     if (!branch) {
-      const info = await fetchJson<{ default_branch: string }>(`https://api.github.com/repos/${repo}`, { headers, signal: ctx.signal });
+      const info = await fetchJson<{ default_branch: string }>(
+        `https://api.github.com/repos/${repo}`,
+        { headers, signal: ctx.signal },
+      );
       branch = info.default_branch;
     }
     ctx.log?.('listing repo tree', { repo, branch });

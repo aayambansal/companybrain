@@ -59,7 +59,10 @@ export async function llmRerankPointwise(
   if (!llm.available || hits.length <= 1) return hits;
   const snippetChars = opts.snippetChars ?? 600;
   const list = hits
-    .map((h, i) => `[${i}] ${h.document.title ? h.document.title + ' — ' : ''}${h.content.slice(0, snippetChars)}`)
+    .map(
+      (h, i) =>
+        `[${i}] ${h.document.title ? h.document.title + ' — ' : ''}${h.content.slice(0, snippetChars)}`,
+    )
     .join('\n\n');
   const res = await llm.complete({
     system:
@@ -90,7 +93,10 @@ export async function llmRerank(
   if (!llm.available || hits.length <= 1) return hits;
   const snippetChars = opts.snippetChars ?? 600;
   const list = hits
-    .map((h, i) => `[${i}] ${h.document.title ? h.document.title + ' — ' : ''}${h.content.slice(0, snippetChars)}`)
+    .map(
+      (h, i) =>
+        `[${i}] ${h.document.title ? h.document.title + ' — ' : ''}${h.content.slice(0, snippetChars)}`,
+    )
     .join('\n\n');
   const res = await llm.complete({
     system:

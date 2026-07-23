@@ -2,14 +2,18 @@ import { describe, it, expect } from 'vitest';
 import { readwiseBookDoc } from './readwise.js';
 
 describe('readwiseBookDoc', () => {
-  it('groups a book\'s highlights into one document', () => {
+  it("groups a book's highlights into one document", () => {
     const doc = readwiseBookDoc({
       user_book_id: 987,
       title: 'Thinking in Systems',
       author: 'Donella Meadows',
       source_url: 'https://example.com/book',
       highlights: [
-        { id: 1, text: 'A system is more than the sum of its parts.', updated: '2025-01-01T00:00:00Z' },
+        {
+          id: 1,
+          text: 'A system is more than the sum of its parts.',
+          updated: '2025-01-01T00:00:00Z',
+        },
         { id: 2, text: 'Systems fool us.', note: 'remember this', updated: '2025-01-02T00:00:00Z' },
       ],
     });

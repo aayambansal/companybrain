@@ -37,13 +37,28 @@ export const discordConnector: Connector = {
   category: 'chat',
   auth: 'apiKey',
   configSchema: [
-    { key: 'botToken', label: 'Bot token', type: 'password', required: true, placeholder: 'MTA...', help: 'A bot token with access to the channel and the Read Message History permission.' },
-    { key: 'channelId', label: 'Channel ID', type: 'string', required: true, placeholder: '123456789012345678', help: 'The channel to index. The bot must be a member of the server.' },
+    {
+      key: 'botToken',
+      label: 'Bot token',
+      type: 'password',
+      required: true,
+      placeholder: 'MTA...',
+      help: 'A bot token with access to the channel and the Read Message History permission.',
+    },
+    {
+      key: 'channelId',
+      label: 'Channel ID',
+      type: 'string',
+      required: true,
+      placeholder: '123456789012345678',
+      help: 'The channel to index. The bot must be a member of the server.',
+    },
   ],
   async *pull(ctx) {
     const token = String(ctx.config.botToken ?? '').trim();
     const channelId = String(ctx.config.channelId ?? '').trim();
-    if (!token || !channelId) throw new Error('discord connector: config.botToken and config.channelId are required');
+    if (!token || !channelId)
+      throw new Error('discord connector: config.botToken and config.channelId are required');
     const headers = { authorization: `Bot ${token}` };
 
     let before: string | undefined = ctx.cursor ?? undefined;

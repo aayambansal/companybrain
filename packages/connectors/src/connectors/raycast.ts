@@ -15,7 +15,10 @@ export function raycastNote(text: string, fallbackTitle: string): { title: strin
   const first = lines[firstIdx]!.trim();
   const heading = /^#{1,6}\s+(.+)$/.exec(first);
   if (heading) {
-    const body = lines.slice(firstIdx + 1).join('\n').trim();
+    const body = lines
+      .slice(firstIdx + 1)
+      .join('\n')
+      .trim();
     return { title: heading[1]!.trim(), body };
   }
   // First line is plain text: use it as the title but keep the full body.
@@ -41,7 +44,8 @@ export const raycastConnector: Connector = {
   ],
   async *pull(ctx) {
     const root = resolve(String(ctx.config.path ?? '').trim());
-    if (!root || !existsSync(root)) throw new Error(`raycast connector: notes folder does not exist: ${root}`);
+    if (!root || !existsSync(root))
+      throw new Error(`raycast connector: notes folder does not exist: ${root}`);
     const files = walkFiles(root, ['md', 'markdown', 'txt']);
     ctx.log?.('walked raycast notes', { root, notes: files.length });
 

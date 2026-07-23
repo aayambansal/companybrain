@@ -19,7 +19,11 @@ export function hydePrompt(query: string): string {
 }
 
 /** Generate a hypothetical answer passage for a query. Returns '' on any failure. */
-export async function hypotheticalDocument(llm: LlmProvider, query: string, temperature = 0): Promise<string> {
+export async function hypotheticalDocument(
+  llm: LlmProvider,
+  query: string,
+  temperature = 0,
+): Promise<string> {
   if (!llm.available) return '';
   try {
     const out = await llm.complete({
@@ -39,7 +43,11 @@ export async function hypotheticalDocument(llm: LlmProvider, query: string, temp
  * additional samples use temperature so their embeddings, when averaged, cover
  * more of the answer neighborhood (the multi-sample HyDE of Gao et al.).
  */
-export async function hypotheticalDocuments(llm: LlmProvider, query: string, n = 1): Promise<string[]> {
+export async function hypotheticalDocuments(
+  llm: LlmProvider,
+  query: string,
+  n = 1,
+): Promise<string[]> {
   if (!llm.available || n < 1) return [];
   const temps = Array.from({ length: n }, (_, i) => (i === 0 ? 0 : 0.7));
   const out = await Promise.all(temps.map((t) => hypotheticalDocument(llm, query, t)));
