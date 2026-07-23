@@ -8,7 +8,7 @@ import { Page } from '@/components/app-shell';
 import { Button, Textarea, Badge, StatusDot, Skeleton, EmptyState, cx } from '@/components/ui';
 import { useToast } from '@/components/toast';
 import { timeAgo, hostname } from '@/lib/format';
-import { IconSearch, IconSparkle, IconArrowRight, IconMemory, IconLayers, IconSpaces } from '@/components/icons';
+import { IconSearch, IconSparkle, IconArrowRight, IconMemory, IconLayers, IconSpaces, IconHash } from '@/components/icons';
 
 export default function OverviewPage() {
   const router = useRouter();
@@ -16,6 +16,7 @@ export default function OverviewPage() {
   const [status, setStatus] = useState<Status | null>(null);
   const [memories, setMemories] = useState<Memory[] | null>(null);
   const [spaces, setSpaces] = useState<Space[]>([]);
+  const [topics, setTopics] = useState<{ topic: string; count: number }[]>([]);
   const [q, setQ] = useState('');
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
@@ -23,14 +24,16 @@ export default function OverviewPage() {
   const [dragOver, setDragOver] = useState(false);
 
   async function load() {
-    const [s, m, sp] = await Promise.allSettled([
+    const [s, m, sp, tp] = await Promise.allSettled([
       api.get<Status>('/v1/status'),
       api.get<{ memories: Memory[] }>('/v1/memories?limit=6'),
       api.get<{ spaces: Space[] }>('/v1/spaces'),
+      api.get<{ topics: { topic: string; count: number }[] }>('/v1/topics?limit=12&minCount=1'),
     ]);
     if (s.status === 'fulfilled') setStatus(s.value);
     setMemories(m.status === 'fulfilled' ? m.value.memories : []);
     if (sp.status === 'fulfilled') setSpaces(sp.value.spaces);
+    if (tp.status === 'fulfilled') setTopics(tp.value.topics);
   }
   useEffect(() => {
     load();
@@ -122,6 +125,25 @@ export default function OverviewPage() {
           text={status?.embedding.model ?? '—'}
         />
       </div>
+
+      {/* Topics: background organization at a glance */}
+      {topics.length > 0 && (
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          <Link href="/topics" className="mr-1 flex items-center gap-1 font-mono text-[12px] text-ink-faint hover:text-ink">
+            <IconHash size={13} /> topics
+          </Link>
+          {topics.map((t) => (
+            <Link
+              key={t.topic}
+              href={`/search?q=${encodeURIComponent(t.topic)}`}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-1 text-[13px] text-ink-muted transition-colors hover:border-[var(--color-primary-line)] hover:text-ink"
+            >
+              {t.topic}
+              <span className="font-mono text-[10px] text-ink-faint">{t.count}</span>
+            </Link>
+          ))}
+        </div>
+      )}
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
         {/* Recent memories */}
