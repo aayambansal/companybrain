@@ -105,18 +105,44 @@ export class MemoryEngine {
 
   // ── Spaces ───────────────────────────────────────────────────────────────
 
-  /** Resolve a space by id or slug, falling back to the org's default space. */
+  /**
+   * Resolve a space by id or slug. A slug that does not exist yet is created,
+   * so naming a space on ingest (or search) routes to that space instead of
+   * silently falling back to the default. With neither id nor slug, the org's
+   * default space is used.
+   */
   async resolveSpaceId(orgId: string, opts: { spaceId?: string; spaceSlug?: string }): Promise<string> {
     if (opts.spaceId) return opts.spaceId;
-    if (opts.spaceSlug) {
-      const [s] = await this.db
-        .select({ id: spaces.id })
-        .from(spaces)
-        .where(and(eq(spaces.orgId, orgId), eq(spaces.slug, opts.spaceSlug)))
-        .limit(1);
-      if (s) return s.id;
-    }
+    if (opts.spaceSlug) return this.getOrCreateSpaceBySlug(orgId, opts.spaceSlug);
     return this.getOrCreateDefaultSpace(orgId);
+  }
+
+  /** Get a space by slug within the org, creating it if it does not exist. */
+  async getOrCreateSpaceBySlug(orgId: string, slug: string): Promise<string> {
+    const existing = await this.db
+      .select({ id: spaces.id })
+      .from(spaces)
+      .where(and(eq(spaces.orgId, orgId), eq(spaces.slug, slug)))
+      .limit(1);
+    if (existing[0]) return existing[0].id;
+    const name = slug
+      .replace(/[-_]+/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+      .trim() || slug;
+    const [created] = await this.db
+      .insert(spaces)
+      .values({ orgId, name, slug, isDefault: false, icon: 'brain' })
+      .onConflictDoNothing({ target: [spaces.orgId, spaces.slug] })
+      .returning({ id: spaces.id });
+    if (created) return created.id;
+    // Lost a create race: the row now exists, re-select it.
+    const [again] = await this.db
+      .select({ id: spaces.id })
+      .from(spaces)
+      .where(and(eq(spaces.orgId, orgId), eq(spaces.slug, slug)))
+      .limit(1);
+    if (!again) throw new Error(`failed to create space '${slug}'`);
+    return again.id;
   }
 
   async getOrCreateDefaultSpace(orgId: string): Promise<string> {
