@@ -110,21 +110,39 @@ async function keywordArm(
   tags: string[] | null,
   pool: number,
 ): Promise<Candidate[]> {
+  // Build an OR query for recall: "ship releases" -> to_tsquery('ship | releases').
+  // plainto_tsquery ANDs every term, which drops partial matches. to_tsquery still
+  // stems each token via the english config, so 'releases' matches stored 'releas'.
+  const orQuery = buildOrTsQuery(params.q);
+  if (!orQuery) return [];
   const rows = await sql<Candidate[]>`
     SELECT c.id AS chunk_id, c.document_id, c.space_id, c.content, c.chunk_index,
            c.metadata, d.title AS doc_title, d.source_url AS doc_url,
            d.connector AS doc_connector, d.tags AS doc_tags,
-           ts_rank(c.tsv, plainto_tsquery('english', ${params.q})) AS score
+           ts_rank(c.tsv, to_tsquery('english', ${orQuery})) AS score
     FROM chunks c
     JOIN documents d ON d.id = c.document_id
     WHERE c.org_id = ${params.orgId}
-      AND c.tsv @@ plainto_tsquery('english', ${params.q})
+      AND c.tsv @@ to_tsquery('english', ${orQuery})
       ${spaceId ? sql`AND c.space_id = ${spaceId}` : sql``}
       ${tags ? sql`AND d.tags ?| ${tags}` : sql``}
     ORDER BY score DESC
     LIMIT ${pool}
   `;
   return rows;
+}
+
+/** Turn a natural-language query into a safe OR tsquery string. */
+export function buildOrTsQuery(q: string): string {
+  const terms = q
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter((t) => t.length > 1);
+  // Deduplicate while preserving order.
+  const seen = new Set<string>();
+  const unique = terms.filter((t) => (seen.has(t) ? false : (seen.add(t), true)));
+  return unique.join(' | ');
 }
 
 function toHits(
