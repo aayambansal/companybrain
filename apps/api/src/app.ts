@@ -20,6 +20,7 @@ import reindex from './routes/reindex.js';
 import analytics from './routes/analytics.js';
 import backup from './routes/backup.js';
 import slack from './routes/slack.js';
+import webhooks from './routes/webhooks.js';
 
 export function createApp() {
   const env = getEnv();
@@ -64,6 +65,7 @@ export function createApp() {
   v1.route('/reindex', reindex);
   v1.route('/analytics', analytics);
   v1.route('/backup', backup);
+  v1.route('/webhooks', webhooks);
   app.route('/v1', v1);
 
   app.notFound((c) => c.json({ error: 'not_found' }, 404));
