@@ -1,5 +1,7 @@
 import { Hono } from 'hono';
+import { streamSSE } from 'hono/streaming';
 import { z } from 'zod';
+import { buildPlaybookPrompt, buildContext, toCitations, PLAYBOOK_SYSTEM } from '@companybrain/core';
 import { getEngine, type Variables } from '../context.js';
 
 const app = new Hono<{ Variables: Variables }>();
@@ -46,6 +48,49 @@ app.post('/', async (c) => {
   }
 
   return c.json({ playbook, savedId }, 201);
+});
+
+// Server-sent events: emit citations, then stream the playbook token by token.
+app.post('/stream', async (c) => {
+  const auth = c.get('auth');
+  const body = await c.req.json().catch(() => ({}));
+  const parsed = playbookSchema.safeParse(body);
+  if (!parsed.success) return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  const d = parsed.data;
+  const engine = getEngine();
+
+  return streamSSE(c, async (stream) => {
+    const { hits } = await engine.search(auth.orgId, {
+      q: d.topic,
+      spaceId: d.spaceId,
+      spaceSlug: d.space,
+      mode: 'hybrid',
+      limit: d.limit ?? 12,
+    });
+    await stream.writeSSE({ event: 'citations', data: JSON.stringify(toCitations(hits)) });
+
+    const llm = engine.llm;
+    if (llm.available && llm.stream && hits.length > 0) {
+      for await (const token of llm.stream({
+        system: PLAYBOOK_SYSTEM,
+        temperature: 0.3,
+        maxTokens: 1600,
+        messages: [{ role: 'user', content: buildPlaybookPrompt(d.topic, buildContext(hits)) }],
+      })) {
+        // JSON-encode so newlines survive SSE framing (Markdown needs them).
+        await stream.writeSSE({ event: 'token', data: JSON.stringify(token) });
+      }
+    } else {
+      const playbook = await engine.generatePlaybook(auth.orgId, {
+        topic: d.topic,
+        spaceId: d.spaceId,
+        spaceSlug: d.space,
+        limit: d.limit,
+      });
+      await stream.writeSSE({ event: 'token', data: JSON.stringify(playbook.content) });
+    }
+    await stream.writeSSE({ event: 'done', data: '1' });
+  });
 });
 
 export default app;

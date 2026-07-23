@@ -34,7 +34,7 @@ export { hypotheticalDocument, hypotheticalDocuments, hydePrompt, blendVectors }
 // Ingest, chat & enrichment
 export { indexDocument, findBySource } from './ingest.js';
 export { generateAnswer, extractiveAnswer, buildContext, toCitations } from './chat.js';
-export { generatePlaybook, buildPlaybookPrompt, extractTitle, type PlaybookResult } from './playbook.js';
+export { generatePlaybook, buildPlaybookPrompt, extractTitle, PLAYBOOK_SYSTEM, type PlaybookResult } from './playbook.js';
 export { buildTopics, buildTopic, type Topic, type TopicRow } from './topics.js';
 export { generateDigest, buildDigestPrompt, type DigestResult } from './digest.js';
 export { enrichDocument, parseEnrichment, type Enrichment } from './enrich.js';
