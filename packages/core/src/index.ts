@@ -36,4 +36,15 @@ export { generateAnswer, extractiveAnswer, buildContext, toCitations } from './c
 export { enrichDocument, parseEnrichment, type Enrichment } from './enrich.js';
 export { dispatchWebhooks, signWebhook, type WebhookEvent } from './webhooks.js';
 export { parseDataUrl } from './vision.js';
+export {
+  describeVideo,
+  hasFfmpeg,
+  probeDurationSec,
+  composeVideoText,
+  formatTimestamp,
+  type VideoDeps,
+  type VideoOptions,
+  type VideoResult,
+  type VideoFrame,
+} from './video.js';
 export type { ImageInput } from './llm/types.js';
