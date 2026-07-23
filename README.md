@@ -159,8 +159,12 @@ Design notes: [docs/architecture.md](./docs/architecture.md).
 | Asana                 | `asana`    | `[core]`    |
 | Readwise              | `readwise` | `[core]`    |
 | Raindrop.io           | `raindrop` | `[core]`    |
+| Dropbox               | `dropbox`  | `[core]`    |
+| Box                   | `box`      | `[core]`    |
+| ClickUp               | `clickup`  | `[core]`    |
+| Todoist               | `todoist`  | `[core]`    |
 
-Twenty-eight connectors and counting. Configure and sync them from the dashboard under Connections. See
+Thirty-two connectors and counting. Configure and sync them from the dashboard under Connections. See
 [docs/connectors.md](./docs/connectors.md) to write your own.
 
 ## Clients
