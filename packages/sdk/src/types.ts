@@ -55,6 +55,8 @@ export interface SearchInput {
   limit?: number;
   tags?: string[];
   minScore?: number;
+  /** Reorder the top results with the server's configured LLM. */
+  rerank?: boolean;
 }
 
 export interface Citation {

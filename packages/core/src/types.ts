@@ -57,6 +57,8 @@ export interface SearchQuery {
   tags?: string[];
   /** Minimum fused score to include (0..1-ish). */
   minScore?: number;
+  /** Reorder the top results with the configured LLM (no-op if none). */
+  rerank?: boolean;
 }
 
 export interface SearchHit {

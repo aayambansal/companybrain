@@ -12,6 +12,7 @@ const searchSchema = z.object({
   limit: z.number().int().min(1).max(100).optional(),
   tags: z.array(z.string()).optional(),
   minScore: z.number().min(0).max(1).optional(),
+  rerank: z.boolean().optional(),
 });
 
 async function run(c: Context<{ Variables: Variables }>, input: z.infer<typeof searchSchema>) {
@@ -25,6 +26,7 @@ async function run(c: Context<{ Variables: Variables }>, input: z.infer<typeof s
     limit: input.limit,
     tags: input.tags,
     minScore: input.minScore,
+    rerank: input.rerank,
   });
   return c.json(res);
 }
