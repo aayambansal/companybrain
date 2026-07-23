@@ -26,6 +26,10 @@ import { airtableConnector } from './airtable.js';
 import { gitlabConnector } from './gitlab.js';
 import { asanaConnector } from './asana.js';
 import { readwiseConnector } from './readwise.js';
+import { dropboxConnector } from './dropbox.js';
+import { boxConnector } from './box.js';
+import { clickupConnector } from './clickup.js';
+import { todoistConnector } from './todoist.js';
 import { raindropConnector } from './raindrop.js';
 
 /** Every built-in connector, in a stable order. */
@@ -58,6 +62,10 @@ export const connectors: Connector[] = [
   asanaConnector,
   readwiseConnector,
   raindropConnector,
+  dropboxConnector,
+  boxConnector,
+  clickupConnector,
+  todoistConnector,
 ];
 
 /** Look up a connector by its stable id. */
@@ -100,3 +108,7 @@ export { gitlabConnector, gitlabIssueDoc } from './gitlab.js';
 export { asanaConnector, asanaTaskDoc } from './asana.js';
 export { readwiseConnector, readwiseBookDoc } from './readwise.js';
 export { raindropConnector, raindropItemToDoc } from './raindrop.js';
+export { dropboxConnector, dropboxEntryToDoc } from './dropbox.js';
+export { boxConnector, boxItemToDoc } from './box.js';
+export { clickupConnector, clickupTaskDoc } from './clickup.js';
+export { todoistConnector, todoistTaskDoc } from './todoist.js';
