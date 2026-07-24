@@ -12,6 +12,16 @@ const app = new Hono<{ Variables: Variables }>();
 export const MAX_CONTENT = 1_000_000;
 const tagsSchema = z.array(z.string().max(64)).max(50);
 
+// Metadata is arbitrary JSON stored as jsonb and echoed back in list/search
+// responses. Bound its serialized size so a memory can't carry a multi-MB blob
+// that bloats every row and response; 100KB is far above real key/value use.
+const MAX_METADATA = 100_000;
+export const metadataSchema = z
+  .record(z.unknown())
+  .refine((m) => JSON.stringify(m).length <= MAX_METADATA, {
+    message: `metadata must be under ${MAX_METADATA} bytes when serialized`,
+  });
+
 // Media data URLs are base64 (~33% larger than the bytes) and get decoded into
 // memory then handed to a vision model / Whisper / ffmpeg. Cap each near the
 // real provider ceiling so an oversized blob is rejected up front instead of
@@ -36,7 +46,7 @@ export const addSchema = z.object({
   tags: tagsSchema.optional(),
   sourceUrl: z.string().url().optional(),
   sourceType: z.string().max(64).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: metadataSchema.optional(),
   dedupe: z.boolean().optional(),
 });
 
@@ -167,7 +177,7 @@ const patchSchema = z.object({
   content: z.string().max(MAX_CONTENT).optional(),
   tags: tagsSchema.optional(),
   spaceId: z.string().uuid().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: metadataSchema.optional(),
 });
 
 app.patch('/:id', async (c) => {

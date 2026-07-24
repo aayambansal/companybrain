@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { eq, desc } from 'drizzle-orm';
 import { documents } from '@companybrain/db';
 import { getEngine, type Variables } from '../context.js';
+import { metadataSchema } from './memories.js';
 
 const app = new Hono<{ Variables: Variables }>();
 
@@ -46,7 +47,7 @@ const importSchema = z.object({
         tags: z.array(z.string().max(64)).max(50).optional(),
         sourceType: z.string().max(64).nullable().optional(),
         sourceUrl: z.string().nullable().optional(),
-        metadata: z.record(z.unknown()).optional(),
+        metadata: metadataSchema.optional(),
       }),
     )
     .max(5000),

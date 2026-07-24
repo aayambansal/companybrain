@@ -25,6 +25,12 @@ describe('memories addSchema bounds', () => {
     expect(addSchema.safeParse({ content: 'c', sourceType: 'x'.repeat(65) }).success).toBe(false);
   });
 
+  it('bounds serialized metadata size', () => {
+    expect(addSchema.safeParse({ content: 'c', metadata: { a: 1, b: 'ok' } }).success).toBe(true);
+    const huge = { blob: 'x'.repeat(100_001) };
+    expect(addSchema.safeParse({ content: 'c', metadata: huge }).success).toBe(false);
+  });
+
   it('accepts a media data URL in place of content', () => {
     // A normal-sized data URL is well under the per-medium caps; the caps
     // themselves use the same .max() the content test exercises.
