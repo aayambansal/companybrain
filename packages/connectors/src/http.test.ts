@@ -73,6 +73,28 @@ describe('SSRF guard', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('re-checks redirect hops and refuses a redirect into an internal address', async () => {
+    process.env.CONNECTOR_ALLOW_INTERNAL = 'false';
+    // A public start (literal public IP, no DNS) that 302s to the metadata endpoint.
+    const fetchSpy = vi.fn(
+      async () =>
+        ({
+          status: 302,
+          ok: false,
+          headers: {
+            get: (h: string) =>
+              h.toLowerCase() === 'location' ? 'http://169.254.169.254/latest/meta-data' : null,
+          },
+          text: async () => '',
+        }) as unknown as Response,
+    );
+    vi.stubGlobal('fetch', fetchSpy);
+    await expect(fetchText('http://93.184.216.34/start')).rejects.toThrow(/internal or private/);
+    // The public hop is fetched once; the internal redirect target is refused
+    // before a second fetch, so redirect:'follow' can't chase it.
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('does not block when internal targets are allowed', async () => {
     process.env.CONNECTOR_ALLOW_INTERNAL = 'true';
     vi.stubGlobal(
