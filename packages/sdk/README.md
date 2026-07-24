@@ -41,3 +41,7 @@ for await (const frame of cb.chatStream({ message: 'Summarize our release proces
 Errors are thrown as `CompanyBrainError` with `status`, `code`, and `details`. On a
 `429` (the chat/playbook LLM rate limit), `retryAfter` holds the seconds to wait before
 retrying, parsed from the `Retry-After` header.
+
+`429` and `503` responses are retried automatically (default 2 times), honoring
+`Retry-After` with exponential-backoff fallback. Set `maxRetries: 0` to disable and have
+them throw immediately.
