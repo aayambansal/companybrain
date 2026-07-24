@@ -56,17 +56,22 @@ export async function generateAnswer(
     return extractiveAnswer(question, hits);
   }
   const context = buildContext(hits);
-  const message = await llm.complete({
-    system: SYSTEM,
-    temperature: 0.2,
-    maxTokens: 1024,
-    messages: [
-      ...history,
-      {
-        role: 'user',
-        content: `Context passages:\n\n${context}\n\n---\nQuestion: ${question}`,
-      },
-    ],
-  });
-  return { message, citations: toCitations(hits), usedHits: hits };
+  try {
+    const message = await llm.complete({
+      system: SYSTEM,
+      temperature: 0.2,
+      maxTokens: 1024,
+      messages: [
+        ...history,
+        {
+          role: 'user',
+          content: `Context passages:\n\n${context}\n\n---\nQuestion: ${question}`,
+        },
+      ],
+    });
+    return { message, citations: toCitations(hits), usedHits: hits };
+  } catch {
+    // LLM failed mid-request: return the extractive answer over the same hits.
+    return extractiveAnswer(question, hits);
+  }
 }
