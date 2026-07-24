@@ -1,4 +1,5 @@
 import type { LlmProvider, CompleteOptions, ImageInput } from './types.js';
+import { sseLines } from './sse.js';
 
 const IMAGE_PROMPT =
   'Extract all text from this image verbatim (OCR). Then, on a new line starting with "Description:", briefly describe what the image shows. If there is no text, just give the description.';
@@ -141,23 +142,4 @@ export class AnthropicProvider implements LlmProvider {
   private assert() {
     if (!this.available) throw new Error('ANTHROPIC_API_KEY is not set; cannot generate.');
   }
-}
-
-/** Split a byte stream into SSE event lines. */
-async function* sseLines(body: ReadableStream<Uint8Array>): AsyncIterable<string> {
-  const reader = body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '';
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    let idx: number;
-    while ((idx = buffer.indexOf('\n')) >= 0) {
-      const line = buffer.slice(0, idx).trim();
-      buffer = buffer.slice(idx + 1);
-      if (line) yield line;
-    }
-  }
-  if (buffer.trim()) yield buffer.trim();
 }
