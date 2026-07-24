@@ -64,4 +64,15 @@ describe('llmRateLimit middleware', () => {
     expect((await a.request('/')).status).toBe(429); // key-1 exhausted
     expect((await b.request('/')).status).toBe(200); // key-2 unaffected
   });
+
+  it('shares one budget across endpoints for the same principal', async () => {
+    process.env.LLM_RATE_LIMIT_PER_MIN = '2';
+    const auth: AuthContext = { orgId: 'org-shared', scopes: [], via: 'single' };
+    const chat = appFor(auth); // stands in for /chat
+    const playbooks = appFor(auth); // stands in for /playbooks
+
+    expect((await chat.request('/')).status).toBe(200); // 1
+    expect((await playbooks.request('/')).status).toBe(200); // 2
+    expect((await chat.request('/')).status).toBe(429); // combined over 2
+  });
 });

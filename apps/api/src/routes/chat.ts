@@ -8,8 +8,9 @@ import { llmRateLimit } from '../llm-rate-limit.js';
 const app = new Hono<{ Variables: Variables }>();
 
 // Chat calls the LLM on every request; cap it per principal to bound provider
-// cost from a leaked key or a runaway loop. Auth already ran on the parent, so
-// the principal is set. Covers both `/` and `/stream`.
+// cost from a leaked key or a runaway loop (shares one budget with playbook
+// synthesis). Auth already ran on the parent, so the principal is set. Covers
+// both `/` and `/stream`.
 app.use('*', llmRateLimit);
 
 const chatSchema = z.object({

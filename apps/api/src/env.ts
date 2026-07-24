@@ -16,10 +16,11 @@ export interface ApiEnv {
   /** Optional shared bearer token that guards single-user mode when set. */
   accessToken?: string;
   /**
-   * Per-principal cap on chat completions per minute. Chat generation is the
-   * one endpoint that calls the LLM on every request, so a leaked key or a
-   * runaway agent loop can run up real provider cost. Default 60/min is far
-   * above interactive use; set to 0 to disable for high-volume automation.
+   * Per-principal cap on LLM generations per minute, shared across the
+   * endpoints that call the model every request (chat, playbook synthesis).
+   * These drive real provider cost, so a leaked key or a runaway agent loop is
+   * bounded here. Default 60/min is far above interactive use; set to 0 to
+   * disable for high-volume automation.
    */
   llmRateLimitPerMin: number;
 }
