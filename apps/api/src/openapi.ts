@@ -163,13 +163,16 @@ export function openapiDocument(version: string): Record<string, unknown> {
               },
             }),
           },
-          responses: { 200: { description: 'answer' } },
+          responses: { 200: { description: 'answer' }, 429: { description: 'rate limited' } },
         },
       },
       '/v1/chat/stream': {
         post: {
           summary: 'RAG answer, streamed over SSE',
-          responses: { 200: { description: 'text/event-stream' } },
+          responses: {
+            200: { description: 'text/event-stream' },
+            429: { description: 'rate limited' },
+          },
         },
       },
       '/v1/playbooks': {
@@ -188,7 +191,16 @@ export function openapiDocument(version: string): Record<string, unknown> {
               },
             }),
           },
-          responses: { 201: { description: 'playbook' } },
+          responses: { 201: { description: 'playbook' }, 429: { description: 'rate limited' } },
+        },
+      },
+      '/v1/playbooks/stream': {
+        post: {
+          summary: 'Synthesize a playbook, streamed over SSE',
+          responses: {
+            200: { description: 'text/event-stream' },
+            429: { description: 'rate limited' },
+          },
         },
       },
       '/v1/topics': {
