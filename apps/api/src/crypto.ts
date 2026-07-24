@@ -94,6 +94,42 @@ export function verifyPassword(password: string, stored: string): boolean {
   return timingSafeEqual(derived, expected);
 }
 
+/** Prefix on a single encrypted secret string. */
+const SECRET_PREFIX = 'enc:v1:';
+
+/**
+ * Encrypt one secret string (e.g. a provider API key) for storage in a settings
+ * blob. Idempotent and opt-in: an already-encrypted value, an empty value, or a
+ * deployment with no CREDENTIALS_KEY is returned unchanged, so it is safe to run
+ * over a value carried forward from a previous save.
+ */
+export function encryptSecret(value: string): string {
+  const key = credentialsKey();
+  if (!key || !value || value.startsWith(SECRET_PREFIX)) return value;
+  const iv = randomBytes(12);
+  const cipher = createCipheriv('aes-256-gcm', key, iv);
+  const ct = Buffer.concat([cipher.update(value, 'utf8'), cipher.final()]);
+  return SECRET_PREFIX + Buffer.concat([iv, cipher.getAuthTag(), ct]).toString('base64');
+}
+
+/**
+ * Decrypt a secret produced by encryptSecret. A plaintext value (no prefix) is
+ * returned as-is; an undecryptable one falls back to an empty string.
+ */
+export function decryptSecret(value: string): string {
+  if (!value || !value.startsWith(SECRET_PREFIX)) return value ?? '';
+  const key = credentialsKey();
+  if (!key) return '';
+  try {
+    const raw = Buffer.from(value.slice(SECRET_PREFIX.length), 'base64');
+    const decipher = createDecipheriv('aes-256-gcm', key, raw.subarray(0, 12));
+    decipher.setAuthTag(raw.subarray(12, 28));
+    return Buffer.concat([decipher.update(raw.subarray(28)), decipher.final()]).toString('utf8');
+  } catch {
+    return '';
+  }
+}
+
 export function slugify(input: string): string {
   return (
     input
