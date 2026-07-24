@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import { z } from 'zod';
+import { extractiveAnswer } from '@companybrain/core';
 import { getEngine, type Variables } from '../context.js';
 
 const app = new Hono<{ Variables: Variables }>();
@@ -67,17 +68,30 @@ app.post('/stream', async (c) => {
       const context = hits
         .map((h, i) => `[${i + 1}] ${h.document.title ?? 'Untitled'}\n${h.content}`)
         .join('\n\n');
-      for await (const token of llm.stream({
-        system:
-          'You are CompanyBrain. Answer only from the context. Cite passages inline as [n]. Be concise.',
-        messages: [
-          ...(d.history ?? []),
-          { role: 'user', content: `Context:\n\n${context}\n\n---\nQuestion: ${d.message}` },
-        ],
-      })) {
-        // JSON-encode so significant whitespace and newlines in tokens survive
-        // the SSE line framing (same as the playbooks stream).
-        await stream.writeSSE({ event: 'token', data: JSON.stringify(token) });
+      let sentAny = false;
+      try {
+        for await (const token of llm.stream({
+          system:
+            'You are CompanyBrain. Answer only from the context. Cite passages inline as [n]. Be concise.',
+          messages: [
+            ...(d.history ?? []),
+            { role: 'user', content: `Context:\n\n${context}\n\n---\nQuestion: ${d.message}` },
+          ],
+        })) {
+          // JSON-encode so significant whitespace and newlines in tokens survive
+          // the SSE line framing (same as the playbooks stream).
+          await stream.writeSSE({ event: 'token', data: JSON.stringify(token) });
+          sentAny = true;
+        }
+      } catch {
+        // The model stream failed; if nothing was sent yet, fall back to a
+        // grounded extractive answer so the user is not left with an empty reply.
+        if (!sentAny) {
+          await stream.writeSSE({
+            event: 'token',
+            data: JSON.stringify(extractiveAnswer(d.message, hits).message),
+          });
+        }
       }
     } else {
       const res = await engine.chat(auth.orgId, d.message, {

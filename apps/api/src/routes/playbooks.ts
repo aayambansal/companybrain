@@ -78,14 +78,27 @@ app.post('/stream', async (c) => {
 
     const llm = engine.llm;
     if (llm.available && llm.stream && hits.length > 0) {
-      for await (const token of llm.stream({
-        system: PLAYBOOK_SYSTEM,
-        temperature: 0.3,
-        maxTokens: 1600,
-        messages: [{ role: 'user', content: buildPlaybookPrompt(d.topic, buildContext(hits)) }],
-      })) {
-        // JSON-encode so newlines survive SSE framing (Markdown needs them).
-        await stream.writeSSE({ event: 'token', data: JSON.stringify(token) });
+      let sentAny = false;
+      try {
+        for await (const token of llm.stream({
+          system: PLAYBOOK_SYSTEM,
+          temperature: 0.3,
+          maxTokens: 1600,
+          messages: [{ role: 'user', content: buildPlaybookPrompt(d.topic, buildContext(hits)) }],
+        })) {
+          // JSON-encode so newlines survive SSE framing (Markdown needs them).
+          await stream.writeSSE({ event: 'token', data: JSON.stringify(token) });
+          sentAny = true;
+        }
+      } catch {
+        // The model stream failed; if nothing was sent, emit a source outline
+        // so the user gets a grounded result rather than an empty document.
+        if (!sentAny) {
+          const outline = `# ${d.topic}\n\n## Sources\n\n${hits
+            .map((h, i) => `- ${h.document.title ?? 'Untitled'} [${i + 1}]`)
+            .join('\n')}`;
+          await stream.writeSSE({ event: 'token', data: JSON.stringify(outline) });
+        }
       }
     } else {
       const playbook = await engine.generatePlaybook(auth.orgId, {
