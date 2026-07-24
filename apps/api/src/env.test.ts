@@ -10,6 +10,8 @@ const KEYS = [
   'JWT_SECRET',
   'COMPANYBRAIN_VERSION',
   'ACCESS_TOKEN',
+  'EXPOSE_ERROR_DETAILS',
+  'NODE_ENV',
 ];
 
 describe('loadApiEnv', () => {
@@ -34,6 +36,20 @@ describe('loadApiEnv', () => {
     expect(env.corsOrigins).toEqual(['http://localhost:3000']);
     expect(env.authMode).toBe('single');
     expect(env.accessToken).toBeUndefined();
+  });
+
+  it('hides error details in production unless explicitly enabled', () => {
+    process.env.NODE_ENV = 'production';
+    expect(loadApiEnv().exposeErrorDetails).toBe(false);
+    process.env.EXPOSE_ERROR_DETAILS = 'true';
+    expect(loadApiEnv().exposeErrorDetails).toBe(true);
+  });
+
+  it('exposes error details outside production for debugging', () => {
+    process.env.NODE_ENV = 'development';
+    expect(loadApiEnv().exposeErrorDetails).toBe(true);
+    delete process.env.NODE_ENV;
+    expect(loadApiEnv().exposeErrorDetails).toBe(true);
   });
 
   it('splits, trims, and drops empty CORS origins', () => {

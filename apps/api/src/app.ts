@@ -82,8 +82,14 @@ export function createApp() {
 
   app.notFound((c) => c.json({ error: 'not_found' }, 404));
   app.onError((err, c) => {
+    // Always log the full error server-side; only disclose the message to the
+    // client when error details are enabled (dev, or EXPOSE_ERROR_DETAILS), so
+    // a production instance doesn't leak internals in its 500 responses.
     console.error('[api] error:', err);
-    return c.json({ error: 'internal_error', message: String(err?.message ?? err) }, 500);
+    const message = env.exposeErrorDetails
+      ? String(err?.message ?? err)
+      : 'An internal error occurred.';
+    return c.json({ error: 'internal_error', message }, 500);
   });
 
   return app;
