@@ -8,8 +8,14 @@ import {
   PLAYBOOK_SYSTEM,
 } from '@companybrain/core';
 import { getEngine, type Variables } from '../context.js';
+import { llmRateLimit } from '../llm-rate-limit.js';
 
 const app = new Hono<{ Variables: Variables }>();
+
+// Playbook synthesis calls the LLM on every request; share the same per-
+// principal budget as chat so a leaked key or runaway loop can't run up
+// provider cost here either. Covers both `/` and `/stream`.
+app.use('*', llmRateLimit);
 
 const playbookSchema = z.object({
   topic: z.string().min(1).max(300),
