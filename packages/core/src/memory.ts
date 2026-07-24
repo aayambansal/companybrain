@@ -400,7 +400,7 @@ export class MemoryEngine {
           sourceUrl: src.sourceUrl ?? null,
           tags: src.tags ?? [],
           metadata: src.metadata ?? {},
-          sourceUpdatedAt: src.sourceUpdatedAt ?? null,
+          sourceUpdatedAt: validDate(src.sourceUpdatedAt),
           status: 'pending',
           updatedAt: new Date(),
         })
@@ -431,8 +431,8 @@ export class MemoryEngine {
         contentHash: hash,
         tags: src.tags ?? [],
         metadata: src.metadata ?? {},
-        sourceCreatedAt: src.sourceCreatedAt ?? null,
-        sourceUpdatedAt: src.sourceUpdatedAt ?? null,
+        sourceCreatedAt: validDate(src.sourceCreatedAt),
+        sourceUpdatedAt: validDate(src.sourceUpdatedAt),
         status: 'pending',
       })
       .returning();
@@ -805,6 +805,16 @@ function toMemory(doc: typeof documents.$inferSelect): Memory {
     createdAt: doc.createdAt.toISOString(),
     updatedAt: doc.updatedAt.toISOString(),
   };
+}
+
+/**
+ * Pure: keep a Date only if it is valid, else null. Connectors build source
+ * timestamps with `new Date(sourceField)`, which yields an Invalid Date (not
+ * undefined) when the source value is malformed. Passing that straight to the
+ * timestamptz column throws and loses the whole document, so null it out.
+ */
+export function validDate(d: Date | null | undefined): Date | null {
+  return d instanceof Date && !Number.isNaN(d.getTime()) ? d : null;
 }
 
 /** Pure: derive a memory title from the first non-empty line, capped at 120 chars. */
