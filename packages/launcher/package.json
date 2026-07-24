@@ -1,6 +1,6 @@
 {
   "name": "companybrain",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "One-command installer and runner for CompanyBrain, the open-source memory layer for your company.",
   "license": "MIT",
   "type": "module",
