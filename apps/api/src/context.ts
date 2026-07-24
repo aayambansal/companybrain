@@ -36,6 +36,11 @@ export function setEngine(engine: MemoryEngine): void {
   engineSingleton = engine;
 }
 
+/** Test hook: drop the cached env so the next getEnv() re-reads process.env. */
+export function resetEnv(): void {
+  envSingleton = null;
+}
+
 let defaultOrgId: string | null = null;
 
 /**
