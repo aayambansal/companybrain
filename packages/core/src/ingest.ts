@@ -41,7 +41,15 @@ export async function indexDocument(
 
     let totalTokens = 0;
     if (pieces.length > 0) {
-      const vectors = await embedder.embed(pieces.map((p) => p.content));
+      // Embed in batches so a large document does not exceed the provider's
+      // per-request limits (e.g. OpenAI caps a request at 2048 inputs / ~300k
+      // tokens); one embed call for a whole book would otherwise fail.
+      const EMBED_BATCH = 96;
+      const vectors: number[][] = [];
+      for (let i = 0; i < pieces.length; i += EMBED_BATCH) {
+        const batch = pieces.slice(i, i + EMBED_BATCH).map((p) => p.content);
+        vectors.push(...(await embedder.embed(batch)));
+      }
       const rows = pieces.map((p, i) => {
         totalTokens += p.tokenCount;
         return {
