@@ -64,20 +64,25 @@ export async function llmRerankPointwise(
         `[${i}] ${h.document.title ? h.document.title + ' — ' : ''}${h.content.slice(0, snippetChars)}`,
     )
     .join('\n\n');
-  const res = await llm.complete({
-    system:
-      'You rate how well each passage answers or directly supports a query. Score every passage from 0 (irrelevant) to 10 (directly and fully answers it) on its own merits, independent of the others. Output one line per passage as "index: score" and nothing else.',
-    messages: [{ role: 'user', content: `Query: ${query}\n\nPassages:\n${list}` }],
-    temperature: 0,
-    maxTokens: 700,
-  });
-  const scores = parseScores(res, hits.length);
-  if (scores.every((s) => s < 0)) return hits;
-  // Stable sort by score desc; original index breaks ties (keeps retrieval order).
-  return hits
-    .map((h, i) => ({ h, i, s: scores[i] ?? -1 }))
-    .sort((a, b) => b.s - a.s || a.i - b.i)
-    .map((x) => x.h);
+  try {
+    const res = await llm.complete({
+      system:
+        'You rate how well each passage answers or directly supports a query. Score every passage from 0 (irrelevant) to 10 (directly and fully answers it) on its own merits, independent of the others. Output one line per passage as "index: score" and nothing else.',
+      messages: [{ role: 'user', content: `Query: ${query}\n\nPassages:\n${list}` }],
+      temperature: 0,
+      maxTokens: 700,
+    });
+    const scores = parseScores(res, hits.length);
+    if (scores.every((s) => s < 0)) return hits;
+    // Stable sort by score desc; original index breaks ties (keeps retrieval order).
+    return hits
+      .map((h, i) => ({ h, i, s: scores[i] ?? -1 }))
+      .sort((a, b) => b.s - a.s || a.i - b.i)
+      .map((x) => x.h);
+  } catch {
+    // Rerank is an optional refinement; keep the retrieval order if it fails.
+    return hits;
+  }
 }
 
 /**
@@ -98,14 +103,19 @@ export async function llmRerank(
         `[${i}] ${h.document.title ? h.document.title + ' — ' : ''}${h.content.slice(0, snippetChars)}`,
     )
     .join('\n\n');
-  const res = await llm.complete({
-    system:
-      'You reorder search results by relevance to a query. Judge whether each passage actually answers or directly supports the query, not just topical overlap. Return ONLY the passage numbers, most relevant first, comma-separated. No prose, no explanation.',
-    // Enough budget to emit an ordering over a large candidate set.
-    messages: [{ role: 'user', content: `Query: ${query}\n\nPassages:\n${list}` }],
-    temperature: 0,
-    maxTokens: 600,
-  });
-  const order = parseOrder(res, hits.length);
-  return order.length > 0 ? applyRerankOrder(hits, order) : hits;
+  try {
+    const res = await llm.complete({
+      system:
+        'You reorder search results by relevance to a query. Judge whether each passage actually answers or directly supports the query, not just topical overlap. Return ONLY the passage numbers, most relevant first, comma-separated. No prose, no explanation.',
+      // Enough budget to emit an ordering over a large candidate set.
+      messages: [{ role: 'user', content: `Query: ${query}\n\nPassages:\n${list}` }],
+      temperature: 0,
+      maxTokens: 600,
+    });
+    const order = parseOrder(res, hits.length);
+    return order.length > 0 ? applyRerankOrder(hits, order) : hits;
+  } catch {
+    // Rerank is an optional refinement; keep the retrieval order if it fails.
+    return hits;
+  }
 }
