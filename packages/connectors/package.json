@@ -19,7 +19,7 @@
   "dependencies": {
     "@companybrain/core": "workspace:*",
     "@companybrain/db": "workspace:*",
-    "unpdf": "^0.12.1"
+    "unpdf": "^1.6.2"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",
