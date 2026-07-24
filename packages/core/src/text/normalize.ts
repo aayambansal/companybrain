@@ -1,9 +1,26 @@
 /**
+ * Matches C0 (U+0000–U+001F) and DEL (U+007F) control characters, except tab,
+ * newline, and carriage return which carry real structure. Built from char
+ * codes so no control characters live in this source file. Postgres text
+ * storage rejects the null byte outright, so an unstripped one would fail the
+ * insert and lose the whole document; the rest are noise.
+ */
+const CONTROL_CHARS = (() => {
+  const chars: string[] = [];
+  for (let c = 0; c <= 0x1f; c++) {
+    if (c !== 0x09 && c !== 0x0a && c !== 0x0d) chars.push(String.fromCharCode(c));
+  }
+  chars.push(String.fromCharCode(0x7f));
+  return new RegExp('[' + chars.join('') + ']', 'g');
+})();
+
+/**
  * Text normalization used before chunking. Keeps structure (paragraphs) but
  * collapses noise so chunk boundaries and embeddings are stable.
  */
 export function normalizeText(input: string): string {
   return input
+    .replace(CONTROL_CHARS, '')
     .replace(/\r\n/g, '\n')
     .replace(/\r/g, '\n')
     .replace(/ /g, ' ') // non-breaking space

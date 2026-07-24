@@ -11,6 +11,17 @@ describe('normalizeText', () => {
   it('collapses runs of spaces and tabs', () => {
     expect(normalizeText('a\t\t   b')).toBe('a b');
   });
+  it('strips the null byte and other control chars (Postgres text rejects U+0000)', () => {
+    const nul = String.fromCharCode(0);
+    const bell = String.fromCharCode(7);
+    const del = String.fromCharCode(127);
+    expect(normalizeText('a' + nul + 'b')).toBe('ab');
+    expect(normalizeText('x' + bell + del + 'y')).toBe('xy');
+  });
+  it('preserves tab, newline, and carriage return', () => {
+    // \r becomes \n (existing behavior); tab and newline survive the strip.
+    expect(normalizeText('p\tq\r\nr')).toBe('p\tq\nr');
+  });
 });
 
 describe('markdownToText', () => {
