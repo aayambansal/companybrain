@@ -31,8 +31,8 @@ app.get('/', async (c) => {
 
 const createSchema = z.object({
   url: z.string().url(),
-  secret: z.string().optional(),
-  events: z.array(z.string()).optional(),
+  secret: z.string().max(512).optional(),
+  events: z.array(z.string().max(64)).max(50).optional(),
 });
 
 app.post('/', async (c) => {

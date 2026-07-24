@@ -4,13 +4,13 @@ import { getEngine, type Variables } from '../context.js';
 
 const app = new Hono<{ Variables: Variables }>();
 
-const searchSchema = z.object({
+export const searchSchema = z.object({
   q: z.string().min(1).max(1000),
   mode: z.enum(['hybrid', 'semantic', 'keyword']).optional(),
   spaceId: z.string().uuid().optional(),
   space: z.string().optional(),
   limit: z.number().int().min(1).max(100).optional(),
-  tags: z.array(z.string()).optional(),
+  tags: z.array(z.string().max(64)).max(50).optional(),
   minScore: z.number().min(0).max(1).optional(),
   rerank: z.boolean().optional(),
   rerankMode: z.enum(['listwise', 'pointwise']).optional(),
