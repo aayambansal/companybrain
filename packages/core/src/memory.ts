@@ -392,6 +392,13 @@ export class MemoryEngine {
     const hash = contentHash(normalized);
     const existing = src.sourceId ? await findBySource(this.db, connectionId, src.sourceId) : null;
 
+    // Don't create a brand-new document with no usable content (a reaction-only
+    // message, an empty file). An existing document still updates normally so a
+    // source edited down to nothing is reflected rather than left stale.
+    if (!existing && !normalized.trim()) {
+      return { documentId: '', action: 'skipped' };
+    }
+
     if (existing) {
       if (existing.contentHash === hash) return { documentId: existing.id, action: 'skipped' };
       await this.db
