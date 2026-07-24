@@ -1,4 +1,5 @@
 import type { LlmProvider, CompleteOptions, ImageInput } from './types.js';
+import { sseLines, parseOpenAiDelta } from './sse.js';
 
 const IMAGE_PROMPT =
   'Extract all text from this image verbatim (OCR). Then, on a new line starting with "Description:", briefly describe what the image shows. If there is no text, just give the description.';
@@ -84,5 +85,29 @@ export class OpenAIProvider implements LlmProvider {
     if (!res.ok) throw new Error(`OpenAI completion failed: ${res.status} ${await res.text()}`);
     const json = (await res.json()) as { choices: { message: { content: string } }[] };
     return json.choices[0]?.message.content ?? '';
+  }
+
+  async *stream(opts: CompleteOptions): AsyncIterable<string> {
+    if (!this.available) throw new Error('OPENAI_API_KEY is not set; cannot generate.');
+    const messages = opts.system
+      ? [{ role: 'system', content: opts.system }, ...opts.messages]
+      : opts.messages;
+    const res = await fetch(`${this.baseUrl}/chat/completions`, {
+      method: 'POST',
+      signal: AbortSignal.timeout(90_000),
+      headers: { Authorization: `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: this.model,
+        temperature: opts.temperature ?? 0.2,
+        max_tokens: opts.maxTokens ?? 1024,
+        messages,
+        stream: true,
+      }),
+    });
+    if (!res.ok || !res.body) throw new Error(`OpenAI stream failed: ${res.status}`);
+    for await (const line of sseLines(res.body)) {
+      const text = parseOpenAiDelta(line);
+      if (text) yield text;
+    }
   }
 }
