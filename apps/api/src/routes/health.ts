@@ -11,7 +11,14 @@ app.get('/', async (c) => {
   } catch {
     db = 'down';
   }
-  return c.json({ status: db === 'up' ? 'ok' : 'degraded', db, ts: new Date().toISOString() });
+  const healthy = db === 'up';
+  // Return 503 when the database is unreachable so load balancers, orchestrator
+  // readiness probes, and the Docker HEALTHCHECK take the instance out of
+  // rotation instead of routing traffic it cannot serve.
+  return c.json(
+    { status: healthy ? 'ok' : 'degraded', db, ts: new Date().toISOString() },
+    healthy ? 200 : 503,
+  );
 });
 
 export default app;
