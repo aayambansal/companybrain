@@ -38,4 +38,6 @@ for await (const frame of cb.chatStream({ message: 'Summarize our release proces
 - `cb.apiKeys` — `list`, `create`, `revoke`
 - `cb.search(...)`, `cb.chat(...)`, `cb.chatStream(...)`, `cb.status()`
 
-Errors are thrown as `CompanyBrainError` with `status`, `code`, and `details`.
+Errors are thrown as `CompanyBrainError` with `status`, `code`, and `details`. On a
+`429` (the chat/playbook LLM rate limit), `retryAfter` holds the seconds to wait before
+retrying, parsed from the `Retry-After` header.

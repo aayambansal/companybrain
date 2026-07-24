@@ -134,6 +134,61 @@ def test_error_falls_back_to_error_code_when_no_message():
     assert err.details == [{"path": "q"}]
 
 
+def test_rate_limit_surfaces_retry_after():
+    def handler(request):
+        return httpx.Response(
+            429,
+            headers={"Retry-After": "45"},
+            json={"error": "rate_limited", "message": "LLM rate limit reached (60/min)."},
+        )
+
+    cb = make_client(handler)
+    with pytest.raises(CompanyBrainError) as excinfo:
+        cb.chat("hi")
+
+    err = excinfo.value
+    assert err.status == 429
+    assert err.code == "rate_limited"
+    assert err.retry_after == 45
+
+
+def test_rate_limited_stream_surfaces_retry_after():
+    def handler(request):
+        return httpx.Response(
+            429,
+            headers={"Retry-After": "12"},
+            json={"error": "rate_limited", "message": "slow down"},
+        )
+
+    cb = make_client(handler)
+    with pytest.raises(CompanyBrainError) as excinfo:
+        for _ in cb.chat_stream("hi"):
+            pass
+
+    assert excinfo.value.status == 429
+    assert excinfo.value.retry_after == 12
+
+
+def test_error_without_retry_after_leaves_it_none():
+    def handler(request):
+        return httpx.Response(401, json={"error": "unauthorized", "message": "nope"})
+
+    cb = make_client(handler)
+    with pytest.raises(CompanyBrainError) as excinfo:
+        cb.memories.list()
+    assert excinfo.value.retry_after is None
+
+
+def test_parse_retry_after():
+    from companybrain._common import parse_retry_after
+
+    assert parse_retry_after("45") == 45
+    assert parse_retry_after("  7 ") == 7
+    assert parse_retry_after("0") == 0
+    assert parse_retry_after("5abc") is None
+    assert parse_retry_after(None) is None
+
+
 def test_base_url_trailing_slash_is_normalized():
     cb = CompanyBrain(api_url="http://localhost:3333/", transport=httpx.MockTransport(lambda r: httpx.Response(200, json={})))
     assert cb.api_url == "http://localhost:3333"
@@ -184,6 +239,27 @@ def test_async_client_add_and_stream():
     assert memory["id"] == "m9"
     assert ("token", "hi") in frames
     assert ("done", "1") in frames
+
+
+def test_async_rate_limit_surfaces_retry_after():
+    def handler(request):
+        return httpx.Response(
+            429,
+            headers={"Retry-After": "20"},
+            json={"error": "rate_limited", "message": "slow down"},
+        )
+
+    async def run():
+        transport = httpx.MockTransport(handler)
+        async with AsyncCompanyBrain(
+            api_url="http://test.local", api_key="k", transport=transport
+        ) as cb:
+            await cb.chat("hi")
+
+    with pytest.raises(CompanyBrainError) as excinfo:
+        asyncio.run(run())
+    assert excinfo.value.status == 429
+    assert excinfo.value.retry_after == 20
 
 
 def test_defaults_come_from_env(monkeypatch):

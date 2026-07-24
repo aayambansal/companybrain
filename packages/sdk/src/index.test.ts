@@ -1,16 +1,22 @@
 import { describe, it, expect, vi } from 'vitest';
-import { CompanyBrain, CompanyBrainError } from './index.js';
+import { CompanyBrain, CompanyBrainError, parseRetryAfter } from './index.js';
 
 function mockFetch(
-  handler: (url: string, init: RequestInit) => { status?: number; body: unknown },
+  handler: (
+    url: string,
+    init: RequestInit,
+  ) => { status?: number; body: unknown; headers?: Record<string, string> },
 ) {
   return vi.fn(async (url: string | URL, init?: RequestInit) => {
-    const { status = 200, body } = handler(url.toString(), init ?? {});
+    const { status = 200, body, headers = {} } = handler(url.toString(), init ?? {});
+    const lower: Record<string, string> = {};
+    for (const [k, v] of Object.entries(headers)) lower[k.toLowerCase()] = v;
     return {
       ok: status >= 200 && status < 300,
       status,
+      headers: { get: (name: string) => lower[name.toLowerCase()] ?? null },
       text: async () => (body === undefined ? '' : JSON.stringify(body)),
-    } as Response;
+    } as unknown as Response;
   }) as unknown as typeof fetch;
 }
 
@@ -77,6 +83,29 @@ describe('CompanyBrain SDK', () => {
     await expect(cb.memories.list()).rejects.toMatchObject({ status: 401, code: 'unauthorized' });
   });
 
+  it('surfaces Retry-After from a 429 as retryAfter seconds', async () => {
+    const fetchImpl = mockFetch(() => ({
+      status: 429,
+      headers: { 'Retry-After': '42' },
+      body: { error: 'rate_limited', message: 'LLM rate limit reached (60/min). Retry in 42s.' },
+    }));
+    const cb = new CompanyBrain({ fetch: fetchImpl });
+    await expect(cb.chat({ message: 'hi' })).rejects.toMatchObject({
+      status: 429,
+      code: 'rate_limited',
+      retryAfter: 42,
+    });
+  });
+
+  it('parses Retry-After seconds, ignoring garbage and honoring absence', () => {
+    expect(parseRetryAfter('42')).toBe(42);
+    expect(parseRetryAfter('  7 ')).toBe(7);
+    expect(parseRetryAfter('0')).toBe(0);
+    expect(parseRetryAfter('5abc')).toBeUndefined();
+    expect(parseRetryAfter(null)).toBeUndefined();
+    expect(parseRetryAfter(undefined)).toBeUndefined();
+  });
+
   it('normalizes the base url (no trailing slash)', () => {
     const cb = new CompanyBrain({
       apiUrl: 'http://localhost:3333/',
@@ -124,11 +153,34 @@ describe('CompanyBrain SDK chatStream', () => {
 
   it('throws a typed error when the stream response is not ok', async () => {
     const fetchImpl = vi.fn(
-      async () => ({ ok: false, status: 500, body: null }) as unknown as Response,
+      async () =>
+        ({
+          ok: false,
+          status: 500,
+          body: null,
+          headers: { get: () => null },
+          text: async () => '',
+        }) as unknown as Response,
     ) as unknown as typeof fetch;
     const cb = new CompanyBrain({ fetch: fetchImpl });
     await expect(async () => {
       for await (const _ of cb.chatStream({ message: 'hi' })) void _;
     }).rejects.toBeInstanceOf(CompanyBrainError);
+  });
+
+  it('surfaces a 429 with retryAfter on a rate-limited stream', async () => {
+    const fetchImpl = vi.fn(
+      async () =>
+        ({
+          ok: false,
+          status: 429,
+          headers: { get: (n: string) => (n.toLowerCase() === 'retry-after' ? '30' : null) },
+          text: async () => JSON.stringify({ error: 'rate_limited', message: 'slow down' }),
+        }) as unknown as Response,
+    ) as unknown as typeof fetch;
+    const cb = new CompanyBrain({ fetch: fetchImpl });
+    await expect(async () => {
+      for await (const _ of cb.chatStream({ message: 'hi' })) void _;
+    }).rejects.toMatchObject({ status: 429, code: 'rate_limited', retryAfter: 30 });
   });
 });

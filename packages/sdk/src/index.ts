@@ -39,13 +39,37 @@ export class CompanyBrainError extends Error {
   readonly status: number;
   readonly code?: string;
   readonly details?: unknown;
-  constructor(message: string, status: number, code?: string, details?: unknown) {
+  /** Seconds to wait before retrying, from the `Retry-After` header (429s). */
+  readonly retryAfter?: number;
+  constructor(
+    message: string,
+    status: number,
+    code?: string,
+    details?: unknown,
+    retryAfter?: number,
+  ) {
     super(message);
     this.name = 'CompanyBrainError';
     this.status = status;
     this.code = code;
     this.details = details;
+    this.retryAfter = retryAfter;
   }
+}
+
+/**
+ * Parse a `Retry-After` header into whole seconds. Handles the delta-seconds
+ * form the API emits, and falls back to the HTTP-date form the spec also
+ * allows. Returns undefined when absent or unparseable.
+ */
+export function parseRetryAfter(header: string | null | undefined): number | undefined {
+  if (!header) return undefined;
+  const trimmed = header.trim();
+  const secs = Number.parseInt(trimmed, 10);
+  if (Number.isFinite(secs) && secs >= 0 && String(secs) === trimmed) return secs;
+  const date = Date.parse(trimmed);
+  if (!Number.isNaN(date)) return Math.max(0, Math.round((date - Date.now()) / 1000));
+  return undefined;
 }
 
 function envVar(name: string): string | undefined {
@@ -112,6 +136,7 @@ export class CompanyBrain {
         res.status,
         err.error,
         err.issues,
+        parseRetryAfter(res.headers.get('Retry-After')),
       );
     }
     return data as T;
@@ -153,8 +178,19 @@ export class CompanyBrain {
     const headers: Record<string, string> = { ...this.headers, 'Content-Type': 'application/json' };
     if (this.apiKey) headers['Authorization'] = `Bearer ${this.apiKey}`;
     const res = await this.fetchImpl(url, { method: 'POST', headers, body: JSON.stringify(input) });
-    if (!res.ok || !res.body)
-      throw new CompanyBrainError(`chat stream failed (${res.status})`, res.status);
+    if (!res.ok || !res.body) {
+      // Surface the same structured error the non-streaming path does, so a
+      // rate-limited stream (429) reports its message, code, and retry hint.
+      const text = await res.text().catch(() => '');
+      const err = (text ? safeJson(text) : {}) as { error?: string; message?: string };
+      throw new CompanyBrainError(
+        err.message ?? err.error ?? `chat stream failed (${res.status})`,
+        res.status,
+        err.error,
+        undefined,
+        parseRetryAfter(res.headers.get('Retry-After')),
+      );
+    }
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
