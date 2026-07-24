@@ -21,10 +21,12 @@ function blocksInternalTargets(): boolean {
   return process.env.AUTH_MODE === 'multi';
 }
 
-/** Throw if the policy forbids fetching this (internal/private) URL. */
+/**
+ * Throw if the URL points at an internal/private address. Called per redirect
+ * hop only when the guard is active (see fetchWithRetry). Fast literal check
+ * first, then a DNS check for hostnames that resolve to an internal IP.
+ */
 async function guardFetchTarget(url: string): Promise<void> {
-  if (!blocksInternalTargets()) return;
-  // Fast literal check first, then a DNS check for hostnames hiding an internal IP.
   if (urlBlockReason(url) !== null || (await isBlockedInternalTarget(url))) {
     throw new Error(`Refusing to fetch internal or private address: ${redactUrl(url)}`);
   }
@@ -59,6 +61,8 @@ export const DEFAULT_TIMEOUT_MS = 30_000;
 const RETRY_STATUS = new Set([429, 503]);
 const MAX_RETRIES = 4;
 const MAX_RETRY_DELAY_MS = 60_000;
+/** Redirect hops followed when the SSRF guard is active (each is re-checked). */
+const MAX_REDIRECTS = 5;
 
 /**
  * Combine an optional caller signal with a timeout, so a request aborts on
@@ -104,17 +108,36 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
  * fetch() with a fresh timeout per attempt, retrying 429/503 with backoff that
  * honors `Retry-After`. Each attempt gets its own timeout signal so a retry is
  * not cut short by the first attempt's clock.
+ *
+ * When the SSRF guard is active it follows redirects manually and re-checks
+ * every hop, so a public URL can't 3xx-redirect into an internal address
+ * (which `redirect: 'follow'` would silently chase). Otherwise redirects are
+ * followed normally with no per-hop cost.
  */
 async function fetchWithRetry(
   url: string,
-  init: Omit<RequestInit, 'signal'>,
+  init: Omit<RequestInit, 'signal' | 'redirect'>,
   callerSignal: AbortSignal | undefined,
   timeoutMs: number,
 ): Promise<Response> {
-  for (let attempt = 0; ; attempt++) {
-    const res = await fetch(url, { ...init, signal: requestSignal(callerSignal, timeoutMs) });
-    if (!RETRY_STATUS.has(res.status) || attempt >= MAX_RETRIES) return res;
-    await sleep(retryDelayMs(res.headers.get('retry-after'), attempt), callerSignal);
+  const guarded = blocksInternalTargets();
+  let current = url;
+  for (let hop = 0; ; hop++) {
+    if (guarded) await guardFetchTarget(current);
+    let res: Response;
+    for (let attempt = 0; ; attempt++) {
+      res = await fetch(current, {
+        ...init,
+        redirect: guarded ? 'manual' : 'follow',
+        signal: requestSignal(callerSignal, timeoutMs),
+      });
+      if (!RETRY_STATUS.has(res.status) || attempt >= MAX_RETRIES) break;
+      await sleep(retryDelayMs(res.headers.get('retry-after'), attempt), callerSignal);
+    }
+    if (!guarded || res.status < 300 || res.status >= 400) return res;
+    const location = res.headers.get('location');
+    if (!location || hop >= MAX_REDIRECTS) return res;
+    current = new URL(location, current).toString();
   }
 }
 
@@ -124,10 +147,9 @@ export async function fetchText(
   signal?: AbortSignal,
   timeoutMs = DEFAULT_TIMEOUT_MS,
 ): Promise<string> {
-  await guardFetchTarget(url);
   const res = await fetchWithRetry(
     url,
-    { redirect: 'follow', headers: { 'user-agent': USER_AGENT, accept: '*/*' } },
+    { headers: { 'user-agent': USER_AGENT, accept: '*/*' } },
     signal,
     timeoutMs,
   );
@@ -147,12 +169,10 @@ export interface JsonRequest {
 
 /** Fetch JSON with optional auth headers. Throws on non-2xx. */
 export async function fetchJson<T = unknown>(url: string, opts: JsonRequest = {}): Promise<T> {
-  await guardFetchTarget(url);
   const res = await fetchWithRetry(
     url,
     {
       method: opts.method ?? 'GET',
-      redirect: 'follow',
       headers: {
         'user-agent': USER_AGENT,
         accept: 'application/json',
