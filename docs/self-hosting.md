@@ -58,6 +58,10 @@ indexing, re-embed your chunks so scores stay comparable.
 - [ ] Leave `WEBHOOK_ALLOW_INTERNAL` off (the default) so user-registered
       webhooks can't be aimed at the metadata endpoint or internal services
       (SSRF); enable it only if you webhook to a trusted local address.
+- [ ] In multi-tenant mode (`AUTH_MODE=multi`), connectors block internal/private
+      crawl targets by default (a connector stores what it fetches, so an internal
+      URL is a read-SSRF). Set `CONNECTOR_ALLOW_INTERNAL=true` only if every user is
+      trusted to reach internal sources.
 - [ ] Terminate TLS at a reverse proxy in front of the API and web.
 - [ ] Use a least-privilege Postgres role.
 - [ ] Back up the database. Your brain lives there.

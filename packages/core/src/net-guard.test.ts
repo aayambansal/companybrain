@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   isPrivateIpv4,
   isPrivateIp,
-  webhookUrlBlockReason,
-  isBlockedWebhookTarget,
+  urlBlockReason,
+  isBlockedInternalTarget,
 } from './net-guard.js';
 
 describe('isPrivateIpv4', () => {
@@ -47,24 +47,24 @@ describe('isPrivateIp (v6 aware)', () => {
   });
 });
 
-describe('webhookUrlBlockReason', () => {
+describe('urlBlockReason', () => {
   it('rejects internal targets and bad schemes', () => {
-    expect(webhookUrlBlockReason('http://localhost/hook')).toMatch(/localhost/);
-    expect(webhookUrlBlockReason('http://app.localhost/hook')).toMatch(/localhost/);
-    expect(webhookUrlBlockReason('http://127.0.0.1:9000/hook')).toMatch(/private|loopback/);
-    expect(webhookUrlBlockReason('http://169.254.169.254/latest/meta-data')).toMatch(/private/);
-    expect(webhookUrlBlockReason('http://[::1]/hook')).toMatch(/private|loopback/);
-    expect(webhookUrlBlockReason('ftp://example.com/hook')).toMatch(/http/);
-    expect(webhookUrlBlockReason('not a url')).toMatch(/valid/);
+    expect(urlBlockReason('http://localhost/hook')).toMatch(/localhost/);
+    expect(urlBlockReason('http://app.localhost/hook')).toMatch(/localhost/);
+    expect(urlBlockReason('http://127.0.0.1:9000/hook')).toMatch(/private|loopback/);
+    expect(urlBlockReason('http://169.254.169.254/latest/meta-data')).toMatch(/private/);
+    expect(urlBlockReason('http://[::1]/hook')).toMatch(/private|loopback/);
+    expect(urlBlockReason('ftp://example.com/hook')).toMatch(/http/);
+    expect(urlBlockReason('not a url')).toMatch(/valid/);
   });
   it('accepts a normal public https URL', () => {
-    expect(webhookUrlBlockReason('https://hooks.example.com/companybrain')).toBeNull();
+    expect(urlBlockReason('https://hooks.example.com/companybrain')).toBeNull();
   });
 });
 
-describe('isBlockedWebhookTarget', () => {
+describe('isBlockedInternalTarget', () => {
   it('blocks a literal-internal target without needing DNS', async () => {
-    expect(await isBlockedWebhookTarget('http://127.0.0.1/x')).toBe(true);
-    expect(await isBlockedWebhookTarget('ftp://example.com')).toBe(true);
+    expect(await isBlockedInternalTarget('http://127.0.0.1/x')).toBe(true);
+    expect(await isBlockedInternalTarget('ftp://example.com')).toBe(true);
   });
 });

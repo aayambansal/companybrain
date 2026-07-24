@@ -1,8 +1,34 @@
 /**
  * Minimal HTTP helper built on the global `fetch` (Node 20+). No npm deps.
  */
+import { isBlockedInternalTarget, urlBlockReason } from '@companybrain/core';
 
 const USER_AGENT = 'CompanyBrain-Connector/0.1 (+https://github.com/aayambansal/companybrain)';
+
+/**
+ * Whether to refuse fetching internal/private/loopback URLs. Connectors fetch
+ * user-configured URLs and store the response for the user to read, so an
+ * unguarded fetch is a read-SSRF (a URL aimed at the cloud metadata endpoint or
+ * an internal service would be exfiltrated). Internal sources (an intranet
+ * wiki, a local feed) are a legitimate connector target though, so the default
+ * is mode-aware: block in multi-tenant mode where users are untrusted, allow in
+ * single-user mode (your own box). CONNECTOR_ALLOW_INTERNAL overrides either way.
+ */
+function blocksInternalTargets(): boolean {
+  const flag = process.env.CONNECTOR_ALLOW_INTERNAL;
+  if (flag === 'true') return false;
+  if (flag === 'false') return true;
+  return process.env.AUTH_MODE === 'multi';
+}
+
+/** Throw if the policy forbids fetching this (internal/private) URL. */
+async function guardFetchTarget(url: string): Promise<void> {
+  if (!blocksInternalTargets()) return;
+  // Fast literal check first, then a DNS check for hostnames hiding an internal IP.
+  if (urlBlockReason(url) !== null || (await isBlockedInternalTarget(url))) {
+    throw new Error(`Refusing to fetch internal or private address: ${redactUrl(url)}`);
+  }
+}
 
 /** Query-param names whose value must never appear in a log or error message. */
 const SENSITIVE_PARAM = /token|secret|key|password|auth|credential|sig|access/i;
@@ -98,6 +124,7 @@ export async function fetchText(
   signal?: AbortSignal,
   timeoutMs = DEFAULT_TIMEOUT_MS,
 ): Promise<string> {
+  await guardFetchTarget(url);
   const res = await fetchWithRetry(
     url,
     { redirect: 'follow', headers: { 'user-agent': USER_AGENT, accept: '*/*' } },
@@ -120,6 +147,7 @@ export interface JsonRequest {
 
 /** Fetch JSON with optional auth headers. Throws on non-2xx. */
 export async function fetchJson<T = unknown>(url: string, opts: JsonRequest = {}): Promise<T> {
+  await guardFetchTarget(url);
   const res = await fetchWithRetry(
     url,
     {
