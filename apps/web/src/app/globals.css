@@ -32,15 +32,21 @@
   --color-spark-strong: oklch(0.62 0.16 60);
   --color-spark-soft: oklch(0.76 0.16 68 / 0.16);
 
-  /* Status (semantic, distinct from the accent, tuned for a light ground) */
+  /* Status (semantic, distinct from the accent, tuned for a light ground).
+     The base tone is for dots, borders, and solid fills; the -ink tone is a
+     darker variant for status TEXT so it clears 4.5:1 on the -soft chip bg. */
   --color-success: oklch(0.56 0.15 155);
   --color-success-soft: oklch(0.56 0.15 155 / 0.12);
+  --color-success-ink: oklch(0.48 0.15 155);
   --color-warn: oklch(0.64 0.15 66);
   --color-warn-soft: oklch(0.64 0.15 66 / 0.14);
+  --color-warn-ink: oklch(0.5 0.15 66);
   --color-danger: oklch(0.55 0.2 25);
   --color-danger-soft: oklch(0.55 0.2 25 / 0.1);
+  --color-danger-ink: oklch(0.5 0.2 25);
   --color-info: oklch(0.54 0.13 250);
   --color-info-soft: oklch(0.54 0.13 250 / 0.12);
+  --color-info-ink: oklch(0.5 0.13 250);
 
   /* Type */
   --font-sans: 'Switzer', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif;

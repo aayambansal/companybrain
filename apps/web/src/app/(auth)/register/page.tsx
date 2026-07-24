@@ -97,7 +97,7 @@ export default function RegisterPage() {
           />
         </Field>
         {error && (
-          <p className="rounded-md border border-[color-mix(in_oklch,var(--color-danger),transparent_55%)] bg-[var(--color-danger-soft)] px-3 py-2 text-[13px] text-[var(--color-danger)]">
+          <p className="rounded-md border border-[color-mix(in_oklch,var(--color-danger),transparent_55%)] bg-[var(--color-danger-soft)] px-3 py-2 text-[13px] text-[var(--color-danger-ink)]">
             {error}
           </p>
         )}
