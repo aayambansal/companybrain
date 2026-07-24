@@ -55,8 +55,8 @@ export default function AnalyticsPage() {
 
       {empty ? (
         <EmptyState
-          title="no data yet"
-          description="Add memories or connect a source, then come back."
+          title="Nothing to chart yet"
+          description="Charts appear once memories start landing. Capture one from the overview, or connect a source."
           icon={<IconMemory size={28} />}
         />
       ) : (

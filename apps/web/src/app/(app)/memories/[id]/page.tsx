@@ -69,7 +69,7 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
         </div>
       ) : memory === 'missing' ? (
         <EmptyState
-          title="not found"
+          title="Memory not found"
           description="This memory does not exist or was deleted."
           icon={<IconMemory size={28} />}
         />

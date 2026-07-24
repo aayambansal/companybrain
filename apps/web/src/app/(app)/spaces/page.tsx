@@ -113,8 +113,8 @@ export default function SpacesPage() {
         </div>
       ) : spaces.length === 0 ? (
         <EmptyState
-          title="no spaces"
-          description="Create one to start organizing."
+          title="No spaces yet"
+          description="Spaces keep separate bodies of knowledge apart, so a search can be scoped to one of them."
           icon={<IconSpaces size={28} />}
         />
       ) : (

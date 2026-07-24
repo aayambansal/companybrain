@@ -143,7 +143,7 @@ export default function ChatPage() {
         {turns.length === 0 ? (
           <div className="pt-10">
             <EmptyState
-              title="ask your company brain"
+              title="Ask your company brain"
               description="Answers are grounded in your indexed knowledge and come back with citations you can open."
               icon={<IconChat size={28} />}
             />

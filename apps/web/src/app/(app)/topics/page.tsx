@@ -36,7 +36,7 @@ export default function TopicsPage() {
         </div>
       ) : topics.length === 0 ? (
         <EmptyState
-          title="no topics yet"
+          title="No topics yet"
           description="Index a few memories with an LLM configured for enrichment, or connect a source. Topics form on their own from tags and people."
           icon={<IconSpaces size={28} />}
         />

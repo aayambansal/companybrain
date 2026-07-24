@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { motion, useReducedMotion } from 'motion/react';
 import { api, type SearchResponse, type SearchHit } from '@/lib/api';
 import { Page } from '@/components/app-shell';
 import { Badge, Skeleton, EmptyState, cx } from '@/components/ui';
@@ -26,6 +27,7 @@ function SearchInner() {
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const reduceMotion = useReducedMotion();
 
   const run = useCallback(async (query: string, m: Mode) => {
     if (!query.trim()) {
@@ -113,26 +115,40 @@ function SearchInner() {
           </div>
         ) : failed ? (
           <EmptyState
-            title="search failed"
+            title="Search failed"
             description="Something went wrong reaching the index. Check the connection and try again."
             icon={<IconSearch size={28} />}
           />
         ) : !res ? (
           <EmptyState
-            title="type a query"
+            title="Type a query"
             description="Try a question, a phrase, or a keyword."
             icon={<IconSearch size={28} />}
           />
         ) : res.hits.length === 0 ? (
           <EmptyState
-            title="no matches"
+            title="No matches"
             description={`Nothing indexed matched "${res.query}".`}
             icon={<IconSearch size={28} />}
           />
         ) : (
+          /* Results are already visible by default; the stagger only conveys
+             that a new set landed, and collapses to nothing under
+             prefers-reduced-motion. */
           <ul className="space-y-3">
-            {res.hits.map((h) => (
-              <Hit key={h.chunkId} hit={h} query={res.query} />
+            {res.hits.map((h, i) => (
+              <motion.li
+                key={h.chunkId}
+                initial={reduceMotion ? false : { opacity: 0.4, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: reduceMotion ? 0 : 0.22,
+                  delay: reduceMotion ? 0 : Math.min(i, 6) * 0.03,
+                  ease: [0.25, 1, 0.5, 1],
+                }}
+              >
+                <Hit hit={h} query={res.query} />
+              </motion.li>
             ))}
           </ul>
         )}
@@ -171,7 +187,7 @@ function highlight(text: string, query: string): React.ReactNode {
 function Hit({ hit, query }: { hit: SearchHit; query: string }) {
   const pct = Math.round(hit.score * 100);
   return (
-    <li className="rounded-lg border border-border bg-surface p-4 transition-colors hover:border-border-strong">
+    <div className="rounded-lg border border-border bg-surface p-4 transition-colors hover:border-border-strong">
       <div className="flex items-start justify-between gap-3">
         <Link
           href={`/memories/${hit.documentId}`}
@@ -213,7 +229,7 @@ function Hit({ hit, query }: { hit: SearchHit; query: string }) {
           </a>
         )}
       </div>
-    </li>
+    </div>
   );
 }
 
