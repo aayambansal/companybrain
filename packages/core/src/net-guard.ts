@@ -1,9 +1,9 @@
 /**
- * SSRF guard for outbound webhooks. Webhook URLs are user-controlled, so
- * delivery could otherwise be pointed at the cloud metadata endpoint, loopback,
- * or private-range services on the host's network. These helpers reject those
- * targets. Self-hosters who genuinely webhook to a local service opt back in
- * with WEBHOOK_ALLOW_INTERNAL=true.
+ * SSRF guard for outbound fetches to user-controlled URLs (webhook delivery,
+ * connector crawling). Without it a target could be pointed at the cloud
+ * metadata endpoint, loopback, or private-range services on the host's network.
+ * These helpers classify addresses and reject those targets; callers gate
+ * enforcement on their own allow-internal policy.
  */
 import { lookup } from 'node:dns/promises';
 
@@ -33,11 +33,11 @@ export function isPrivateIp(ip: string): boolean {
 }
 
 /**
- * Reason a webhook URL is rejected on its literal form (scheme + hostname),
- * or null if it looks acceptable. Catches non-http(s) schemes, localhost, and
- * literal private/loopback IPs without a DNS lookup.
+ * Reason a URL is rejected on its literal form (scheme + hostname), or null if
+ * it looks acceptable. Catches non-http(s) schemes, localhost, and literal
+ * private/loopback IPs without a DNS lookup.
  */
-export function webhookUrlBlockReason(rawUrl: string): string | null {
+export function urlBlockReason(rawUrl: string): string | null {
   let u: URL;
   try {
     u = new URL(rawUrl);
@@ -69,12 +69,12 @@ export async function resolvesToInternal(hostname: string): Promise<boolean> {
 }
 
 /**
- * Full check used at delivery time: literal rejection plus a DNS resolution
+ * Full check used at request time: literal rejection plus a DNS resolution
  * check for hostnames that hide an internal address. Returns true if the URL
- * must not be delivered to.
+ * must not be fetched.
  */
-export async function isBlockedWebhookTarget(rawUrl: string): Promise<boolean> {
-  if (webhookUrlBlockReason(rawUrl) !== null) return true;
+export async function isBlockedInternalTarget(rawUrl: string): Promise<boolean> {
+  if (urlBlockReason(rawUrl) !== null) return true;
   try {
     return await resolvesToInternal(new URL(rawUrl).hostname);
   } catch {

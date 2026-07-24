@@ -7,7 +7,7 @@ import { createHmac } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import { webhooks } from '@companybrain/db';
 import type { Database } from '@companybrain/db';
-import { isBlockedWebhookTarget } from './net-guard.js';
+import { isBlockedInternalTarget } from './net-guard.js';
 
 export interface WebhookEvent {
   event: string;
@@ -43,7 +43,7 @@ export async function dispatchWebhooks(db: Database, evt: WebhookEvent): Promise
   });
   await Promise.allSettled(
     targets.map(async (h) => {
-      if (!allowInternal && (await isBlockedWebhookTarget(h.url))) {
+      if (!allowInternal && (await isBlockedInternalTarget(h.url))) {
         // Record a distinct status so a blocked target is visible, not silent.
         await db
           .update(webhooks)

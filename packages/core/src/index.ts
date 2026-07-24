@@ -70,8 +70,8 @@ export { generateDigest, buildDigestPrompt, type DigestResult } from './digest.j
 export { enrichDocument, parseEnrichment, type Enrichment } from './enrich.js';
 export { dispatchWebhooks, signWebhook, type WebhookEvent } from './webhooks.js';
 export {
-  webhookUrlBlockReason,
-  isBlockedWebhookTarget,
+  urlBlockReason,
+  isBlockedInternalTarget,
   isPrivateIp,
   isPrivateIpv4,
 } from './net-guard.js';

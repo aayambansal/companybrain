@@ -48,7 +48,8 @@ for the full record.
   set; login throttled to slow credential brute-force.
 - LLM generations (chat and playbook synthesis) rate-limited per principal on a shared budget
   (`LLM_RATE_LIMIT_PER_MIN`, default 60) so a leaked key or a runaway loop can't run up provider cost.
-- Outbound webhooks refuse internal/private/loopback targets by default (SSRF guard); opt in with
-  `WEBHOOK_ALLOW_INTERNAL` for trusted local integrations. 500 responses hide internal error detail
-  in production (`EXPOSE_ERROR_DETAILS` to override); ingest input sizes are bounded.
+- SSRF guards on outbound fetches: webhooks refuse internal/private/loopback targets by default
+  (`WEBHOOK_ALLOW_INTERNAL` to opt in), and connectors block internal crawl targets in multi-tenant
+  mode (`CONNECTOR_ALLOW_INTERNAL` to override). 500 responses hide internal error detail in
+  production (`EXPOSE_ERROR_DETAILS` to override); ingest input sizes are bounded.
 - One-command self-host (`npx companybrain`); Docker and cloud deploy blueprints.

@@ -54,6 +54,45 @@ describe('fetchText', () => {
   });
 });
 
+describe('SSRF guard', () => {
+  const savedAuth = process.env.AUTH_MODE;
+  const savedAllow = process.env.CONNECTOR_ALLOW_INTERNAL;
+  afterEach(() => {
+    if (savedAuth === undefined) delete process.env.AUTH_MODE;
+    else process.env.AUTH_MODE = savedAuth;
+    if (savedAllow === undefined) delete process.env.CONNECTOR_ALLOW_INTERNAL;
+    else process.env.CONNECTOR_ALLOW_INTERNAL = savedAllow;
+  });
+
+  it('refuses internal targets when blocking is enabled, without fetching', async () => {
+    process.env.CONNECTOR_ALLOW_INTERNAL = 'false';
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    await expect(fetchText('http://127.0.0.1:9200/_search')).rejects.toThrow(/internal or private/);
+    await expect(fetchJson('http://169.254.169.254/latest/meta-data')).rejects.toThrow(/internal/);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not block when internal targets are allowed', async () => {
+    process.env.CONNECTOR_ALLOW_INTERNAL = 'true';
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: true, text: async () => 'ok' }) as Response),
+    );
+    expect(await fetchText('http://127.0.0.1/local')).toBe('ok');
+  });
+
+  it('is off by default outside multi-tenant mode', async () => {
+    delete process.env.CONNECTOR_ALLOW_INTERNAL;
+    delete process.env.AUTH_MODE;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: true, text: async () => 'ok' }) as Response),
+    );
+    expect(await fetchText('http://127.0.0.1/local')).toBe('ok');
+  });
+});
+
 describe('retryDelayMs', () => {
   it('honors a numeric Retry-After in seconds', () => {
     expect(retryDelayMs('2', 0)).toBe(2000);
