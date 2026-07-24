@@ -24,6 +24,13 @@ describe('memories addSchema bounds', () => {
   it('bounds sourceType', () => {
     expect(addSchema.safeParse({ content: 'c', sourceType: 'x'.repeat(65) }).success).toBe(false);
   });
+
+  it('accepts a media data URL in place of content', () => {
+    // A normal-sized data URL is well under the per-medium caps; the caps
+    // themselves use the same .max() the content test exercises.
+    const r = addSchema.safeParse({ image: 'data:image/png;base64,iVBORw0KGgo=' });
+    expect(r.success).toBe(true);
+  });
 });
 
 describe('search searchSchema bounds', () => {

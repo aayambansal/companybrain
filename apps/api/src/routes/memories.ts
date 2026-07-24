@@ -8,20 +8,28 @@ const app = new Hono<{ Variables: Variables }>();
 
 // A single memory of ~1MB is already ~500 embedding chunks; cap here so one
 // request can't spawn unbounded embedding work (cost, latency, memory). This
-// is generous, a full book is well under it, and it bounds only the text field,
-// not the image/audio/video data URLs which are legitimately large.
+// is generous, a full book is well under it.
 export const MAX_CONTENT = 1_000_000;
 const tagsSchema = z.array(z.string().max(64)).max(50);
+
+// Media data URLs are base64 (~33% larger than the bytes) and get decoded into
+// memory then handed to a vision model / Whisper / ffmpeg. Cap each near the
+// real provider ceiling so an oversized blob is rejected up front instead of
+// buffered and sent to a processor that would reject it anyway. Vision APIs cap
+// around 20MB, Whisper around 25MB; video is looser since ffmpeg runs locally.
+const MAX_IMAGE = 28_000_000; // ~20MB decoded
+const MAX_AUDIO = 35_000_000; // ~25MB decoded
+const MAX_VIDEO = 280_000_000; // ~200MB decoded
 
 export const addSchema = z.object({
   title: z.string().max(500).optional(),
   content: z.string().min(1).max(MAX_CONTENT).optional(),
   /** A data URL (data:image/png;base64,...) to OCR + caption with a vision LLM. */
-  image: z.string().optional(),
+  image: z.string().max(MAX_IMAGE).optional(),
   /** A data URL (data:audio/mpeg;base64,...) to transcribe with a speech model. */
-  audio: z.string().optional(),
+  audio: z.string().max(MAX_AUDIO).optional(),
   /** A data URL (data:video/mp4;base64,...) to transcribe + frame-caption via ffmpeg. */
-  video: z.string().optional(),
+  video: z.string().max(MAX_VIDEO).optional(),
   format: z.enum(['text', 'markdown', 'html']).optional(),
   space: z.string().optional(),
   spaceId: z.string().uuid().optional(),
