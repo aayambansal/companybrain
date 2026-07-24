@@ -41,10 +41,10 @@ const importSchema = z.object({
   memories: z
     .array(
       z.object({
-        title: z.string().nullable().optional(),
-        content: z.string().min(1),
-        tags: z.array(z.string()).optional(),
-        sourceType: z.string().nullable().optional(),
+        title: z.string().max(500).nullable().optional(),
+        content: z.string().min(1).max(1_000_000),
+        tags: z.array(z.string().max(64)).max(50).optional(),
+        sourceType: z.string().max(64).nullable().optional(),
         sourceUrl: z.string().nullable().optional(),
         metadata: z.record(z.unknown()).optional(),
       }),

@@ -6,9 +6,16 @@ import { queryInt } from '../query.js';
 
 const app = new Hono<{ Variables: Variables }>();
 
-const addSchema = z.object({
+// A single memory of ~1MB is already ~500 embedding chunks; cap here so one
+// request can't spawn unbounded embedding work (cost, latency, memory). This
+// is generous, a full book is well under it, and it bounds only the text field,
+// not the image/audio/video data URLs which are legitimately large.
+export const MAX_CONTENT = 1_000_000;
+const tagsSchema = z.array(z.string().max(64)).max(50);
+
+export const addSchema = z.object({
   title: z.string().max(500).optional(),
-  content: z.string().min(1).optional(),
+  content: z.string().min(1).max(MAX_CONTENT).optional(),
   /** A data URL (data:image/png;base64,...) to OCR + caption with a vision LLM. */
   image: z.string().optional(),
   /** A data URL (data:audio/mpeg;base64,...) to transcribe with a speech model. */
@@ -18,9 +25,9 @@ const addSchema = z.object({
   format: z.enum(['text', 'markdown', 'html']).optional(),
   space: z.string().optional(),
   spaceId: z.string().uuid().optional(),
-  tags: z.array(z.string()).optional(),
+  tags: tagsSchema.optional(),
   sourceUrl: z.string().url().optional(),
-  sourceType: z.string().optional(),
+  sourceType: z.string().max(64).optional(),
   metadata: z.record(z.unknown()).optional(),
   dedupe: z.boolean().optional(),
 });
@@ -149,8 +156,8 @@ app.get('/:id/versions', async (c) => {
 
 const patchSchema = z.object({
   title: z.string().max(500).optional(),
-  content: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+  content: z.string().max(MAX_CONTENT).optional(),
+  tags: tagsSchema.optional(),
   spaceId: z.string().uuid().optional(),
   metadata: z.record(z.unknown()).optional(),
 });
