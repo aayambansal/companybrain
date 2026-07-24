@@ -117,6 +117,8 @@ jobs:
           AUTH_MODE: multi
           EMBEDDING_PROVIDER: local
           LLM_PROVIDER: none
+          # Low cap so the smoke can assert the LLM rate limit is wired to /chat.
+          LLM_RATE_LIMIT_PER_MIN: "2"
           API_HOST: 127.0.0.1
           API_PORT: "3333"
           JWT_SECRET: ci-smoke-secret-000000000000000000000000000000000000000000000000
@@ -215,3 +217,18 @@ jobs:
             cat /tmp/api.log; exit 1
           fi
           echo "tenant isolation ok: cross-org read blocked ($IDOR_CODE)"
+
+          # LLM rate limit is wired to /chat: with the cap at 2/min, the third
+          # POST must be 429. The limiter runs before the handler, so this holds
+          # even though no LLM is configured. Confirms the middleware is mounted.
+          RL_CODE=""
+          for n in 1 2 3; do
+            RL_CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/v1/chat" \
+              -H "authorization: Bearer $TOKEN" -H 'content-type: application/json' \
+              -d '{"message":"ping"}')
+          done
+          if [ "$RL_CODE" != "429" ]; then
+            echo "::error::chat rate limit not enforced: 3rd request returned $RL_CODE, expected 429"
+            cat /tmp/api.log; exit 1
+          fi
+          echo "chat rate limit ok: 3rd request over cap returned 429"
