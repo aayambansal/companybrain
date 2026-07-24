@@ -69,4 +69,19 @@ describe('generateDigest', () => {
     expect(r.count).toBe(0);
     expect(r.summary).toContain('Nothing new');
   });
+
+  it('falls back to the plain list when the LLM errors mid-request', async () => {
+    const throwing = {
+      name: 'stub',
+      model: 'stub',
+      available: true,
+      async complete() {
+        throw new Error('llm down');
+      },
+    } as unknown as LlmProvider;
+    const r = await generateDigest(throwing, mems);
+    expect(r.summary).toContain('Recently added');
+    expect(r.summary).toContain('Launch date');
+    expect(r.count).toBe(2);
+  });
 });

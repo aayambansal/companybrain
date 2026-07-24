@@ -38,23 +38,26 @@ export async function generateDigest(llm: LlmProvider, memories: Memory[]): Prom
   if (memories.length === 0) {
     return { summary: '_Nothing new to report._', memories: [], count: 0 };
   }
-  if (!llm.available) {
-    const list = memories.map((m) => `- ${m.title ?? 'Untitled'}`).join('\n');
-    return {
-      summary: `## Recently added\n\n${list}`,
-      memories: memoryRefs,
-      count: memories.length,
-    };
-  }
+  const plainList = (): DigestResult => ({
+    summary: `## Recently added\n\n${memories.map((m) => `- ${m.title ?? 'Untitled'}`).join('\n')}`,
+    memories: memoryRefs,
+    count: memories.length,
+  });
+  if (!llm.available) return plainList();
   const items = memories.map((m) => ({
     title: m.title,
     snippet: (m.summary ?? m.content ?? '').slice(0, 200).replace(/\s+/g, ' ').trim(),
   }));
-  const summary = await llm.complete({
-    system: SYSTEM,
-    temperature: 0.3,
-    maxTokens: 700,
-    messages: [{ role: 'user', content: buildDigestPrompt(items) }],
-  });
-  return { summary: summary.trim(), memories: memoryRefs, count: memories.length };
+  try {
+    const summary = await llm.complete({
+      system: SYSTEM,
+      temperature: 0.3,
+      maxTokens: 700,
+      messages: [{ role: 'user', content: buildDigestPrompt(items) }],
+    });
+    return { summary: summary.trim(), memories: memoryRefs, count: memories.length };
+  } catch {
+    // The LLM failed mid-request; still return the plain list rather than a 500.
+    return plainList();
+  }
 }
