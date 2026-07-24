@@ -103,7 +103,7 @@ export default function ConnectionsPage() {
       {/* Configured */}
       {connections.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-2.5 font-mono text-sm text-ink-muted">Connected</h2>
+          <h2 className="mb-2.5 text-sm font-medium text-ink-muted">Connected</h2>
           <ul className="space-y-2">
             {connections.map((c) => (
               <li
@@ -143,7 +143,7 @@ export default function ConnectionsPage() {
       {selected && (
         <form onSubmit={create} className="card mb-8 space-y-4 p-5">
           <div className="flex items-center justify-between">
-            <h2 className="font-mono text-sm text-ink">Configure {selected.displayName}</h2>
+            <h2 className="text-sm font-medium text-ink">Configure {selected.displayName}</h2>
             <button
               type="button"
               onClick={() => setSelected(null)}
@@ -188,7 +188,7 @@ export default function ConnectionsPage() {
       )}
 
       {/* Available connectors */}
-      <h2 className="mb-2.5 font-mono text-sm text-ink-muted">Available</h2>
+      <h2 className="mb-2.5 text-sm font-medium text-ink-muted">Available</h2>
       {available === null ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[0, 1, 2, 3, 4, 5].map((i) => (

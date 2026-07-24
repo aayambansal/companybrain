@@ -119,7 +119,7 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
 
           {memory.summary && (
             <div className="mt-6 rounded-lg border border-[var(--color-primary-line)] bg-[var(--color-primary-soft)] p-4">
-              <h2 className="mb-1.5 font-mono text-[12px] uppercase tracking-wide text-[var(--color-primary-strong)]">
+              <h2 className="mb-1.5 text-[12px] uppercase tracking-wide text-[var(--color-primary-strong)]">
                 Summary
               </h2>
               <p className="text-[14px] leading-relaxed text-ink">{memory.summary}</p>
@@ -128,9 +128,7 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
 
           <div className="mt-6">
             <div className="mb-2 flex items-center justify-between">
-              <h2 className="font-mono text-[12px] uppercase tracking-wide text-ink-faint">
-                Content
-              </h2>
+              <h2 className="text-[12px] uppercase tracking-wide text-ink-faint">Content</h2>
               <button
                 onClick={() => copyContent(memory.content ?? '')}
                 className="text-[12px] text-ink-faint transition-colors hover:text-ink"
@@ -145,9 +143,7 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
 
           {related.length > 0 && (
             <div className="mt-6">
-              <h2 className="mb-2 font-mono text-[12px] uppercase tracking-wide text-ink-faint">
-                Related
-              </h2>
+              <h2 className="mb-2 text-[12px] uppercase tracking-wide text-ink-faint">Related</h2>
               <ul className="space-y-2">
                 {related.map((h) => (
                   <li key={h.documentId}>

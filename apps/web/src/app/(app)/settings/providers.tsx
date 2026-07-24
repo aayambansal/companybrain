@@ -54,7 +54,7 @@ export function ProvidersSection() {
 
   return (
     <section>
-      <h2 className="mb-1 flex items-center gap-1.5 font-mono text-sm text-ink-muted">
+      <h2 className="mb-1 flex items-center gap-1.5 text-sm font-medium text-ink-muted">
         <IconSparkle size={15} className="text-[var(--color-primary)]" /> Providers
       </h2>
       <p className="mb-3 text-[13px] text-ink-faint">

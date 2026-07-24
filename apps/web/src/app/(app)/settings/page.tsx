@@ -68,7 +68,7 @@ export default function SettingsPage() {
       <div className="space-y-8">
         {/* Workspace */}
         <section>
-          <h2 className="mb-3 font-mono text-sm text-ink-muted">Workspace</h2>
+          <h2 className="mb-3 text-sm font-medium text-ink-muted">Workspace</h2>
           <div className="card divide-y divide-border">
             <Row label="Organization" value={me?.org?.name ?? '—'} />
             <Row
@@ -105,7 +105,7 @@ export default function SettingsPage() {
         {/* API keys */}
         <section>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-mono text-sm text-ink-muted">API keys</h2>
+            <h2 className="text-sm font-medium text-ink-muted">API keys</h2>
           </div>
 
           {reveal && (

@@ -2,20 +2,31 @@
 /**
  * companybrain — one-command installer and runner for CompanyBrain.
  *
- *   npx companybrain            # set up and start the whole stack
+ *   npx companybrain            # set up and start the whole stack (Docker)
  *   npx companybrain up         # same
+ *   npx companybrain dev        # run without Docker against a local Postgres
  *   npx companybrain down       # stop it
+ *   npx companybrain upgrade    # pull latest, rebuild, restart
+ *   npx companybrain uninstall  # remove containers, volumes, and the install
  *   npx companybrain logs       # tail logs
  *   npx companybrain status     # health check
  *   npx companybrain mcp        # print an MCP client config snippet
  *
- * Zero dependencies. Clones the repo if needed, writes a .env, and runs the
- * bundled docker compose stack (Postgres + pgvector, API, dashboard).
+ * Zero dependencies. Clones the repo if needed, writes a .env, and runs either
+ * the bundled docker compose stack or, with `dev`, a local no-Docker stack.
  */
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+import { createConnection } from 'node:net';
 import { createInterface } from 'node:readline/promises';
 import { randomBytes } from 'node:crypto';
 
@@ -243,6 +254,7 @@ async function up(flags) {
         ? 'Docker is installed but did not become ready. Open Docker Desktop and wait for it to\n' +
             '  finish starting, then re-run `npx companybrain up`. If Docker Desktop keeps crashing,\n' +
             '  restart it, or reset it (Settings > Troubleshoot > Reset to factory defaults) / reinstall.\n' +
+            '  Or skip Docker entirely: `npx companybrain dev` (runs against a local Postgres).\n' +
             `  App directory: ${dir}`
         : 'Docker is required and was not found. Install Docker Desktop\n' +
             '  (https://docs.docker.com/get-docker/), then re-run `npx companybrain up`.\n' +
@@ -300,6 +312,111 @@ async function up(flags) {
 function requireInstall(dir) {
   if (!existsSync(join(dir, 'docker-compose.yml')))
     die(`No CompanyBrain install found at ${dir}. Run \`npx companybrain up\` first.`);
+}
+
+/** Parse a .env file into a plain object (ignores comments and blank lines). */
+function envFileVars(dir) {
+  const path = join(dir, '.env');
+  if (!existsSync(path)) return {};
+  const out = {};
+  for (const line of readFileSync(path, 'utf8').split('\n')) {
+    if (/^\s*#/.test(line)) continue;
+    const m = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.*?)\s*$/);
+    if (m) out[m[1]] = m[2];
+  }
+  return out;
+}
+
+/** Best-effort TCP reachability check (zero-dependency, no pg client needed). */
+function tcpReachable(host, port, timeoutMs = 2500) {
+  return new Promise((resolve) => {
+    const sock = createConnection({ host, port });
+    const finish = (ok) => {
+      sock.destroy();
+      resolve(ok);
+    };
+    sock.setTimeout(timeoutMs);
+    sock.once('connect', () => finish(true));
+    sock.once('timeout', () => finish(false));
+    sock.once('error', () => finish(false));
+  });
+}
+
+async function pgReachable(dbUrl) {
+  try {
+    const u = new URL(dbUrl);
+    return await tcpReachable(u.hostname || '127.0.0.1', Number(u.port || 5432));
+  } catch {
+    return false;
+  }
+}
+
+/** Run a command in the foreground with the app's .env merged into the environment. */
+function runWithEnv(dir, cmd, args) {
+  return new Promise((resolve) => {
+    const p = spawn(cmd, args, {
+      cwd: dir,
+      stdio: 'inherit',
+      env: { ...process.env, ...envFileVars(dir) },
+    });
+    p.on('close', (code) => resolve(code ?? 1));
+  });
+}
+
+/**
+ * Run the stack without Docker, against a local Postgres. For machines where
+ * Docker isn't available or won't start. Installs deps, migrates, and runs the
+ * API + dashboard in the foreground (Ctrl-C to stop).
+ */
+async function dev(flags) {
+  banner();
+  const dir = appDir(flags);
+  ensureRepo(dir);
+  if (!existsSync(join(dir, '.env'))) {
+    const ans = await prompt(flags);
+    writeEnv(dir, ans);
+  }
+  const env = envFileVars(dir);
+  let dbUrl = flags.db ? String(flags.db) : env.DATABASE_URL;
+  if (!dbUrl) {
+    dbUrl = `postgres://${process.env.USER || 'postgres'}@127.0.0.1:5432/companybrain`;
+    appendFileSync(join(dir, '.env'), `DATABASE_URL=${dbUrl}\nAUTO_MIGRATE=true\n`);
+    log(paint(C.dim, `Using local Postgres: ${dbUrl}`));
+  }
+  if (!(await pgReachable(dbUrl))) {
+    die(
+      `Cannot reach Postgres at ${dbUrl}.\n` +
+        '  Start it and create the database with the vector extension, e.g. on macOS:\n' +
+        '    brew services start postgresql@14\n' +
+        '    createdb companybrain && psql -d companybrain -c "CREATE EXTENSION vector"\n' +
+        '  then re-run `npx companybrain dev`. (Or fix Docker and use `npx companybrain up`.)',
+    );
+  }
+  if (!has('pnpm'))
+    die('pnpm is required for the no-Docker path. Install it with `npm i -g pnpm`.');
+  if (!existsSync(join(dir, 'node_modules'))) {
+    log(paint(C.dim, 'Installing dependencies (first run, a few minutes) ...'));
+    if ((await runStream('pnpm', ['install'], { cwd: dir })) !== 0) die('pnpm install failed.');
+  }
+  log(paint(C.dim, 'Running database migrations ...'));
+  await runWithEnv(dir, 'pnpm', ['--filter', '@companybrain/db', 'migrate']);
+  log('');
+  log(paint(C.green, '  Starting CompanyBrain without Docker. Press Ctrl-C to stop.'));
+  log('  Dashboard   ' + paint(C.amber, 'http://localhost:3000'));
+  log(
+    '  API         ' + paint(C.amber, 'http://localhost:3333') + paint(C.gray, '  (docs at /docs)'),
+  );
+  log('');
+  // Run only the API + dashboard (not every package's dev task), in the
+  // foreground, until the user presses Ctrl-C.
+  await runWithEnv(dir, 'pnpm', [
+    'exec',
+    'turbo',
+    'run',
+    'dev',
+    '--filter=@companybrain/api',
+    '--filter=@companybrain/web',
+  ]);
 }
 
 function openUrl(url) {
@@ -372,6 +489,9 @@ async function main() {
     case 'up':
     case 'start':
       return up(flags);
+    case 'dev':
+    case 'nodocker':
+      return dev(flags);
     case 'down':
     case 'stop':
       requireInstall(dir);
@@ -424,6 +544,7 @@ async function main() {
       banner();
       log('Usage: npx companybrain <command>\n');
       log('  up         set up (clone if needed) and start the stack   [default]');
+      log('  dev        run without Docker against a local Postgres (Ctrl-C to stop)');
       log('  down       stop the stack');
       log('  restart    restart the stack');
       log('  upgrade    pull the latest version, rebuild, and restart');

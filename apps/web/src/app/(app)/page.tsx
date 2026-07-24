@@ -149,16 +149,23 @@ export default function OverviewPage() {
         </div>
       </form>
 
-      {/* Stats */}
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat icon={<IconMemory size={16} />} label="Memories" value={counts?.documents} />
-        <Stat icon={<IconLayers size={16} />} label="Chunks" value={counts?.chunks} />
-        <Stat icon={<IconSpaces size={16} />} label="Spaces" value={counts?.spaces} />
-        <Stat
-          icon={<IconSparkle size={16} />}
-          label="Model"
-          text={status?.embedding.model ?? '—'}
-        />
+      {/* What this instance is holding, read as one line rather than four
+          identical tiles: the numbers belong to the same sentence. */}
+      <div className="panel mb-6 flex flex-wrap items-center gap-x-8 gap-y-3 px-4 py-3">
+        <Reading label="memories" value={counts?.documents} />
+        <Reading label="chunks" value={counts?.chunks} />
+        <Reading label="spaces" value={counts?.spaces} />
+        <div className="ml-auto flex items-center gap-2 text-sm">
+          <span className="text-ink-faint">embedder</span>
+          <code className="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-xs text-ink-muted">
+            {status?.embedding.model ?? '—'}
+          </code>
+          {status && (
+            <Badge tone={status.llm.available ? 'primary' : 'neutral'}>
+              {status.llm.available ? status.llm.provider : 'no llm'}
+            </Badge>
+          )}
+        </div>
       </div>
 
       {/* Topics: background organization at a glance */}
@@ -166,7 +173,7 @@ export default function OverviewPage() {
         <div className="mb-6 flex flex-wrap items-center gap-2">
           <Link
             href="/topics"
-            className="mr-1 flex items-center gap-1 font-mono text-[12px] text-ink-faint hover:text-ink"
+            className="mr-1 flex items-center gap-1 text-xs text-ink-faint hover:text-ink"
           >
             <IconHash size={13} /> topics
           </Link>
@@ -187,7 +194,7 @@ export default function OverviewPage() {
         {/* Recent memories */}
         <section>
           <div className="mb-2.5 flex items-center justify-between">
-            <h2 className="font-mono text-sm text-ink-muted">Recent</h2>
+            <h2 className="text-sm font-medium text-ink-muted">Recent</h2>
             <Link
               href="/memories"
               className="flex items-center gap-1 text-[13px] text-ink-faint hover:text-ink"
@@ -259,7 +266,7 @@ export default function OverviewPage() {
               handleFiles(e.dataTransfer.files);
             }}
           >
-            <h2 className="mb-2.5 flex items-center gap-1.5 font-mono text-sm text-ink-muted">
+            <h2 className="mb-2.5 flex items-center gap-1.5 text-sm font-medium text-ink-muted">
               <IconSparkle size={15} className="text-[var(--color-primary)]" /> Quick capture
             </h2>
             <Textarea
@@ -272,7 +279,7 @@ export default function OverviewPage() {
               placeholder="Paste a decision, a doc, a link, a thought. Or drop text and markdown files here."
             />
             <div className="mt-2.5 flex items-center justify-between">
-              <label className="cursor-pointer font-mono text-[11px] text-ink-faint transition-colors hover:text-ink">
+              <label className="cursor-pointer text-xs text-ink-faint transition-colors hover:text-ink">
                 {uploading ? 'uploading…' : '+ upload files'}
                 <input
                   type="file"
@@ -299,7 +306,7 @@ export default function OverviewPage() {
 
           <div className="card p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-mono text-sm text-ink-muted">What&apos;s new</h2>
+              <h2 className="text-sm font-medium text-ink-muted">What&apos;s new</h2>
               <button
                 onClick={loadDigest}
                 disabled={digestBusy}
@@ -332,7 +339,7 @@ export default function OverviewPage() {
           </div>
 
           <div className="card p-4">
-            <h2 className="mb-3 font-mono text-sm text-ink-muted">Spaces</h2>
+            <h2 className="mb-3 text-sm font-medium text-ink-muted">Spaces</h2>
             {spaces.length === 0 ? (
               <p className="text-[13px] text-ink-faint">No spaces yet.</p>
             ) : (
@@ -367,31 +374,14 @@ export default function OverviewPage() {
   );
 }
 
-function Stat({
-  icon,
-  label,
-  value,
-  text,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value?: number;
-  text?: string;
-}) {
+/** One reading on the instrument strip: the count leads, the noun follows. */
+function Reading({ label, value }: { label: string; value?: number }) {
   return (
-    <div className="rounded-lg border border-border bg-surface px-4 py-3">
-      <div className="flex items-center gap-1.5 text-ink-faint">
-        {icon}
-        <span className="text-[11px] uppercase tracking-wide">{label}</span>
-      </div>
-      <p className="mt-1.5 font-mono text-2xl font-semibold text-ink">
-        {text ??
-          (value === undefined ? (
-            <span className="text-ink-faint">—</span>
-          ) : (
-            value.toLocaleString()
-          ))}
-      </p>
+    <div className="flex items-baseline gap-1.5">
+      <span data-numeric className="text-xl font-semibold text-ink">
+        {value === undefined ? <span className="text-ink-faint">—</span> : value.toLocaleString()}
+      </span>
+      <span className="text-sm text-ink-muted">{label}</span>
     </div>
   );
 }
