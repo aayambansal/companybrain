@@ -44,4 +44,6 @@ for the full record.
 
 - Single-user mode by default (no sign-in); multi-workspace auth, API keys, and roles when needed.
 - Bring your own Postgres and providers; local embedder runs with no API key.
+- Connector and provider credentials encrypted at rest (AES-256-GCM) when `CREDENTIALS_KEY` is
+  set; login throttled to slow credential brute-force.
 - One-command self-host (`npx companybrain`); Docker and cloud deploy blueprints.
