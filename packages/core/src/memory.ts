@@ -129,6 +129,9 @@ export class MemoryEngine {
 
   /** Get a space by slug within the org, creating it if it does not exist. */
   async getOrCreateSpaceBySlug(orgId: string, slug: string): Promise<string> {
+    // Cap to the slug column width so an oversized value degrades instead of
+    // failing the insert; lookup and insert then use the same trimmed slug.
+    slug = slug.slice(0, 128);
     const existing = await this.db
       .select({ id: spaces.id })
       .from(spaces)
@@ -205,7 +208,7 @@ export class MemoryEngine {
         spaceId,
         connectionId: input.connectionId ?? null,
         connector: input.connector ?? 'api',
-        sourceType: input.sourceType ?? input.format ?? 'text',
+        sourceType: (input.sourceType ?? input.format ?? 'text').slice(0, 64),
         sourceId: input.sourceId ?? null,
         sourceUrl: input.sourceUrl ?? null,
         title: input.title ?? deriveTitle(normalized),
@@ -423,7 +426,7 @@ export class MemoryEngine {
         spaceId,
         connectionId,
         connector,
-        sourceType: src.sourceType ?? 'text',
+        sourceType: (src.sourceType ?? 'text').slice(0, 64),
         sourceId: src.sourceId ?? null,
         sourceUrl: src.sourceUrl ?? null,
         title: src.title ?? deriveTitle(normalized),
