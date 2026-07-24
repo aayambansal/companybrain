@@ -53,6 +53,8 @@ indexing, re-embed your chunks so scores stay comparable.
 - [ ] Keep `LLM_RATE_LIMIT_PER_MIN` set (default 60) so a leaked key or a
       runaway loop can't run up provider cost; raise it for high-volume
       automation or set 0 to disable.
+- [ ] Leave `EXPOSE_ERROR_DETAILS` off (the default in production) so 500
+      responses don't disclose internal error messages; flip it on only to debug.
 - [ ] Terminate TLS at a reverse proxy in front of the API and web.
 - [ ] Use a least-privilege Postgres role.
 - [ ] Back up the database. Your brain lives there.

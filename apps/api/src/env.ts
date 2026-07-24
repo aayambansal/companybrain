@@ -23,6 +23,13 @@ export interface ApiEnv {
    * disable for high-volume automation.
    */
   llmRateLimitPerMin: number;
+  /**
+   * Whether 500 responses include the raw error message. Off by default in
+   * production so internal details (DB errors, paths, stack fragments) are not
+   * disclosed to clients; on in development for debugging, or force with
+   * EXPOSE_ERROR_DETAILS=true. Errors are always logged server-side regardless.
+   */
+  exposeErrorDetails: boolean;
 }
 
 export function loadApiEnv(): ApiEnv {
@@ -42,6 +49,8 @@ export function loadApiEnv(): ApiEnv {
     authMode,
     accessToken: process.env.ACCESS_TOKEN || undefined,
     llmRateLimitPerMin: parseLimit(process.env.LLM_RATE_LIMIT_PER_MIN, 60),
+    exposeErrorDetails:
+      process.env.EXPOSE_ERROR_DETAILS === 'true' || process.env.NODE_ENV !== 'production',
   };
 }
 
