@@ -275,17 +275,14 @@ function Markdown({ source }: { source: string }) {
     if (/^#\s+/.test(line)) {
       flush();
       out.push(
-        <h1
-          key={out.length}
-          className="mb-1 font-display text-2xl font-semibold tracking-tight text-ink"
-        >
+        <h1 key={out.length} className="mb-1 text-2xl font-semibold tracking-tight text-ink">
           {line.replace(/^#\s+/, '')}
         </h1>,
       );
     } else if (/^##\s+/.test(line)) {
       flush();
       out.push(
-        <h2 key={out.length} className="mb-2 mt-6 font-display text-lg font-semibold text-ink">
+        <h2 key={out.length} className="mb-2 mt-6 text-lg font-semibold text-ink">
           {line.replace(/^##\s+/, '')}
         </h2>,
       );

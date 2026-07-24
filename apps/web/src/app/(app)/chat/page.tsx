@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { API_URL, type Citation } from '@/lib/api';
-import { Button, Textarea, EmptyState } from '@/components/ui';
+import { Button, Textarea } from '@/components/ui';
 import { IconChat, IconArrowRight, IconSparkle } from '@/components/icons';
 
 interface Turn {
@@ -128,7 +128,7 @@ export default function ChatPage() {
   return (
     <div className="mx-auto flex h-[calc(100dvh-3.5rem)] w-full max-w-3xl flex-col px-5 md:h-dvh md:px-8">
       <div className="flex items-center justify-between py-5">
-        <h1 className="font-display text-2xl font-semibold tracking-[-0.02em]">Ask</h1>
+        <h1 className="text-2xl font-semibold tracking-[-0.02em]">Ask</h1>
         {turns.length > 0 && (
           <button
             onClick={() => setTurns([])}
@@ -141,13 +141,20 @@ export default function ChatPage() {
 
       <div ref={scrollRef} className="flex-1 space-y-6 overflow-y-auto pb-4">
         {turns.length === 0 ? (
-          <div className="pt-10">
-            <EmptyState
-              title="Ask your company brain"
-              description="Answers are grounded in your indexed knowledge and come back with citations you can open."
-              icon={<IconChat size={28} />}
-            />
-            <div className="mx-auto mt-6 flex max-w-md flex-col gap-2">
+          /* The page is already empty, so a dashed container inside it would be
+             redundant. Centre one block in the free space and let the example
+             questions be the affordance: they teach what this can answer and
+             start the task in one click. */
+          <div className="flex h-full flex-col items-center justify-center py-10">
+            <div className="grid size-11 place-items-center rounded-xl bg-[var(--color-primary-soft)] text-primary">
+              <IconChat size={22} />
+            </div>
+            <h2 className="mt-4 text-lg font-semibold text-ink">Ask your company brain</h2>
+            <p className="mt-1.5 max-w-sm text-center text-sm text-ink-muted">
+              Answers are grounded in what you have indexed and come back with citations you can
+              open.
+            </p>
+            <div className="mt-7 flex w-full max-w-md flex-col gap-2">
               {[
                 'What did we decide about the release process?',
                 'Summarize what we know about onboarding',
@@ -156,10 +163,13 @@ export default function ChatPage() {
                 <button
                   key={s}
                   onClick={() => setInput(s)}
-                  className="flex items-center justify-between rounded-lg border border-border bg-surface px-3.5 py-2.5 text-left text-[13px] text-ink-muted transition-colors hover:border-border-strong hover:text-ink"
+                  className="group flex items-center justify-between gap-3 rounded-lg border border-border bg-surface px-3.5 py-2.5 text-left text-sm text-ink-muted transition-colors hover:border-border-strong hover:text-ink"
                 >
                   {s}
-                  <IconArrowRight size={14} className="text-ink-faint" />
+                  <IconArrowRight
+                    size={14}
+                    className="shrink-0 text-ink-faint transition-transform group-hover:translate-x-0.5"
+                  />
                 </button>
               ))}
             </div>

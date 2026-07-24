@@ -50,7 +50,7 @@ export default function TopicsPage() {
               <div className="mb-3 flex items-center justify-between gap-2">
                 <Link
                   href={`/search?q=${encodeURIComponent(t.topic)}`}
-                  className="truncate font-display text-[15px] font-semibold text-ink hover:text-[var(--color-primary-strong)]"
+                  className="truncate text-[15px] font-semibold text-ink hover:text-[var(--color-primary-strong)]"
                 >
                   {t.topic}
                 </Link>
