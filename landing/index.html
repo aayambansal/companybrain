@@ -908,15 +908,31 @@
             ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2);
             ctx.fillStyle = SPARK; ctx.shadowColor = SPARK; ctx.shadowBlur = 10; ctx.fill(); ctx.shadowBlur = 0;
           }
-          raf = requestAnimationFrame(step);
+          if (running) raf = requestAnimationFrame(step);
         }
         function drawStatic() {
           ctx.clearRect(0, 0, w, h);
           for (var i = 0; i < nodes.length; i++) { ctx.beginPath(); ctx.arc(nodes[i].x, nodes[i].y, nodes[i].r, 0, Math.PI * 2); ctx.fillStyle = 'oklch(0.54 0.21 264 / 0.4)'; ctx.fill(); }
         }
+        var running = false, visible = true;
+        function start() { if (running || reduce || !visible) return; running = true; raf = requestAnimationFrame(step); }
+        function stop() { running = false; cancelAnimationFrame(raf); }
         resize();
-        window.addEventListener('resize', function () { cancelAnimationFrame(raf); resize(); if (!reduce) step(); else drawStatic(); });
-        if (reduce) drawStatic(); else step();
+        window.addEventListener('resize', function () { stop(); resize(); if (reduce) drawStatic(); else start(); });
+        if (reduce) {
+          drawStatic();
+        } else if ('IntersectionObserver' in window) {
+          // Pause the ambient loop once the hero scrolls out of view. rAF only
+          // throttles when the whole tab is hidden, not when the canvas leaves
+          // the viewport, so on this long page it would otherwise keep burning
+          // CPU off-screen.
+          new IntersectionObserver(function (entries) {
+            visible = entries[0].isIntersecting;
+            if (visible) start(); else stop();
+          }, { threshold: 0 }).observe(canvas);
+        } else {
+          start();
+        }
       })();
     </script>
   </body>
