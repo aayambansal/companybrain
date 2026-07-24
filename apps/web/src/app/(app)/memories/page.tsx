@@ -105,7 +105,7 @@ function MemoriesInner() {
         </div>
       ) : memories.length === 0 ? (
         <EmptyState
-          title="no memories here"
+          title="No memories here"
           description="Capture something from the overview, or configure a connector to sync a source."
           icon={<IconMemory size={28} />}
           action={

@@ -210,7 +210,7 @@ export default function OverviewPage() {
             </div>
           ) : memories.length === 0 ? (
             <EmptyState
-              title="nothing indexed yet"
+              title="Nothing indexed yet"
               description="Capture a note on the right, or connect a source to fill your brain."
               icon={<IconMemory size={28} />}
             />

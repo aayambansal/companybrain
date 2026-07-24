@@ -174,7 +174,7 @@ export default function PlaybooksPage() {
           </div>
           <div className="mt-8">
             <EmptyState
-              title="write a playbook from memory"
+              title="Write a playbook from memory"
               description="Pick a topic. CompanyBrain gathers the relevant memories and drafts a structured, cited page you can read on Monday."
               icon={<IconLayers size={28} />}
             />

@@ -197,7 +197,7 @@ export default function ConnectionsPage() {
         </div>
       ) : available.length === 0 ? (
         <EmptyState
-          title="no connectors registered"
+          title="No connectors registered"
           description="The server has no connector runner wired in yet. Add a memory from the overview, or use the API and SDK to ingest directly."
           icon={<IconPlug size={28} />}
         />
