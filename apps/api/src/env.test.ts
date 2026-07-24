@@ -12,6 +12,7 @@ const KEYS = [
   'ACCESS_TOKEN',
   'EXPOSE_ERROR_DETAILS',
   'NODE_ENV',
+  'WEBHOOK_ALLOW_INTERNAL',
 ];
 
 describe('loadApiEnv', () => {
@@ -50,6 +51,12 @@ describe('loadApiEnv', () => {
     expect(loadApiEnv().exposeErrorDetails).toBe(true);
     delete process.env.NODE_ENV;
     expect(loadApiEnv().exposeErrorDetails).toBe(true);
+  });
+
+  it('blocks internal webhook targets unless explicitly allowed', () => {
+    expect(loadApiEnv().webhookAllowInternal).toBe(false);
+    process.env.WEBHOOK_ALLOW_INTERNAL = 'true';
+    expect(loadApiEnv().webhookAllowInternal).toBe(true);
   });
 
   it('splits, trims, and drops empty CORS origins', () => {

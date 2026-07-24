@@ -7,6 +7,7 @@ import { createHmac } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import { webhooks } from '@companybrain/db';
 import type { Database } from '@companybrain/db';
+import { isBlockedWebhookTarget } from './net-guard.js';
 
 export interface WebhookEvent {
   event: string;
@@ -20,6 +21,9 @@ export function signWebhook(secret: string, body: string): string {
 }
 
 export async function dispatchWebhooks(db: Database, evt: WebhookEvent): Promise<void> {
+  // Webhook URLs are user-controlled; refuse to deliver to internal/private
+  // targets (SSRF) unless the operator has explicitly opted in.
+  const allowInternal = process.env.WEBHOOK_ALLOW_INTERNAL === 'true';
   let hooks;
   try {
     hooks = await db
@@ -39,6 +43,14 @@ export async function dispatchWebhooks(db: Database, evt: WebhookEvent): Promise
   });
   await Promise.allSettled(
     targets.map(async (h) => {
+      if (!allowInternal && (await isBlockedWebhookTarget(h.url))) {
+        // Record a distinct status so a blocked target is visible, not silent.
+        await db
+          .update(webhooks)
+          .set({ lastStatus: -1, lastDeliveredAt: new Date() })
+          .where(eq(webhooks.id, h.id));
+        return;
+      }
       const headers: Record<string, string> = {
         'content-type': 'application/json',
         'user-agent': 'CompanyBrain-Webhook/1',
