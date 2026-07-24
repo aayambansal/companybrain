@@ -6,6 +6,7 @@ import { organizations, users, spaces } from '@companybrain/db';
 import { getEngine, getEnv, type Variables } from '../context.js';
 import { hashPassword, verifyPassword, slugify } from '../crypto.js';
 import { signSession, resolveAuth, SESSION_COOKIE } from '../auth.js';
+import { hitRateLimit, clearRateLimit } from '../rate-limit.js';
 
 const app = new Hono<{ Variables: Variables }>();
 
@@ -69,11 +70,26 @@ app.post('/login', async (c) => {
   if (!parsed.success)
     return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
   const { email, password } = parsed.data;
+
+  // Throttle credential brute-force: cap failed attempts per account. A success
+  // clears the counter, so a legitimate user is never locked out by their own
+  // occasional typo.
+  const rlKey = `login:${email.toLowerCase()}`;
+  const rl = hitRateLimit(rlKey, { max: 10, windowMs: 15 * 60_000 });
+  if (rl.limited) {
+    c.header('Retry-After', String(rl.retryAfterSeconds));
+    return c.json(
+      { error: 'too_many_requests', message: 'Too many login attempts. Try again later.' },
+      429,
+    );
+  }
+
   const engine = getEngine();
   const [user] = await engine.db.select().from(users).where(eq(users.email, email)).limit(1);
   if (!user || !user.passwordHash || !verifyPassword(password, user.passwordHash)) {
     return c.json({ error: 'invalid_credentials' }, 401);
   }
+  clearRateLimit(rlKey);
   void engine.db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, user.id));
   const token = await signSession(user.id, user.orgId);
   setCookie(c, SESSION_COOKIE, token, {
