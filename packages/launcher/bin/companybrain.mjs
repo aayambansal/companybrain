@@ -71,6 +71,35 @@ function dockerReady() {
   return info.status === 0;
 }
 
+/**
+ * Ensure the Docker daemon is reachable. If Docker is installed but not running
+ * (the common case on a fresh machine where Docker Desktop hasn't been opened),
+ * start it and wait, rather than making the user stop, launch Docker, and re-run.
+ */
+async function ensureDockerRunning() {
+  if (dockerReady()) return true;
+  if (!has('docker')) return false; // not installed at all
+  const launched =
+    process.platform === 'darwin'
+      ? spawnSync('open', ['-a', 'Docker'], { stdio: 'ignore' }).status === 0
+      : process.platform === 'win32'
+        ? spawnSync('cmd', ['/c', 'start', '', 'Docker Desktop'], { stdio: 'ignore' }).status === 0
+        : false; // Linux daemons usually need `sudo systemctl start docker`, which we can't do unattended
+  if (!launched) return dockerReady();
+  process.stdout.write(paint(C.dim, 'Docker is installed but not running — starting it'));
+  const deadline = Date.now() + 120_000;
+  while (Date.now() < deadline) {
+    if (dockerReady()) {
+      process.stdout.write('\n');
+      return true;
+    }
+    process.stdout.write(paint(C.dim, '.'));
+    await new Promise((r) => setTimeout(r, 3000));
+  }
+  process.stdout.write('\n');
+  return dockerReady();
+}
+
 function runStream(cmd, args, opts = {}) {
   return new Promise((resolve) => {
     const p = spawn(cmd, args, { stdio: 'inherit', ...opts });
@@ -208,11 +237,16 @@ async function up(flags) {
     const ans = await prompt(flags);
     writeEnv(dir, ans);
   }
-  if (!dockerReady()) {
+  if (!(await ensureDockerRunning())) {
     die(
-      'Docker is not running. Start Docker Desktop (or the daemon), then re-run `npx companybrain up`.\n' +
-        `  App directory: ${dir}\n` +
-        '  Alternatively run without Docker: `pnpm install && pnpm db:migrate && pnpm dev` in that directory.',
+      has('docker')
+        ? 'Docker is installed but did not start in time. Open Docker Desktop, wait for it to finish\n' +
+            '  starting, then re-run `npx companybrain up`.\n' +
+            `  App directory: ${dir}`
+        : 'Docker is required and was not found. Install Docker Desktop\n' +
+            '  (https://docs.docker.com/get-docker/), then re-run `npx companybrain up`.\n' +
+            `  Or bring your own Postgres+pgvector: set DATABASE_URL in ${join(dir, '.env')},\n` +
+            `  then run \`pnpm install && pnpm db:migrate && pnpm dev\` in ${dir}.`,
     );
   }
   log(paint(C.dim, 'Starting the stack (this builds images on first run) ...\n'));
