@@ -36,3 +36,17 @@ export function parseOpenAiDelta(line: string): string | null {
     return null;
   }
 }
+
+/**
+ * Pure: parse one Ollama chat NDJSON line into its content chunk, or null for a
+ * `done` marker, an empty chunk, or a non-json line. (Ollama streams raw JSON
+ * objects, one per line, rather than SSE `data:` frames.)
+ */
+export function parseOllamaLine(line: string): string | null {
+  try {
+    const parsed = JSON.parse(line) as { message?: { content?: string } };
+    return parsed.message?.content || null;
+  } catch {
+    return null;
+  }
+}

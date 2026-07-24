@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sseLines, parseOpenAiDelta } from './sse.js';
+import { sseLines, parseOpenAiDelta, parseOllamaLine } from './sse.js';
 
 /** A ReadableStream that emits the given string chunks as UTF-8 bytes. */
 function streamOf(chunks: string[]): ReadableStream<Uint8Array> {
@@ -23,6 +23,18 @@ describe('parseOpenAiDelta', () => {
     expect(parseOpenAiDelta(': keep-alive')).toBeNull();
     expect(parseOpenAiDelta('data: {"choices":[{"delta":{"role":"assistant"}}]}')).toBeNull();
     expect(parseOpenAiDelta('data: not json')).toBeNull();
+  });
+});
+
+describe('parseOllamaLine', () => {
+  it('extracts the content chunk from an Ollama NDJSON line', () => {
+    expect(parseOllamaLine('{"message":{"content":"Hi"},"done":false}')).toBe('Hi');
+  });
+
+  it('returns null for a done marker, empty content, or non-json', () => {
+    expect(parseOllamaLine('{"done":true}')).toBeNull();
+    expect(parseOllamaLine('{"message":{"content":""}}')).toBeNull();
+    expect(parseOllamaLine('not json')).toBeNull();
   });
 });
 
