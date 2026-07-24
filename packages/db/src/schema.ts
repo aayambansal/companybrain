@@ -149,7 +149,8 @@ export const connections = pgTable(
     connector: varchar('connector', { length: 64 }).notNull(), // e.g. 'obsidian', 'slack'
     name: text('name').notNull(),
     config: jsonb('config').$type<Record<string, unknown>>().default({}).notNull(),
-    // Credentials are encrypted at rest by the app layer before storage.
+    // Credentials are encrypted at rest (AES-256-GCM) by the app layer when
+    // CREDENTIALS_KEY is set; otherwise stored as-is. Never returned by the API.
     credentials: jsonb('credentials').$type<Record<string, unknown>>().default({}).notNull(),
     status: connectionStatus('status').default('active').notNull(),
     cursor: text('cursor'), // opaque sync cursor for incremental syncs
