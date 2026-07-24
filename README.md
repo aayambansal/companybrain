@@ -147,6 +147,10 @@ Design notes: [docs/architecture.md](./docs/architecture.md).
 | `packages/db`           | Drizzle schema + migrations (Postgres / pgvector)     |
 | `packages/connectors`   | source integrations + sync runner                     |
 | `packages/sdk`          | TypeScript SDK                                         |
+| `packages/ai-sdk`       | Vercel AI SDK tools (`searchMemory` / `askMemory` / `addMemory`) |
+| `packages/langchain`    | LangChain / LangGraph `CompanyBrainRetriever`         |
+| `packages/openai`       | OpenAI-compatible function-calling tools              |
+| `packages/n8n-nodes-companybrain` | n8n Search / Ask / Add node                 |
 | `packages/launcher`     | the `npx companybrain` installer                      |
 | `sdks/python`           | Python SDK                                             |
 | `examples`              | runnable TS / Python / curl examples                  |
