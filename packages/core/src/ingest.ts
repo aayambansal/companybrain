@@ -36,10 +36,12 @@ export async function indexDocument(
     const text = normalizeText(doc.content ?? '');
     const pieces = chunkText(text, config.chunk);
 
-    // Replace any existing chunks (idempotent re-index).
-    await db.delete(chunksTable).where(eq(chunksTable.documentId, documentId));
-
+    // Embed BEFORE touching the stored chunks. Embedding is a slow external
+    // call that can fail; building the new chunk rows first means a failure
+    // leaves the document's existing chunks intact rather than deleting them
+    // with nothing to replace them.
     let totalTokens = 0;
+    const rows: (typeof chunksTable.$inferInsert)[] = [];
     if (pieces.length > 0) {
       // Embed in batches so a large document does not exceed the provider's
       // per-request limits (e.g. OpenAI caps a request at 2048 inputs / ~300k
@@ -50,9 +52,9 @@ export async function indexDocument(
         const batch = pieces.slice(i, i + EMBED_BATCH).map((p) => p.content);
         vectors.push(...(await embedder.embed(batch)));
       }
-      const rows = pieces.map((p, i) => {
+      pieces.forEach((p, i) => {
         totalTokens += p.tokenCount;
-        return {
+        rows.push({
           orgId: doc.orgId,
           documentId: doc.id,
           spaceId: doc.spaceId,
@@ -61,14 +63,21 @@ export async function indexDocument(
           tokenCount: p.tokenCount,
           embedding: toStorageVector(vectors[i] ?? [], config.embedding.dimensions),
           metadata: {},
-        };
+        });
       });
-      // Insert in batches to keep statements bounded.
+    }
+
+    // Swap the chunk set atomically: replace old chunks with new ones in one
+    // transaction. An interrupted or concurrent re-index can then never leave
+    // the document chunk-less or with duplicated chunks. Empty documents just
+    // clear their chunks (rows is empty, so the insert loop is a no-op).
+    await db.transaction(async (tx) => {
+      await tx.delete(chunksTable).where(eq(chunksTable.documentId, documentId));
       const BATCH = 100;
       for (let i = 0; i < rows.length; i += BATCH) {
-        await db.insert(chunksTable).values(rows.slice(i, i + BATCH));
+        await tx.insert(chunksTable).values(rows.slice(i, i + BATCH));
       }
-    }
+    });
 
     await db
       .update(documents)
