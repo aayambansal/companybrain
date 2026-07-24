@@ -59,9 +59,16 @@ export const slackConnector: Connector = {
       throw new Error('slack connector: config.token and config.channel are required');
     const auth = { authorization: `Bearer ${token}` };
 
-    let cursor: string | undefined = ctx.cursor ?? undefined;
+    // Incremental sync keyed on the newest message timestamp. `oldest` fetches
+    // only messages newer than the last sync, so new messages are picked up.
+    // (The pagination cursor points backward through history, so persisting it
+    // would make later syncs miss everything posted since the first sync.)
+    const since = ctx.cursor ?? undefined;
+    let newest = since;
+    let cursor: string | undefined;
     do {
       const params = new URLSearchParams({ channel, limit: '200' });
+      if (since) params.set('oldest', since);
       if (cursor) params.set('cursor', cursor);
       const res = await fetchJson<{
         ok: boolean;
@@ -78,9 +85,10 @@ export const slackConnector: Connector = {
         if (ctx.signal?.aborted) return;
         const doc = slackMessageDoc(msg, channel);
         if (doc) yield doc;
+        if (msg.ts && (!newest || Number(msg.ts) > Number(newest))) newest = msg.ts;
       }
       cursor = res.response_metadata?.next_cursor || undefined;
-      if (cursor) await ctx.setCursor?.(cursor);
     } while (cursor);
+    if (newest && newest !== since) await ctx.setCursor?.(newest);
   },
 };
