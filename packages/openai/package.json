@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "description": "OpenAI function-calling tools for CompanyBrain — give any OpenAI-compatible agent (Agents SDK, Assistants, raw function calling) memory it can search, ask, and write.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aayambansal/companybrain.git",
+    "directory": "packages/openai"
+  },
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "description": "Vercel AI SDK tools for CompanyBrain — give any AI SDK agent memory it can search and write.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aayambansal/companybrain.git",
+    "directory": "packages/ai-sdk"
+  },
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
