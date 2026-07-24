@@ -7,7 +7,7 @@ npm install @companybrain/ai-sdk @companybrain/sdk ai
 ```
 
 ```ts
-import { generateText } from 'ai';
+import { generateText, stepCountIs } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { CompanyBrain } from '@companybrain/sdk';
 import { companyBrainTools } from '@companybrain/ai-sdk';
@@ -17,7 +17,7 @@ const cb = new CompanyBrain({ apiKey: process.env.COMPANYBRAIN_API_KEY });
 const { text } = await generateText({
   model: openai('gpt-4o'),
   tools: companyBrainTools(cb),
-  maxSteps: 5,
+  stopWhen: stepCountIs(5),
   prompt: 'What did we decide about the release process, and note that we moved it to Fridays.',
 });
 ```

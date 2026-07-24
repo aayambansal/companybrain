@@ -2,7 +2,7 @@
  * Vercel AI SDK tools for CompanyBrain. Give any AI SDK agent memory it can
  * search, write, and ask.
  *
- *   import { generateText } from 'ai';
+ *   import { generateText, stepCountIs } from 'ai';
  *   import { openai } from '@ai-sdk/openai';
  *   import { CompanyBrain } from '@companybrain/sdk';
  *   import { companyBrainTools } from '@companybrain/ai-sdk';
@@ -11,11 +11,11 @@
  *   const { text } = await generateText({
  *     model: openai('gpt-4o'),
  *     tools: companyBrainTools(cb),
- *     maxSteps: 5,
+ *     stopWhen: stepCountIs(5),
  *     prompt: 'What did we decide about the release process?',
  *   });
  */
-import { tool } from 'ai';
+import { tool, type ToolSet } from 'ai';
 import { z } from 'zod';
 import type { CompanyBrain } from '@companybrain/sdk';
 
@@ -24,12 +24,18 @@ export interface CompanyBrainToolsOptions {
   space?: string;
 }
 
-export function companyBrainTools(client: CompanyBrain, options: CompanyBrainToolsOptions = {}) {
+// The return type is annotated as ToolSet so the emitted declaration does not
+// depend on the AI SDK's internal @ai-sdk/provider* packages (TS2742), and so
+// the bundle drops straight into generateText/streamText's `tools` option.
+export function companyBrainTools(
+  client: CompanyBrain,
+  options: CompanyBrainToolsOptions = {},
+): ToolSet {
   return {
     searchMemory: tool({
       description:
         'Search the company knowledge base (documents, notes, chats, docs) for passages relevant to a query. Use this to ground answers in what the company already knows.',
-      parameters: z.object({
+      inputSchema: z.object({
         query: z.string().describe('What to search for'),
         limit: z.number().int().min(1).max(20).optional().describe('How many passages to return'),
       }),
@@ -53,7 +59,7 @@ export function companyBrainTools(client: CompanyBrain, options: CompanyBrainToo
     askMemory: tool({
       description:
         'Ask the company knowledge base a question and get a grounded answer with citations.',
-      parameters: z.object({
+      inputSchema: z.object({
         question: z.string().describe('The question to answer from company memory'),
       }),
       execute: async ({ question }) => {
@@ -68,7 +74,7 @@ export function companyBrainTools(client: CompanyBrain, options: CompanyBrainToo
     addMemory: tool({
       description:
         'Store a new fact, decision, or note in the company knowledge base so it can be recalled later.',
-      parameters: z.object({
+      inputSchema: z.object({
         content: z.string().describe('The text to remember'),
         title: z.string().optional(),
         tags: z.array(z.string()).optional(),
