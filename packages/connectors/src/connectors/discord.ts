@@ -61,7 +61,11 @@ export const discordConnector: Connector = {
       throw new Error('discord connector: config.botToken and config.channelId are required');
     const headers = { authorization: `Bot ${token}` };
 
-    let before: string | undefined = ctx.cursor ?? undefined;
+    // Re-scan from the newest messages each sync; dedup by message id skips ones
+    // already stored, so new messages are picked up. `before` is a within-sync
+    // pagination cursor only: it is not persisted, because it points backward
+    // through history and resuming from it would miss everything posted since.
+    let before: string | undefined;
     for (;;) {
       if (ctx.signal?.aborted) return;
       const params = new URLSearchParams({ limit: '100' });
@@ -81,7 +85,6 @@ export const discordConnector: Connector = {
       const last = messages[messages.length - 1];
       before = last?.id;
       if (!before) break;
-      await ctx.setCursor?.(before);
     }
   },
 };
