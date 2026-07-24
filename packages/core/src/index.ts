@@ -50,7 +50,14 @@ export {
 
 // Ingest, chat & enrichment
 export { indexDocument, findBySource } from './ingest.js';
-export { generateAnswer, extractiveAnswer, buildContext, toCitations } from './chat.js';
+export {
+  generateAnswer,
+  extractiveAnswer,
+  buildContext,
+  toCitations,
+  recentHistory,
+  MAX_CHAT_HISTORY,
+} from './chat.js';
 export {
   generatePlaybook,
   buildPlaybookPrompt,

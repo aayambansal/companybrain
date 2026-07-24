@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import { z } from 'zod';
-import { extractiveAnswer } from '@companybrain/core';
+import { extractiveAnswer, recentHistory } from '@companybrain/core';
 import { getEngine, type Variables } from '../context.js';
 
 const app = new Hono<{ Variables: Variables }>();
@@ -74,7 +74,7 @@ app.post('/stream', async (c) => {
           system:
             'You are CompanyBrain. Answer only from the context. Cite passages inline as [n]. Be concise.',
           messages: [
-            ...(d.history ?? []),
+            ...recentHistory(d.history ?? []),
             { role: 'user', content: `Context:\n\n${context}\n\n---\nQuestion: ${d.message}` },
           ],
         })) {
