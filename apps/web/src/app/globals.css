@@ -17,10 +17,10 @@
   --color-border: oklch(0.905 0.007 266);
   --color-border-strong: oklch(0.855 0.01 266);
 
-  /* Ink (graphite; body clears 4.5:1 on paper) */
+  /* Ink (graphite; every level clears 4.5:1 on paper, incl. small/faint text) */
   --color-ink: oklch(0.215 0.021 266);
   --color-ink-muted: oklch(0.5 0.02 266);
-  --color-ink-faint: oklch(0.605 0.018 266);
+  --color-ink-faint: oklch(0.54 0.018 266);
 
   /* Brand: iris/cobalt primary + amber spark */
   --color-primary: oklch(0.55 0.2 264);
