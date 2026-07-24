@@ -4,6 +4,7 @@ import { createApp } from './app.js';
 import { getEngine, getEnv, ensureDefaultOrg } from './context.js';
 import { applyProviders } from './routes/providers.js';
 import { startScheduler } from './scheduler.js';
+import { createShutdown } from './shutdown.js';
 import { banner } from './banner.js';
 
 async function main() {
@@ -41,9 +42,9 @@ async function main() {
   const app = createApp();
 
   // Periodic connector syncs (opt-in per connection via syncIntervalMinutes).
-  if (process.env.DISABLE_SCHEDULER !== 'true') startScheduler();
+  const scheduler = process.env.DISABLE_SCHEDULER !== 'true' ? startScheduler() : null;
 
-  serve({ fetch: app.fetch, hostname: env.host, port: env.port }, () => {
+  const server = serve({ fetch: app.fetch, hostname: env.host, port: env.port }, () => {
     process.stdout.write(
       banner({
         version: env.version,
@@ -53,6 +54,17 @@ async function main() {
       }),
     );
   });
+
+  // Graceful shutdown on a container stop or Ctrl-C (see ./shutdown).
+  const shutdown = createShutdown({
+    stopScheduler: scheduler ? () => clearInterval(scheduler) : null,
+    closeServer: () => new Promise<void>((resolve) => server.close(() => resolve())),
+    closeEngine: () => engine.close(),
+    exit: (code) => process.exit(code),
+    log: (message) => console.error(message),
+  });
+  process.on('SIGTERM', () => void shutdown('SIGTERM'));
+  process.on('SIGINT', () => void shutdown('SIGINT'));
 }
 
 main().catch((err) => {
