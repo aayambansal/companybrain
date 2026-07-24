@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { buildContext, toCitations, extractiveAnswer } from './chat.js';
+import { buildContext, toCitations, extractiveAnswer, generateAnswer } from './chat.js';
 import type { SearchHit } from './types.js';
+import type { LlmProvider } from './llm/types.js';
 
 function hit(id: string, title: string, content: string): SearchHit {
   return {
@@ -54,5 +55,23 @@ describe('extractiveAnswer', () => {
     expect(r.message).toContain('first');
     expect(r.citations).toHaveLength(3); // capped at top 3
     expect(r.usedHits).toHaveLength(3);
+  });
+});
+
+describe('generateAnswer LLM-error fallback', () => {
+  it('returns the extractive answer when the LLM errors mid-request', async () => {
+    const throwing = {
+      name: 'stub',
+      model: 'stub',
+      available: true,
+      async complete() {
+        throw new Error('llm down');
+      },
+    } as unknown as LlmProvider;
+    const hits = [hit('a', 'Release', 'ships thursday'), hit('b', 'Infra', 'postgres')];
+    const r = await generateAnswer(throwing, 'when do we ship?', hits);
+    expect(r.message).toContain('ships thursday');
+    expect(r.usedHits.length).toBeGreaterThan(0);
+    expect(r.citations.length).toBeGreaterThan(0);
   });
 });
