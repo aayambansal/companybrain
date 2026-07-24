@@ -46,6 +46,15 @@ export function extractiveAnswer(question: string, hits: SearchHit[]): ChatRespo
   };
 }
 
+/** Max prior turns sent to the model, so a long conversation can't overflow its
+ *  context window (or run up token cost). */
+export const MAX_CHAT_HISTORY = 20;
+
+/** Pure: keep only the most recent `max` history turns. */
+export function recentHistory<T>(history: T[], max = MAX_CHAT_HISTORY): T[] {
+  return history.length > max ? history.slice(-max) : history;
+}
+
 export async function generateAnswer(
   llm: LlmProvider,
   question: string,
@@ -62,7 +71,7 @@ export async function generateAnswer(
       temperature: 0.2,
       maxTokens: 1024,
       messages: [
-        ...history,
+        ...recentHistory(history),
         {
           role: 'user',
           content: `Context passages:\n\n${context}\n\n---\nQuestion: ${question}`,

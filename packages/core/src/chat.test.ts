@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { buildContext, toCitations, extractiveAnswer, generateAnswer } from './chat.js';
+import {
+  buildContext,
+  toCitations,
+  extractiveAnswer,
+  generateAnswer,
+  recentHistory,
+  MAX_CHAT_HISTORY,
+} from './chat.js';
 import type { SearchHit } from './types.js';
 import type { LlmProvider } from './llm/types.js';
 
@@ -73,5 +80,26 @@ describe('generateAnswer LLM-error fallback', () => {
     expect(r.message).toContain('ships thursday');
     expect(r.usedHits.length).toBeGreaterThan(0);
     expect(r.citations.length).toBeGreaterThan(0);
+  });
+});
+
+describe('recentHistory', () => {
+  it('returns the history unchanged when within the cap', () => {
+    const h = [
+      { role: 'user', content: 'a' },
+      { role: 'assistant', content: 'b' },
+    ];
+    expect(recentHistory(h)).toBe(h);
+  });
+
+  it('keeps only the most recent turns when over the cap', () => {
+    const h = Array.from({ length: MAX_CHAT_HISTORY + 5 }, (_, i) => ({
+      role: 'user',
+      content: String(i),
+    }));
+    const out = recentHistory(h);
+    expect(out).toHaveLength(MAX_CHAT_HISTORY);
+    expect(out[0]!.content).toBe('5'); // dropped the oldest 5
+    expect(out[out.length - 1]!.content).toBe(String(MAX_CHAT_HISTORY + 4));
   });
 });
