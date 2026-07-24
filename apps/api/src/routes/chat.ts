@@ -3,8 +3,14 @@ import { streamSSE } from 'hono/streaming';
 import { z } from 'zod';
 import { extractiveAnswer, recentHistory } from '@companybrain/core';
 import { getEngine, type Variables } from '../context.js';
+import { llmRateLimit } from '../llm-rate-limit.js';
 
 const app = new Hono<{ Variables: Variables }>();
+
+// Chat calls the LLM on every request; cap it per principal to bound provider
+// cost from a leaked key or a runaway loop. Auth already ran on the parent, so
+// the principal is set. Covers both `/` and `/stream`.
+app.use('*', llmRateLimit);
 
 const chatSchema = z.object({
   message: z.string().min(1).max(8000),

@@ -50,6 +50,9 @@ indexing, re-embed your chunks so scores stay comparable.
       provider credentials at rest. Keep it stable and backed up; rotating it
       makes existing encrypted credentials unreadable.
 - [ ] Lock `CORS_ORIGINS` to your dashboard origin.
+- [ ] Keep `LLM_RATE_LIMIT_PER_MIN` set (default 60) so a leaked key or a
+      runaway loop can't run up provider cost; raise it for high-volume
+      automation or set 0 to disable.
 - [ ] Terminate TLS at a reverse proxy in front of the API and web.
 - [ ] Use a least-privilege Postgres role.
 - [ ] Back up the database. Your brain lives there.
