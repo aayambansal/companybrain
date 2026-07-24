@@ -76,7 +76,7 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
       ) : (
         <article>
           <div className="flex items-start justify-between gap-4">
-            <h1 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink">
+            <h1 className="text-2xl font-semibold tracking-[-0.02em] text-ink">
               {memory.title ?? 'Untitled'}
             </h1>
             <Button variant="danger" size="sm" onClick={remove} loading={deleting}>
