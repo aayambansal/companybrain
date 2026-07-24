@@ -127,6 +127,7 @@ export default function PlaybooksPage() {
         <Input
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
+          aria-label="Playbook topic"
           placeholder="A topic to write up — e.g. how we ship a release"
           className="h-11 flex-1 text-[15px]"
         />
