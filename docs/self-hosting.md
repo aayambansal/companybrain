@@ -46,6 +46,9 @@ indexing, re-embed your chunks so scores stay comparable.
 ## Production checklist
 
 - [ ] Set a strong `JWT_SECRET` (`openssl rand -hex 32`).
+- [ ] Set `CREDENTIALS_KEY` (`openssl rand -hex 32`) to encrypt connector and
+      provider credentials at rest. Keep it stable and backed up; rotating it
+      makes existing encrypted credentials unreadable.
 - [ ] Lock `CORS_ORIGINS` to your dashboard origin.
 - [ ] Terminate TLS at a reverse proxy in front of the API and web.
 - [ ] Use a least-privilege Postgres role.
