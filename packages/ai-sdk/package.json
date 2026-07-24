@@ -56,5 +56,8 @@
         "import": "./dist/index.js"
       }
     }
-  }
+  },
+  "author": "aayambansal",
+  "homepage": "https://github.com/aayambansal/companybrain#readme",
+  "bugs": "https://github.com/aayambansal/companybrain/issues"
 }

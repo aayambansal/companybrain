@@ -29,5 +29,8 @@
   },
   "scripts": {
     "start": "node ./bin/companybrain.mjs"
-  }
+  },
+  "author": "aayambansal",
+  "homepage": "https://github.com/aayambansal/companybrain#readme",
+  "bugs": "https://github.com/aayambansal/companybrain/issues"
 }
