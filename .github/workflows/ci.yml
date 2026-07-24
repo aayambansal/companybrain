@@ -112,6 +112,9 @@ jobs:
       - name: API smoke test
         env:
           AUTO_MIGRATE: "false"
+          # Multi-tenant mode so the token maps to its registered org, which lets
+          # the smoke assert cross-org isolation (IDOR) below.
+          AUTH_MODE: multi
           EMBEDDING_PROVIDER: local
           LLM_PROVIDER: none
           API_HOST: 127.0.0.1
@@ -155,12 +158,16 @@ jobs:
           fi
           echo "register ok"
 
-          # Add a memory (literal words guarantee a keyword-arm hit).
-          curl -fsS -X POST "$BASE/v1/memories" \
+          # Add a memory (literal words guarantee a keyword-arm hit); keep its id
+          # for the tenant-isolation check.
+          ADD=$(curl -fsS -X POST "$BASE/v1/memories" \
             -H "authorization: Bearer $TOKEN" \
             -H 'content-type: application/json' \
-            -d '{"title":"CI smoke","content":"CompanyBrain integration smoke verification zulu quebec"}' \
-            > /dev/null
+            -d '{"title":"CI smoke","content":"CompanyBrain integration smoke verification zulu quebec"}')
+          MID_A=$(printf '%s' "$ADD" | jq -r '.memory.id')
+          if [ -z "$MID_A" ] || [ "$MID_A" = "null" ]; then
+            echo "::error::add did not return a memory id: $ADD"; exit 1
+          fi
           echo "add memory ok"
 
           # Search and require at least one hit.
@@ -191,3 +198,20 @@ jobs:
             cat /tmp/api.log; exit 1
           fi
           echo "space isolation ok: $SC_COUNT hit"
+
+          # Tenant isolation (IDOR): a second org must not read the first org's
+          # memory by id. Register org B and fetch org A's memory id with B's token.
+          REG_B=$(curl -fsS -X POST "$BASE/v1/auth/register" \
+            -H 'content-type: application/json' \
+            -d '{"email":"ci-b@example.com","password":"password123","name":"CI B","orgName":"CI Org B"}')
+          TOKEN_B=$(printf '%s' "$REG_B" | jq -r '.token')
+          if [ -z "$TOKEN_B" ] || [ "$TOKEN_B" = "null" ]; then
+            echo "::error::second register did not return a token: $REG_B"; exit 1
+          fi
+          IDOR_CODE=$(curl -s -o /tmp/idor.json -w '%{http_code}' \
+            -H "authorization: Bearer $TOKEN_B" "$BASE/v1/memories/$MID_A")
+          if [ "$IDOR_CODE" = "200" ]; then
+            echo "::error::IDOR: org B read org A's memory (status $IDOR_CODE): $(cat /tmp/idor.json)"
+            cat /tmp/api.log; exit 1
+          fi
+          echo "tenant isolation ok: cross-org read blocked ($IDOR_CODE)"
