@@ -198,8 +198,16 @@ async function up(flags) {
   banner();
   const dir = appDir(flags);
   ensureRepo(dir);
-  const ans = await prompt(flags);
-  writeEnv(dir, ans);
+  // Only prompt and write .env on first run; a re-run keeps the user's existing
+  // config (and a stable JWT_SECRET) instead of clobbering hand-edited values.
+  if (existsSync(join(dir, '.env'))) {
+    log(
+      paint(C.dim, `Using existing config at ${join(dir, '.env')} (edit it to change settings).`),
+    );
+  } else {
+    const ans = await prompt(flags);
+    writeEnv(dir, ans);
+  }
   if (!dockerReady()) {
     die(
       'Docker is not running. Start Docker Desktop (or the daemon), then re-run `npx companybrain up`.\n' +
@@ -274,8 +282,11 @@ async function main() {
         const r = await fetch('http://localhost:3333/health', {
           signal: AbortSignal.timeout(3000),
         });
-        const j = await r.json();
-        log(paint(C.green, 'up') + ' ' + JSON.stringify(j));
+        const j = await r.json().catch(() => ({}));
+        // /health returns 503 when the database is unreachable, so reflect the
+        // status code rather than reporting "up" for a degraded instance.
+        if (r.ok) log(paint(C.green, 'up') + ' ' + JSON.stringify(j));
+        else log(paint(C.red, 'degraded') + ' ' + JSON.stringify(j));
       } catch {
         log(paint(C.red, 'down') + ' (API not reachable on :3333)');
       }
