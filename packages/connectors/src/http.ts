@@ -4,6 +4,28 @@
 
 const USER_AGENT = 'CompanyBrain-Connector/0.1 (+https://github.com/aayambansal/companybrain)';
 
+/** Query-param names whose value must never appear in a log or error message. */
+const SENSITIVE_PARAM = /token|secret|key|password|auth|credential|sig|access/i;
+
+/**
+ * Redact credential-looking query-param values so a URL is safe to put in an
+ * error message. Some source APIs take the token in the query string (e.g.
+ * `?api_token=...`); without this, a failed request would leak it into the
+ * thrown error, which is stored on the sync run and shown in the dashboard.
+ */
+export function redactUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    for (const key of [...u.searchParams.keys()]) {
+      if (SENSITIVE_PARAM.test(key)) u.searchParams.set(key, 'REDACTED');
+    }
+    return u.toString();
+  } catch {
+    // Not a parseable absolute URL; drop any query string to be safe.
+    return url.split('?')[0] ?? url;
+  }
+}
+
 /** Default per-request timeout so a slow source cannot hang a whole sync. */
 export const DEFAULT_TIMEOUT_MS = 30_000;
 
@@ -83,7 +105,7 @@ export async function fetchText(
     timeoutMs,
   );
   if (!res.ok) {
-    throw new Error(`GET ${url} -> ${res.status} ${res.statusText}`);
+    throw new Error(`GET ${redactUrl(url)} -> ${res.status} ${res.statusText}`);
   }
   return res.text();
 }
@@ -117,7 +139,7 @@ export async function fetchJson<T = unknown>(url: string, opts: JsonRequest = {}
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(
-      `${opts.method ?? 'GET'} ${url} -> ${res.status} ${res.statusText} ${text.slice(0, 200)}`,
+      `${opts.method ?? 'GET'} ${redactUrl(url)} -> ${res.status} ${res.statusText} ${text.slice(0, 200)}`,
     );
   }
   return (await res.json()) as T;
