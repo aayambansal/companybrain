@@ -142,7 +142,7 @@ def test_rate_limit_surfaces_retry_after():
             json={"error": "rate_limited", "message": "LLM rate limit reached (60/min)."},
         )
 
-    cb = make_client(handler)
+    cb = make_client(handler, max_retries=0)
     with pytest.raises(CompanyBrainError) as excinfo:
         cb.chat("hi")
 
@@ -150,6 +150,48 @@ def test_rate_limit_surfaces_retry_after():
     assert err.status == 429
     assert err.code == "rate_limited"
     assert err.retry_after == 45
+
+
+def test_retries_429_then_succeeds():
+    calls = {"n": 0}
+
+    def handler(request):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return httpx.Response(429, headers={"Retry-After": "0"}, json={})
+        return httpx.Response(200, json={"message": "ok", "citations": []})
+
+    cb = make_client(handler)  # default max_retries=2
+    out = cb.chat("hi")
+    assert out["message"] == "ok"
+    assert calls["n"] == 2
+
+
+def test_gives_up_after_max_retries():
+    calls = {"n": 0}
+
+    def handler(request):
+        calls["n"] += 1
+        return httpx.Response(429, headers={"Retry-After": "0"}, json={"error": "rate_limited"})
+
+    cb = make_client(handler, max_retries=2)
+    with pytest.raises(CompanyBrainError) as excinfo:
+        cb.search("x")
+    assert excinfo.value.status == 429
+    assert calls["n"] == 3  # initial + 2 retries
+
+
+def test_max_retries_zero_throws_immediately():
+    calls = {"n": 0}
+
+    def handler(request):
+        calls["n"] += 1
+        return httpx.Response(429, headers={"Retry-After": "5"}, json={"error": "rate_limited"})
+
+    cb = make_client(handler, max_retries=0)
+    with pytest.raises(CompanyBrainError):
+        cb.search("x")
+    assert calls["n"] == 1
 
 
 def test_rate_limited_stream_surfaces_retry_after():
@@ -252,7 +294,7 @@ def test_async_rate_limit_surfaces_retry_after():
     async def run():
         transport = httpx.MockTransport(handler)
         async with AsyncCompanyBrain(
-            api_url="http://test.local", api_key="k", transport=transport
+            api_url="http://test.local", api_key="k", transport=transport, max_retries=0
         ) as cb:
             await cb.chat("hi")
 
@@ -260,6 +302,27 @@ def test_async_rate_limit_surfaces_retry_after():
         asyncio.run(run())
     assert excinfo.value.status == 429
     assert excinfo.value.retry_after == 20
+
+
+def test_async_retries_429_then_succeeds():
+    calls = {"n": 0}
+
+    def handler(request):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return httpx.Response(429, headers={"Retry-After": "0"}, json={})
+        return httpx.Response(200, json={"message": "ok", "citations": []})
+
+    async def run():
+        transport = httpx.MockTransport(handler)
+        async with AsyncCompanyBrain(
+            api_url="http://test.local", api_key="k", transport=transport
+        ) as cb:
+            return await cb.chat("hi")
+
+    out = asyncio.run(run())
+    assert out["message"] == "ok"
+    assert calls["n"] == 2
 
 
 def test_defaults_come_from_env(monkeypatch):

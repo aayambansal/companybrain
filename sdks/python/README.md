@@ -68,6 +68,9 @@ Non-2xx responses raise `CompanyBrainError` with `status`, `code`, `message`,
 and `details`. On a `429` (the chat/playbook LLM rate limit), `retry_after`
 holds the seconds to wait before retrying, parsed from the `Retry-After` header.
 
+`429` and `503` responses are retried automatically (default 2 times), honoring
+`Retry-After` with exponential-backoff fallback. Pass `max_retries=0` to disable.
+
 ## Development
 
 ```sh

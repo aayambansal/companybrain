@@ -89,12 +89,36 @@ describe('CompanyBrain SDK', () => {
       headers: { 'Retry-After': '42' },
       body: { error: 'rate_limited', message: 'LLM rate limit reached (60/min). Retry in 42s.' },
     }));
-    const cb = new CompanyBrain({ fetch: fetchImpl });
+    const cb = new CompanyBrain({ fetch: fetchImpl, maxRetries: 0 });
     await expect(cb.chat({ message: 'hi' })).rejects.toMatchObject({
       status: 429,
       code: 'rate_limited',
       retryAfter: 42,
     });
+  });
+
+  it('retries a 429 (honoring Retry-After) then returns the success', async () => {
+    let calls = 0;
+    const fetchImpl = mockFetch(() => {
+      calls += 1;
+      if (calls === 1) return { status: 429, headers: { 'Retry-After': '0' }, body: {} };
+      return { body: { message: 'ok', citations: [] } };
+    });
+    const cb = new CompanyBrain({ fetch: fetchImpl, maxRetries: 2 });
+    const res = await cb.chat({ message: 'hi' });
+    expect(res.message).toBe('ok');
+    expect(calls).toBe(2);
+  });
+
+  it('gives up after maxRetries and throws the rate-limit error', async () => {
+    let calls = 0;
+    const fetchImpl = mockFetch(() => {
+      calls += 1;
+      return { status: 429, headers: { 'Retry-After': '0' }, body: { error: 'rate_limited' } };
+    });
+    const cb = new CompanyBrain({ fetch: fetchImpl, maxRetries: 2 });
+    await expect(cb.search({ q: 'x' })).rejects.toMatchObject({ status: 429 });
+    expect(calls).toBe(3); // initial + 2 retries
   });
 
   it('parses Retry-After seconds, ignoring garbage and honoring absence', () => {

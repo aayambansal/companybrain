@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any, AsyncIterator, Dict, List, Optional, Tuple
 
 import httpx
@@ -40,10 +41,12 @@ class AsyncCompanyBrain:
         api_key: Optional[str] = None,
         headers: Optional[Dict[str, str]] = None,
         timeout: float = 30.0,
+        max_retries: int = 2,
         transport: Optional[httpx.AsyncBaseTransport] = None,
     ) -> None:
         self.api_url = _c.resolve_api_url(api_url)
         self._api_key = _c.resolve_api_key(api_key)
+        self._max_retries = max(0, max_retries)
         self._http = httpx.AsyncClient(
             base_url=self.api_url,
             headers=_c.build_headers(self._api_key, headers),
@@ -74,8 +77,19 @@ class AsyncCompanyBrain:
         params: Optional[Dict[str, Any]] = None,
         json: Optional[Dict[str, Any]] = None,
     ) -> Any:
-        response = await self._http.request(method, path, params=params or None, json=json)
-        return _handle(response)
+        for attempt in range(self._max_retries + 1):
+            response = await self._http.request(method, path, params=params or None, json=json)
+            if (
+                response.is_success
+                or attempt >= self._max_retries
+                or response.status_code not in (429, 503)
+            ):
+                return _handle(response)
+            # Retry a rate-limit / transient response, honoring Retry-After.
+            await response.aread()
+            retry_after = _c.parse_retry_after(response.headers.get("Retry-After"))
+            await asyncio.sleep(min(retry_after if retry_after is not None else 2**attempt, 20))
+        return _handle(response)  # pragma: no cover - loop always returns above
 
     # --- top-level operations -------------------------------------------
     async def search(

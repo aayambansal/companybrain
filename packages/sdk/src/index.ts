@@ -33,6 +33,12 @@ export interface CompanyBrainOptions {
   headers?: Record<string, string>;
   /** Custom fetch implementation (for tests / non-standard runtimes). */
   fetch?: typeof fetch;
+  /**
+   * How many times to retry a 429 or 503 before giving up, honoring the
+   * `Retry-After` header (else exponential backoff, capped at 20s). Default 2;
+   * set 0 to disable and have rate-limit responses throw immediately.
+   */
+  maxRetries?: number;
 }
 
 export class CompanyBrainError extends Error {
@@ -76,11 +82,16 @@ function envVar(name: string): string | undefined {
   return typeof process !== 'undefined' && process.env ? process.env[name] : undefined;
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export class CompanyBrain {
   readonly apiUrl: string;
   private apiKey?: string;
   private headers: Record<string, string>;
   private fetchImpl: typeof fetch;
+  private maxRetries: number;
 
   readonly memories: MemoriesResource;
   readonly spaces: SpacesResource;
@@ -99,6 +110,7 @@ export class CompanyBrain {
     if (!this.fetchImpl) {
       throw new Error('No fetch implementation available. Pass one via options.fetch.');
     }
+    this.maxRetries = Math.max(0, options.maxRetries ?? 2);
     this.memories = new MemoriesResource(this);
     this.spaces = new SpacesResource(this);
     this.connections = new ConnectionsResource(this);
@@ -120,26 +132,30 @@ export class CompanyBrain {
     const headers: Record<string, string> = { ...this.headers };
     if (this.apiKey) headers['Authorization'] = `Bearer ${this.apiKey}`;
     if (opts.body !== undefined) headers['Content-Type'] = 'application/json';
+    const body = opts.body !== undefined ? JSON.stringify(opts.body) : undefined;
 
-    const res = await this.fetchImpl(url.toString(), {
-      method,
-      headers,
-      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-    });
+    for (let attempt = 0; ; attempt++) {
+      const res = await this.fetchImpl(url.toString(), { method, headers, body });
+      const text = await res.text();
+      const data = text ? safeJson(text) : undefined;
+      if (res.ok) return data as T;
 
-    const text = await res.text();
-    const data = text ? safeJson(text) : undefined;
-    if (!res.ok) {
+      const retryAfter = parseRetryAfter(res.headers.get('Retry-After'));
+      // Retry rate-limit / transient-unavailable responses, honoring Retry-After.
+      if ((res.status === 429 || res.status === 503) && attempt < this.maxRetries) {
+        const backoff = retryAfter ?? 2 ** attempt;
+        await sleep(Math.min(backoff * 1000, 20_000));
+        continue;
+      }
       const err = (data ?? {}) as { error?: string; message?: string; issues?: unknown };
       throw new CompanyBrainError(
         err.message ?? err.error ?? `Request failed (${res.status})`,
         res.status,
         err.error,
         err.issues,
-        parseRetryAfter(res.headers.get('Retry-After')),
+        retryAfter,
       );
     }
-    return data as T;
   }
 
   // Convenience top-level methods.
