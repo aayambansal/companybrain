@@ -4,6 +4,7 @@ import { and, eq, desc } from 'drizzle-orm';
 import { connections, syncRuns } from '@companybrain/db';
 import { getEngine, type Variables } from '../context.js';
 import { getConnectorRegistry } from '../connectors/registry.js';
+import { activeSyncRunId } from '../sync-guard.js';
 
 const app = new Hono<{ Variables: Variables }>();
 
@@ -98,6 +99,13 @@ app.post('/:id/sync', async (c) => {
       { error: 'no_runner', message: 'No connector runner is registered on this server.' },
       501,
     );
+  }
+
+  // Don't start a second concurrent sync for the same connection: two runs would
+  // share one starting cursor and race on setCursor, moving it backwards.
+  const activeId = await activeSyncRunId(engine, conn.id);
+  if (activeId) {
+    return c.json({ started: false, alreadyRunning: true, syncRunId: activeId }, 200);
   }
 
   const [run] = await engine.db.insert(syncRuns).values({ connectionId: conn.id }).returning();
