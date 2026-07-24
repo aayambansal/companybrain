@@ -174,7 +174,7 @@ export default function PlaybooksPage() {
       )}
 
       {error && !busy && (
-        <div className="mt-6 rounded-lg border border-[color-mix(in_oklch,var(--color-danger),transparent_55%)] bg-[var(--color-danger-soft)] px-4 py-3 text-sm text-[var(--color-danger)]">
+        <div className="mt-6 rounded-lg border border-[color-mix(in_oklch,var(--color-danger),transparent_55%)] bg-[var(--color-danger-soft)] px-4 py-3 text-sm text-[var(--color-danger-ink)]">
           {error}
         </div>
       )}

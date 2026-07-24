@@ -207,7 +207,7 @@ function ProviderCard({
           </Field>
         </div>
       )}
-      {warn && <p className="mt-2 text-[12px] text-[var(--color-warn)]">{warn}</p>}
+      {warn && <p className="mt-2 text-[12px] text-[var(--color-warn-ink)]">{warn}</p>}
       <div className="mt-3 flex justify-end gap-2">
         <Button variant="ghost" size="sm" onClick={test} loading={testing}>
           Test
