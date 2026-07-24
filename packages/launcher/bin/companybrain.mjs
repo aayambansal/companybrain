@@ -13,7 +13,7 @@
  * bundled docker compose stack (Postgres + pgvector, API, dashboard).
  */
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
@@ -240,8 +240,9 @@ async function up(flags) {
   if (!(await ensureDockerRunning())) {
     die(
       has('docker')
-        ? 'Docker is installed but did not start in time. Open Docker Desktop, wait for it to finish\n' +
-            '  starting, then re-run `npx companybrain up`.\n' +
+        ? 'Docker is installed but did not become ready. Open Docker Desktop and wait for it to\n' +
+            '  finish starting, then re-run `npx companybrain up`. If Docker Desktop keeps crashing,\n' +
+            '  restart it, or reset it (Settings > Troubleshoot > Reset to factory defaults) / reinstall.\n' +
             `  App directory: ${dir}`
         : 'Docker is required and was not found. Install Docker Desktop\n' +
             '  (https://docs.docker.com/get-docker/), then re-run `npx companybrain up`.\n' +
@@ -276,7 +277,8 @@ async function up(flags) {
     ),
   );
   log('');
-  log(paint(C.gray, `  Stop it with:  npx companybrain down        (app dir: ${dir})`));
+  log(paint(C.gray, '  Open it:   npx companybrain open       Update:  npx companybrain upgrade'));
+  log(paint(C.gray, `  Stop it:   npx companybrain down       (app dir: ${dir})`));
   if (!flags['no-mcp']) {
     log('');
     log(
@@ -295,6 +297,74 @@ async function up(flags) {
   log('');
 }
 
+function requireInstall(dir) {
+  if (!existsSync(join(dir, 'docker-compose.yml')))
+    die(`No CompanyBrain install found at ${dir}. Run \`npx companybrain up\` first.`);
+}
+
+function openUrl(url) {
+  if (process.platform === 'darwin') spawnSync('open', [url], { stdio: 'ignore' });
+  else if (process.platform === 'win32')
+    spawnSync('cmd', ['/c', 'start', '', url], { stdio: 'ignore' });
+  else spawnSync('xdg-open', [url], { stdio: 'ignore' });
+}
+
+async function confirm(question) {
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  const answer = (await rl.question(question)).trim().toLowerCase();
+  rl.close();
+  return answer === 'y' || answer === 'yes';
+}
+
+async function upgrade(flags) {
+  const dir = appDir(flags);
+  requireInstall(dir);
+  if (!has('git')) die('git is required to upgrade, or update your checkout manually.');
+  log(paint(C.dim, 'Fetching the latest CompanyBrain ...'));
+  const pull = spawnSync('git', ['-C', dir, 'pull', '--ff-only'], { stdio: 'inherit' });
+  if (pull.status !== 0)
+    die(
+      'git pull failed. If you edited files in the app directory, stash or discard them, then retry.',
+    );
+  if (!(await ensureDockerRunning())) die('Docker is not available; start Docker and retry.');
+  log(paint(C.dim, 'Rebuilding and restarting ...\n'));
+  const code = await runStream('docker', ['compose', 'up', '-d', '--build'], { cwd: dir });
+  if (code !== 0) die('docker compose failed.');
+  const ok = await waitHealth('http://localhost:3333');
+  log(paint(C.green, ok ? '\n  Upgraded and running.' : '\n  Upgraded (still warming up).'));
+  log('  Dashboard   ' + paint(C.amber, 'http://localhost:3000') + '\n');
+}
+
+async function uninstall(flags) {
+  const dir = appDir(flags);
+  if (!existsSync(join(dir, 'docker-compose.yml'))) die(`No CompanyBrain install found at ${dir}.`);
+  if (!(flags.yes || flags.y)) {
+    const ok = await confirm(
+      paint(
+        C.red,
+        'This removes the containers, volumes (your stored memories), and install. Continue? (y/N) ',
+      ),
+    );
+    if (!ok) return log('Cancelled.');
+  }
+  if (dockerReady()) {
+    log(paint(C.dim, 'Stopping and removing containers + volumes ...'));
+    await runStream('docker', ['compose', 'down', '-v', '--remove-orphans'], { cwd: dir });
+  } else {
+    log(paint(C.dim, 'Docker is not running, so containers/volumes were left as-is.'));
+  }
+  // Only delete the managed clone (~/.companybrain/app); never a user's own checkout.
+  const managed = join(homedir(), '.companybrain', 'app');
+  if (dir === managed) {
+    log(paint(C.dim, `Removing ${dir} ...`));
+    rmSync(dir, { recursive: true, force: true });
+    log(paint(C.green, 'Uninstalled.'));
+  } else {
+    log(paint(C.green, 'Removed containers and volumes.'));
+    log(paint(C.dim, `Left your checkout at ${dir} in place; delete it yourself if you want.`));
+  }
+}
+
 async function main() {
   const { cmd, flags } = parseArgs(process.argv.slice(2));
   const dir = appDir(flags);
@@ -304,11 +374,27 @@ async function main() {
       return up(flags);
     case 'down':
     case 'stop':
-      if (!existsSync(join(dir, 'docker-compose.yml')))
-        die(`No CompanyBrain install found at ${dir}.`);
+      requireInstall(dir);
       process.exit(await runStream('docker', ['compose', 'down'], { cwd: dir }));
       break;
+    case 'restart':
+      requireInstall(dir);
+      if (!(await ensureDockerRunning())) die('Docker is not available; start Docker and retry.');
+      log(paint(C.dim, 'Restarting the stack ...'));
+      process.exit(await runStream('docker', ['compose', 'restart'], { cwd: dir }));
+      break;
+    case 'upgrade':
+    case 'update':
+      return upgrade(flags);
+    case 'uninstall':
+    case 'remove':
+      return uninstall(flags);
+    case 'open':
+      openUrl('http://localhost:3000');
+      log('Opening ' + paint(C.amber, 'http://localhost:3000'));
+      break;
     case 'logs':
+      requireInstall(dir);
       process.exit(await runStream('docker', ['compose', 'logs', '-f'], { cwd: dir }));
       break;
     case 'status': {
@@ -337,13 +423,17 @@ async function main() {
     case '-h':
       banner();
       log('Usage: npx companybrain <command>\n');
-      log('  up        set up (clone if needed) and start the stack   [default]');
-      log('  down      stop the stack');
-      log('  logs      tail the stack logs');
-      log('  status    check the API health');
-      log('  mcp       print an MCP client config snippet');
-      log('  help      this message\n');
-      log('Flags: --yes (accept defaults), --dir=<path>, --no-mcp\n');
+      log('  up         set up (clone if needed) and start the stack   [default]');
+      log('  down       stop the stack');
+      log('  restart    restart the stack');
+      log('  upgrade    pull the latest version, rebuild, and restart');
+      log('  open       open the dashboard in your browser');
+      log('  logs       tail the stack logs');
+      log('  status     check the API health');
+      log('  mcp        print an MCP client config snippet');
+      log('  uninstall  stop, remove containers + volumes, and the install');
+      log('  help       this message\n');
+      log('Flags: --yes (accept defaults / skip confirms), --dir=<path>, --no-mcp\n');
       break;
     default:
       die(`Unknown command "${cmd}". Try: npx companybrain help`);
