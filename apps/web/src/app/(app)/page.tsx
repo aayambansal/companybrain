@@ -139,6 +139,7 @@ export default function OverviewPage() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
+            aria-label="Ask or search your brain"
             placeholder="Ask your brain anything, or search for it"
             className="h-12 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-faint"
           />
