@@ -125,15 +125,24 @@ export class CompanyBrain implements INodeType {
       const headers: Record<string, string> = { 'content-type': 'application/json' };
       if (apiKey) headers['authorization'] = `Bearer ${apiKey}`;
 
-      const response = await this.helpers.httpRequest({
-        method: 'POST' as IHttpRequestMethods,
-        url: apiUrl + path,
-        headers,
-        body,
-        json: true,
-      });
-
-      out.push({ json: response as IDataObject, pairedItem: { item: i } });
+      try {
+        const response = await this.helpers.httpRequest({
+          method: 'POST' as IHttpRequestMethods,
+          url: apiUrl + path,
+          headers,
+          body,
+          json: true,
+        });
+        out.push({ json: response as IDataObject, pairedItem: { item: i } });
+      } catch (error) {
+        // Respect n8n's "Continue On Fail": isolate a bad item instead of
+        // failing the whole batch.
+        if (this.continueOnFail()) {
+          out.push({ json: { error: (error as Error).message }, pairedItem: { item: i } });
+          continue;
+        }
+        throw error;
+      }
     }
 
     return [out];
