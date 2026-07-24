@@ -21,11 +21,13 @@ The dashboard uses a session cookie instead. Both resolve to an org context.
 ## Memories
 
 ```
-POST   /v1/memories          add a memory (text or a URL to fetch)
-GET    /v1/memories          list, with pagination and filters
-GET    /v1/memories/:id      fetch one, with its chunks
-PATCH  /v1/memories/:id      update title, content, tags, space
-DELETE /v1/memories/:id      remove a memory and its chunks
+POST   /v1/memories               add a memory (text or a URL to fetch)
+GET    /v1/memories               list, with pagination and filters
+GET    /v1/memories/:id           fetch one, with its chunks
+GET    /v1/memories/:id/related   related memories, ranked by similarity
+GET    /v1/memories/:id/versions  prior content versions (temporal history)
+PATCH  /v1/memories/:id           update title, content, tags, space
+DELETE /v1/memories/:id           remove a memory and its chunks
 ```
 
 Add a memory:
@@ -111,9 +113,11 @@ DELETE /v1/spaces/:id
 ## Connections
 
 ```
-GET    /v1/connections
+GET    /v1/connections/available  list connector types you can configure
+GET    /v1/connections            list configured connections (no credentials)
 POST   /v1/connections            configure a connector instance
 POST   /v1/connections/:id/sync   trigger a sync
+GET    /v1/connections/:id/runs   recent sync runs for a connection
 DELETE /v1/connections/:id
 ```
 
