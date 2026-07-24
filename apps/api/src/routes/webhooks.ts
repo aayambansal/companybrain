@@ -2,8 +2,8 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { and, eq, desc } from 'drizzle-orm';
 import { webhooks } from '@companybrain/db';
-import { signWebhook } from '@companybrain/core';
-import { getEngine, type Variables } from '../context.js';
+import { signWebhook, webhookUrlBlockReason } from '@companybrain/core';
+import { getEngine, getEnv, type Variables } from '../context.js';
 
 const app = new Hono<{ Variables: Variables }>();
 
@@ -41,6 +41,11 @@ app.post('/', async (c) => {
   const parsed = createSchema.safeParse(body);
   if (!parsed.success)
     return c.json({ error: 'invalid_request', issues: parsed.error.issues }, 400);
+  // Reject internal/private webhook targets (SSRF) unless the operator opted in.
+  if (!getEnv().webhookAllowInternal) {
+    const reason = webhookUrlBlockReason(parsed.data.url);
+    if (reason) return c.json({ error: 'invalid_url', message: `Webhook URL ${reason}.` }, 400);
+  }
   const [row] = await getEngine()
     .db.insert(webhooks)
     .values({

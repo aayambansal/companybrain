@@ -30,6 +30,12 @@ export interface ApiEnv {
    * EXPOSE_ERROR_DETAILS=true. Errors are always logged server-side regardless.
    */
   exposeErrorDetails: boolean;
+  /**
+   * Allow webhooks to target internal/private/loopback addresses. Off by
+   * default so a user-registered webhook can't be pointed at the metadata
+   * endpoint or host-internal services (SSRF); turn on for local integrations.
+   */
+  webhookAllowInternal: boolean;
 }
 
 export function loadApiEnv(): ApiEnv {
@@ -51,6 +57,7 @@ export function loadApiEnv(): ApiEnv {
     llmRateLimitPerMin: parseLimit(process.env.LLM_RATE_LIMIT_PER_MIN, 60),
     exposeErrorDetails:
       process.env.EXPOSE_ERROR_DETAILS === 'true' || process.env.NODE_ENV !== 'production',
+    webhookAllowInternal: process.env.WEBHOOK_ALLOW_INTERNAL === 'true',
   };
 }
 

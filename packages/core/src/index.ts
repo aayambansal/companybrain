@@ -69,6 +69,12 @@ export { buildTopics, buildTopic, type Topic, type TopicRow } from './topics.js'
 export { generateDigest, buildDigestPrompt, type DigestResult } from './digest.js';
 export { enrichDocument, parseEnrichment, type Enrichment } from './enrich.js';
 export { dispatchWebhooks, signWebhook, type WebhookEvent } from './webhooks.js';
+export {
+  webhookUrlBlockReason,
+  isBlockedWebhookTarget,
+  isPrivateIp,
+  isPrivateIpv4,
+} from './net-guard.js';
 export { parseDataUrl } from './vision.js';
 export {
   describeVideo,
