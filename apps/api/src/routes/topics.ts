@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { getEngine, type Variables } from '../context.js';
+import { queryInt } from '../query.js';
 
 const app = new Hono<{ Variables: Variables }>();
 
@@ -10,8 +11,8 @@ app.get('/', async (c) => {
   const engine = getEngine();
   const spaceId = c.req.query('spaceId') || undefined;
   const space = c.req.query('space') || undefined;
-  const limit = Math.min(Number.parseInt(c.req.query('limit') ?? '24', 10) || 24, 100);
-  const minCount = Math.max(Number.parseInt(c.req.query('minCount') ?? '2', 10) || 2, 1);
+  const limit = queryInt(c.req.query('limit'), { fallback: 24, min: 1, max: 100 });
+  const minCount = queryInt(c.req.query('minCount'), { fallback: 2, min: 1 });
   const topics = await engine.topics(auth.orgId, { spaceId, spaceSlug: space, limit, minCount });
   return c.json({ topics });
 });

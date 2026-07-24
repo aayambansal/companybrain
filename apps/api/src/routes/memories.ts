@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { parseDataUrl } from '@companybrain/core';
 import { getEngine, type Variables } from '../context.js';
+import { queryInt } from '../query.js';
 
 const app = new Hono<{ Variables: Variables }>();
 
@@ -107,8 +108,8 @@ app.post('/', async (c) => {
 app.get('/', async (c) => {
   const auth = c.get('auth');
   const engine = getEngine();
-  const limit = Math.min(Number.parseInt(c.req.query('limit') ?? '50', 10) || 50, 200);
-  const offset = Number.parseInt(c.req.query('offset') ?? '0', 10) || 0;
+  const limit = queryInt(c.req.query('limit'), { fallback: 50, min: 1, max: 200 });
+  const offset = queryInt(c.req.query('offset'), { fallback: 0, min: 0 });
   const spaceId = c.req.query('spaceId') || undefined;
   const connector = c.req.query('connector') || undefined;
   const { memories, total } = await engine.listMemories({
@@ -133,7 +134,7 @@ app.get('/:id', async (c) => {
 app.get('/:id/related', async (c) => {
   const auth = c.get('auth');
   const engine = getEngine();
-  const limit = Math.min(Number.parseInt(c.req.query('limit') ?? '5', 10) || 5, 20);
+  const limit = queryInt(c.req.query('limit'), { fallback: 5, min: 1, max: 20 });
   const related = await engine.related(auth.orgId, c.req.param('id'), limit);
   return c.json({ related });
 });
