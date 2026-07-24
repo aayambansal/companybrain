@@ -74,6 +74,7 @@ function SearchInner() {
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
+            aria-label="Search your brain"
             placeholder="Search your brain"
             className="h-12 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-faint"
           />

@@ -65,7 +65,8 @@ to the API's camelCase fields. Responses are returned as typed dicts matching
 the JSON payloads.
 
 Non-2xx responses raise `CompanyBrainError` with `status`, `code`, `message`,
-and `details`.
+and `details`. On a `429` (the chat/playbook LLM rate limit), `retry_after`
+holds the seconds to wait before retrying, parsed from the `Retry-After` header.
 
 ## Development
 

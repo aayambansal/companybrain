@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f3f3f8" />
+    <meta name="theme-color" content="#f9fafe" />
+    <meta name="color-scheme" content="light" />
     <title>Ask your company anything · CompanyBrain</title>
     <meta
       name="description"
@@ -12,6 +13,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Ask your company anything · CompanyBrain" />
     <meta property="og:description" content="Self-hosted semantic memory. Hybrid search with reranking, 40+ connectors, MCP, SDKs. State-of-the-art retrieval on BEIR, reproducibly." />
+    <link rel="canonical" href="https://aayambansal.github.io/companybrain/" />
     <meta property="og:url" content="https://aayambansal.github.io/companybrain/" />
     <meta property="og:image" content="https://aayambansal.github.io/companybrain/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -318,17 +320,34 @@
       footer a { color: var(--muted); }
       footer a:hover { color: var(--iris-strong); }
 
-      /* reveal (enhances an already-visible default) */
-      .js .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
-      .js .reveal.in { opacity: 1; transform: none; }
+      /* reveal: content is always visible (full opacity); the reveal only slides
+         it into place, so a headless renderer or an un-scrolled section is never
+         invisible. Gating opacity here would hide below-the-fold content from
+         crawlers and assistive tech until JS + scroll fire. */
+      .js .reveal { transform: translateY(16px); transition: transform 0.7s var(--ease); }
+      .js .reveal.in { transform: none; }
       @media (prefers-reduced-motion: reduce) {
         html { scroll-behavior: auto; }
-        .js .reveal { opacity: 1; transform: none; transition: none; }
+        .js .reveal { transform: none; transition: none; }
         .row { animation: none !important; }
         .console-bar .live .dot { animation: none; }
         .node.lit circle.ring { animation: none; }
       }
     </style>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "CompanyBrain",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Linux, macOS, Windows",
+        "description": "Self-hosted semantic memory for your team. Index everything from Slack to Google Docs to PDFs, then get cited answers over an API, an SDK, or MCP. 40+ connectors, hybrid search, one command to run.",
+        "url": "https://aayambansal.github.io/companybrain/",
+        "license": "https://opensource.org/licenses/MIT",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
   </head>
   <body>
     <nav id="nav">
@@ -351,6 +370,7 @@
       </div>
     </nav>
 
+    <main>
     <header id="top">
       <canvas id="constellation" aria-hidden="true"></canvas>
       <div class="veil"></div>
@@ -582,6 +602,7 @@
         </div>
       </div>
     </section>
+    </main>
 
     <footer>
       <div class="wrap">
@@ -907,15 +928,31 @@
             ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2);
             ctx.fillStyle = SPARK; ctx.shadowColor = SPARK; ctx.shadowBlur = 10; ctx.fill(); ctx.shadowBlur = 0;
           }
-          raf = requestAnimationFrame(step);
+          if (running) raf = requestAnimationFrame(step);
         }
         function drawStatic() {
           ctx.clearRect(0, 0, w, h);
           for (var i = 0; i < nodes.length; i++) { ctx.beginPath(); ctx.arc(nodes[i].x, nodes[i].y, nodes[i].r, 0, Math.PI * 2); ctx.fillStyle = 'oklch(0.54 0.21 264 / 0.4)'; ctx.fill(); }
         }
+        var running = false, visible = true;
+        function start() { if (running || reduce || !visible) return; running = true; raf = requestAnimationFrame(step); }
+        function stop() { running = false; cancelAnimationFrame(raf); }
         resize();
-        window.addEventListener('resize', function () { cancelAnimationFrame(raf); resize(); if (!reduce) step(); else drawStatic(); });
-        if (reduce) drawStatic(); else step();
+        window.addEventListener('resize', function () { stop(); resize(); if (reduce) drawStatic(); else start(); });
+        if (reduce) {
+          drawStatic();
+        } else if ('IntersectionObserver' in window) {
+          // Pause the ambient loop once the hero scrolls out of view. rAF only
+          // throttles when the whole tab is hidden, not when the canvas leaves
+          // the viewport, so on this long page it would otherwise keep burning
+          // CPU off-screen.
+          new IntersectionObserver(function (entries) {
+            visible = entries[0].isIntersecting;
+            if (visible) start(); else stop();
+          }, { threshold: 0 }).observe(canvas);
+        } else {
+          start();
+        }
       })();
     </script>
   </body>

@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "description": "Official TypeScript SDK for CompanyBrain, the open-source memory layer.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aayambansal/companybrain.git",
+    "directory": "packages/sdk"
+  },
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

@@ -165,6 +165,7 @@ export default function ChatPage() {
               }
             }}
             rows={1}
+            aria-label="Ask a question about your knowledge"
             placeholder="Ask anything about your knowledge"
             className="max-h-40 min-h-9 resize-none border-0 bg-transparent px-2 py-1.5 focus:border-0"
           />

@@ -46,6 +46,15 @@ export function extractiveAnswer(question: string, hits: SearchHit[]): ChatRespo
   };
 }
 
+/** Max prior turns sent to the model, so a long conversation can't overflow its
+ *  context window (or run up token cost). */
+export const MAX_CHAT_HISTORY = 20;
+
+/** Pure: keep only the most recent `max` history turns. */
+export function recentHistory<T>(history: T[], max = MAX_CHAT_HISTORY): T[] {
+  return history.length > max ? history.slice(-max) : history;
+}
+
 export async function generateAnswer(
   llm: LlmProvider,
   question: string,
@@ -56,17 +65,22 @@ export async function generateAnswer(
     return extractiveAnswer(question, hits);
   }
   const context = buildContext(hits);
-  const message = await llm.complete({
-    system: SYSTEM,
-    temperature: 0.2,
-    maxTokens: 1024,
-    messages: [
-      ...history,
-      {
-        role: 'user',
-        content: `Context passages:\n\n${context}\n\n---\nQuestion: ${question}`,
-      },
-    ],
-  });
-  return { message, citations: toCitations(hits), usedHits: hits };
+  try {
+    const message = await llm.complete({
+      system: SYSTEM,
+      temperature: 0.2,
+      maxTokens: 1024,
+      messages: [
+        ...recentHistory(history),
+        {
+          role: 'user',
+          content: `Context passages:\n\n${context}\n\n---\nQuestion: ${question}`,
+        },
+      ],
+    });
+    return { message, citations: toCitations(hits), usedHits: hits };
+  } catch {
+    // LLM failed mid-request: return the extractive answer over the same hits.
+    return extractiveAnswer(question, hits);
+  }
 }

@@ -2,6 +2,8 @@ import { eq } from 'drizzle-orm';
 import { connections, syncRuns } from '@companybrain/db';
 import { getConnectorRegistry } from './connectors/registry.js';
 import { getEngine } from './context.js';
+import { activeSyncRunId } from './sync-guard.js';
+import { decryptCredentials } from './crypto.js';
 
 /**
  * In-process connector scheduler. Every tick it looks for active connections
@@ -33,6 +35,9 @@ export function startScheduler(intervalMs = 60_000): NodeJS.Timeout {
         if (!interval || running.has(conn.id)) continue;
         const last = conn.lastSyncedAt ? new Date(conn.lastSyncedAt).getTime() : 0;
         if (now - last < interval * 60_000) continue;
+        // The in-memory set only knows about scheduler-started runs; check the DB
+        // so we also skip a connection with a manual sync already in flight.
+        if (await activeSyncRunId(engine, conn.id)) continue;
         running.add(conn.id);
         const [run] = await engine.db
           .insert(syncRuns)
@@ -42,7 +47,7 @@ export function startScheduler(intervalMs = 60_000): NodeJS.Timeout {
           running.delete(conn.id);
           continue;
         }
-        void runner(engine, conn, run)
+        void runner(engine, { ...conn, credentials: decryptCredentials(conn.credentials) }, run)
           .catch((e) => console.error('[scheduler] sync failed', conn.id, e))
           .finally(() => running.delete(conn.id));
       }

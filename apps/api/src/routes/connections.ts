@@ -4,6 +4,8 @@ import { and, eq, desc } from 'drizzle-orm';
 import { connections, syncRuns } from '@companybrain/db';
 import { getEngine, type Variables } from '../context.js';
 import { getConnectorRegistry } from '../connectors/registry.js';
+import { activeSyncRunId } from '../sync-guard.js';
+import { encryptCredentials, decryptCredentials } from '../crypto.js';
 
 const app = new Hono<{ Variables: Variables }>();
 
@@ -58,7 +60,7 @@ app.post('/', async (c) => {
       name: d.name,
       spaceId: d.spaceId ?? null,
       config: d.config ?? {},
-      credentials: d.credentials ?? {},
+      credentials: encryptCredentials(d.credentials ?? {}),
     })
     .returning({
       id: connections.id,
@@ -100,9 +102,19 @@ app.post('/:id/sync', async (c) => {
     );
   }
 
+  // Don't start a second concurrent sync for the same connection: two runs would
+  // share one starting cursor and race on setCursor, moving it backwards.
+  const activeId = await activeSyncRunId(engine, conn.id);
+  if (activeId) {
+    return c.json({ started: false, alreadyRunning: true, syncRunId: activeId }, 200);
+  }
+
   const [run] = await engine.db.insert(syncRuns).values({ connectionId: conn.id }).returning();
   // Fire and forget; the runner updates the sync_run + connection records.
-  void runner(engine, conn, run!).catch(() => {});
+  // Decrypt the stored credentials just before the connector uses them.
+  void runner(engine, { ...conn, credentials: decryptCredentials(conn.credentials) }, run!).catch(
+    () => {},
+  );
   return c.json({ started: true, syncRunId: run!.id }, 202);
 });
 

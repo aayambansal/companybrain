@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { discordMessageDoc } from './discord.js';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { discordMessageDoc, discordConnector } from './discord.js';
 
 describe('discordMessageDoc', () => {
   it('maps a normal message to a document', () => {
@@ -30,5 +30,45 @@ describe('discordMessageDoc', () => {
         'chan-1',
       ),
     ).toBeNull();
+  });
+});
+
+describe('discordConnector pull', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('re-scans from newest and does not persist a backward cursor', async () => {
+    const urls: string[] = [];
+    let setCursorCalled = false;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        urls.push(String(url));
+        const before = String(url).match(/before=(\d+)/)?.[1];
+        const body = before
+          ? []
+          : [
+              { id: '3', content: 'c', author: { username: 'u' } },
+              { id: '2', content: 'b', author: { username: 'u' } },
+            ];
+        return { ok: true, json: async () => body } as Response;
+      }),
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ctx = {
+      config: { botToken: 't', channelId: 'C' },
+      cursor: 'STALE',
+      setCursor: async () => {
+        setCursorCalled = true;
+      },
+      log: () => {},
+    } as any;
+    const ids: string[] = [];
+    for await (const d of discordConnector.pull(ctx)) ids.push(d.sourceId!);
+
+    // Ignores the stale saved cursor (starts from newest), and never persists one.
+    expect(urls[0]).not.toContain('before=');
+    expect(setCursorCalled).toBe(false);
+    expect(ids).toEqual(['C:3', 'C:2']);
   });
 });

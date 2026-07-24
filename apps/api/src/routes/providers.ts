@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { organizations } from '@companybrain/db';
 import { getEngine, type Variables } from '../context.js';
+import { encryptSecret, decryptSecret } from '../crypto.js';
 
 const app = new Hono<{ Variables: Variables }>();
 
@@ -67,7 +68,7 @@ async function readStored(orgId: string): Promise<StoredProviders> {
 
 /** Map a stored provider entry into an engine config partial. */
 function toEmbeddingConfig(p: StoredProvider) {
-  const key = p.apiKey;
+  const key = p.apiKey ? decryptSecret(p.apiKey) : p.apiKey;
   return {
     provider: (p.provider as 'local' | 'openai' | 'ollama' | 'google') ?? 'local',
     model: p.model ?? 'text-embedding-3-small',
@@ -76,7 +77,7 @@ function toEmbeddingConfig(p: StoredProvider) {
   };
 }
 function toLlmConfig(p: StoredProvider) {
-  const key = p.apiKey;
+  const key = p.apiKey ? decryptSecret(p.apiKey) : p.apiKey;
   return {
     provider: (p.provider as 'anthropic' | 'openai' | 'ollama' | 'none') ?? 'none',
     model: p.model ?? 'claude-sonnet-5',
@@ -140,12 +141,14 @@ app.put('/', async (c) => {
   const next: StoredProviders = { ...current };
   if (parsed.data.embedding) {
     // Keep the existing key if the caller sent an empty string (means "unchanged").
+    // encryptSecret is idempotent, so a carried-forward encrypted key stays as-is
+    // while a freshly supplied plaintext key gets encrypted before storage.
     const key = parsed.data.embedding.apiKey || current.embedding?.apiKey;
-    next.embedding = { ...parsed.data.embedding, apiKey: key };
+    next.embedding = { ...parsed.data.embedding, apiKey: key ? encryptSecret(key) : key };
   }
   if (parsed.data.llm) {
     const key = parsed.data.llm.apiKey || current.llm?.apiKey;
-    next.llm = { ...parsed.data.llm, apiKey: key };
+    next.llm = { ...parsed.data.llm, apiKey: key ? encryptSecret(key) : key };
   }
 
   const [org] = await engine.db

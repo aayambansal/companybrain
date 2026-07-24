@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { parseLinearIssues } from './linear.js';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { parseLinearIssues, linearConnector } from './linear.js';
 
 describe('parseLinearIssues', () => {
   it('returns an empty array for an empty response', () => {
@@ -40,5 +40,50 @@ describe('parseLinearIssues', () => {
     expect(a!.title).toBe('Just a title');
     const [b] = parseLinearIssues({ data: { issues: { nodes: [{ id: '2' }] } } });
     expect(b!.title).toBe('Issue');
+  });
+});
+
+describe('linearConnector pull pagination', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('follows the GraphQL endCursor across pages', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init?: RequestInit) => {
+        const body = JSON.parse(String(init?.body ?? '{}'));
+        const after = body.variables?.after;
+        if (after === 'C2') {
+          return {
+            ok: true,
+            json: async () => ({
+              data: {
+                issues: {
+                  nodes: [{ id: 'i2', identifier: 'ENG-2', title: 'Add' }],
+                  pageInfo: { hasNextPage: false, endCursor: 'C3' },
+                },
+              },
+            }),
+          } as Response;
+        }
+        return {
+          ok: true,
+          json: async () => ({
+            data: {
+              issues: {
+                nodes: [{ id: 'i1', identifier: 'ENG-1', title: 'Fix', description: 'd1' }],
+                pageInfo: { hasNextPage: true, endCursor: 'C2' },
+              },
+            },
+          }),
+        } as Response;
+      }),
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ctx = { config: { apiKey: 'lin_x' }, log: () => {} } as any;
+    const ids: string[] = [];
+    for await (const d of linearConnector.pull(ctx)) ids.push(d.sourceId!);
+
+    expect(ids).toEqual(['i1', 'i2']);
   });
 });

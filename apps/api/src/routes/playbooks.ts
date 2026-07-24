@@ -8,8 +8,14 @@ import {
   PLAYBOOK_SYSTEM,
 } from '@companybrain/core';
 import { getEngine, type Variables } from '../context.js';
+import { llmRateLimit } from '../llm-rate-limit.js';
 
 const app = new Hono<{ Variables: Variables }>();
+
+// Playbook synthesis calls the LLM on every request; share the same per-
+// principal budget as chat so a leaked key or runaway loop can't run up
+// provider cost here either. Covers both `/` and `/stream`.
+app.use('*', llmRateLimit);
 
 const playbookSchema = z.object({
   topic: z.string().min(1).max(300),
@@ -78,14 +84,27 @@ app.post('/stream', async (c) => {
 
     const llm = engine.llm;
     if (llm.available && llm.stream && hits.length > 0) {
-      for await (const token of llm.stream({
-        system: PLAYBOOK_SYSTEM,
-        temperature: 0.3,
-        maxTokens: 1600,
-        messages: [{ role: 'user', content: buildPlaybookPrompt(d.topic, buildContext(hits)) }],
-      })) {
-        // JSON-encode so newlines survive SSE framing (Markdown needs them).
-        await stream.writeSSE({ event: 'token', data: JSON.stringify(token) });
+      let sentAny = false;
+      try {
+        for await (const token of llm.stream({
+          system: PLAYBOOK_SYSTEM,
+          temperature: 0.3,
+          maxTokens: 1600,
+          messages: [{ role: 'user', content: buildPlaybookPrompt(d.topic, buildContext(hits)) }],
+        })) {
+          // JSON-encode so newlines survive SSE framing (Markdown needs them).
+          await stream.writeSSE({ event: 'token', data: JSON.stringify(token) });
+          sentAny = true;
+        }
+      } catch {
+        // The model stream failed; if nothing was sent, emit a source outline
+        // so the user gets a grounded result rather than an empty document.
+        if (!sentAny) {
+          const outline = `# ${d.topic}\n\n## Sources\n\n${hits
+            .map((h, i) => `- ${h.document.title ?? 'Untitled'} [${i + 1}]`)
+            .join('\n')}`;
+          await stream.writeSSE({ event: 'token', data: JSON.stringify(outline) });
+        }
       }
     } else {
       const playbook = await engine.generatePlaybook(auth.orgId, {

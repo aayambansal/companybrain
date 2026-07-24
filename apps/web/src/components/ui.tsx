@@ -33,7 +33,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     secondary: 'bg-surface-2 text-ink border border-border-strong hover:bg-surface-hover',
     ghost: 'text-ink-muted hover:text-ink hover:bg-surface-2',
     danger:
-      'bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-ink',
+      'bg-[var(--color-danger-soft)] text-[var(--color-danger-ink)] border border-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-[var(--color-primary-ink)]',
   };
   return (
     <button
@@ -137,11 +137,11 @@ const badgeTone: Record<BadgeTone, string> = {
   primary:
     'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)] border-[var(--color-primary-line)]',
   success:
-    'bg-[var(--color-success-soft)] text-[var(--color-success)] border-[color-mix(in_oklch,var(--color-success),transparent_60%)]',
-  warn: 'bg-[color-mix(in_oklch,var(--color-warn),transparent_85%)] text-[var(--color-warn)] border-[color-mix(in_oklch,var(--color-warn),transparent_60%)]',
+    'bg-[var(--color-success-soft)] text-[var(--color-success-ink)] border-[color-mix(in_oklch,var(--color-success),transparent_60%)]',
+  warn: 'bg-[color-mix(in_oklch,var(--color-warn),transparent_85%)] text-[var(--color-warn-ink)] border-[color-mix(in_oklch,var(--color-warn),transparent_60%)]',
   danger:
-    'bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[color-mix(in_oklch,var(--color-danger),transparent_55%)]',
-  info: 'bg-[var(--color-info-soft)] text-[var(--color-info)] border-[color-mix(in_oklch,var(--color-info),transparent_60%)]',
+    'bg-[var(--color-danger-soft)] text-[var(--color-danger-ink)] border-[color-mix(in_oklch,var(--color-danger),transparent_55%)]',
+  info: 'bg-[var(--color-info-soft)] text-[var(--color-info-ink)] border-[color-mix(in_oklch,var(--color-info),transparent_60%)]',
 };
 
 export function Badge({

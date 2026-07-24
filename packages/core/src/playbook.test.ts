@@ -71,3 +71,21 @@ describe('generatePlaybook', () => {
     expect(r.citations).toEqual([]);
   });
 });
+
+describe('generatePlaybook LLM-error fallback', () => {
+  it('returns the source outline when the LLM errors mid-request', async () => {
+    const throwing = {
+      name: 'stub',
+      model: 'stub',
+      available: true,
+      async complete() {
+        throw new Error('llm down');
+      },
+    } as unknown as LlmProvider;
+    const hits = [hit('a', 'Release notes', 'ships thursday')];
+    const r = await generatePlaybook(throwing, 'Release', hits);
+    expect(r.content).toContain('## Sources');
+    expect(r.content).toContain('Release notes');
+    expect(r.usedHits.length).toBe(1);
+  });
+});

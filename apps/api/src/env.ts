@@ -15,6 +15,14 @@ export interface ApiEnv {
   authMode: AuthMode;
   /** Optional shared bearer token that guards single-user mode when set. */
   accessToken?: string;
+  /**
+   * Per-principal cap on LLM generations per minute, shared across the
+   * endpoints that call the model every request (chat, playbook synthesis).
+   * These drive real provider cost, so a leaked key or a runaway agent loop is
+   * bounded here. Default 60/min is far above interactive use; set to 0 to
+   * disable for high-volume automation.
+   */
+  llmRateLimitPerMin: number;
 }
 
 export function loadApiEnv(): ApiEnv {
@@ -33,5 +41,13 @@ export function loadApiEnv(): ApiEnv {
     version: process.env.COMPANYBRAIN_VERSION ?? '0.1.0',
     authMode,
     accessToken: process.env.ACCESS_TOKEN || undefined,
+    llmRateLimitPerMin: parseLimit(process.env.LLM_RATE_LIMIT_PER_MIN, 60),
   };
+}
+
+/** Parse a non-negative integer limit, falling back on blank/invalid input. */
+function parseLimit(raw: string | undefined, fallback: number): number {
+  if (raw === undefined || raw.trim() === '') return fallback;
+  const n = Number.parseInt(raw, 10);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
 }

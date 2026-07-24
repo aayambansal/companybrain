@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { requestSignal, fetchJson, fetchText } from './http.js';
+import { requestSignal, fetchJson, fetchText, retryDelayMs, redactUrl } from './http.js';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -51,5 +51,69 @@ describe('fetchText', () => {
       vi.fn(async () => ({ ok: true, text: async () => 'hi' }) as Response),
     );
     expect(await fetchText('https://x/y')).toBe('hi');
+  });
+});
+
+describe('retryDelayMs', () => {
+  it('honors a numeric Retry-After in seconds', () => {
+    expect(retryDelayMs('2', 0)).toBe(2000);
+  });
+
+  it('caps an excessive Retry-After', () => {
+    expect(retryDelayMs('99999', 0)).toBe(60_000);
+  });
+
+  it('uses exponential backoff when Retry-After is absent', () => {
+    expect(retryDelayMs(null, 0)).toBe(1000);
+    expect(retryDelayMs(null, 2)).toBe(4000);
+  });
+});
+
+describe('redactUrl', () => {
+  it('redacts credential-looking query params (so tokens do not leak into errors)', () => {
+    expect(redactUrl('https://x.com/api?api_token=SECRET&limit=100')).toBe(
+      'https://x.com/api?api_token=REDACTED&limit=100',
+    );
+    expect(redactUrl('https://x.com/a?access_token=abc&key=def&secret=ghi')).toBe(
+      'https://x.com/a?access_token=REDACTED&key=REDACTED&secret=REDACTED',
+    );
+  });
+
+  it('leaves non-sensitive params intact', () => {
+    expect(redactUrl('https://x.com/api?limit=100&start=5')).toBe(
+      'https://x.com/api?limit=100&start=5',
+    );
+  });
+
+  it('drops the query string when the URL is not parseable', () => {
+    expect(redactUrl('not a url?token=SECRET')).toBe('not a url');
+  });
+});
+
+describe('fetchJson rate-limit retry', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('retries a 429 honoring Retry-After, then returns the body', async () => {
+    let calls = 0;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        calls += 1;
+        if (calls === 1) {
+          return {
+            ok: false,
+            status: 429,
+            statusText: 'Too Many Requests',
+            headers: new Headers({ 'retry-after': '0' }),
+            text: async () => 'slow down',
+          } as Response;
+        }
+        return { ok: true, status: 200, json: async () => ({ done: true }) } as Response;
+      }),
+    );
+
+    const res = await fetchJson<{ done: boolean }>('https://api.test/x');
+    expect(res).toEqual({ done: true });
+    expect(calls).toBe(2);
   });
 });

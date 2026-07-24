@@ -20,7 +20,7 @@ jobs:
 
       # Build only (no push) to catch Dockerfile breakage.
       - name: Build API image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/api/Dockerfile
@@ -50,7 +50,7 @@ jobs:
 
       - name: Build web image
         if: steps.check.outputs.exists == 'true'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/web/Dockerfile

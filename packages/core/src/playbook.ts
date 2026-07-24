@@ -54,7 +54,7 @@ export async function generatePlaybook(
   hits: SearchHit[],
 ): Promise<PlaybookResult> {
   const citations = toCitations(hits);
-  if (!llm.available || hits.length === 0) {
+  const outline = (): PlaybookResult => {
     const body = hits.length
       ? hits.map((h, i) => `- ${h.document.title ?? 'Untitled'} [${i + 1}]`).join('\n')
       : '_No memories found for this topic yet._';
@@ -64,12 +64,18 @@ export async function generatePlaybook(
       citations,
       usedHits: hits,
     };
+  };
+  if (!llm.available || hits.length === 0) return outline();
+  try {
+    const content = await llm.complete({
+      system: PLAYBOOK_SYSTEM,
+      temperature: 0.3,
+      maxTokens: 1600,
+      messages: [{ role: 'user', content: buildPlaybookPrompt(topic, buildContext(hits)) }],
+    });
+    return { title: extractTitle(content, topic), content, citations, usedHits: hits };
+  } catch {
+    // LLM failed mid-request: return the source outline rather than erroring.
+    return outline();
   }
-  const content = await llm.complete({
-    system: PLAYBOOK_SYSTEM,
-    temperature: 0.3,
-    maxTokens: 1600,
-    messages: [{ role: 'user', content: buildPlaybookPrompt(topic, buildContext(hits)) }],
-  });
-  return { title: extractTitle(content, topic), content, citations, usedHits: hits };
 }

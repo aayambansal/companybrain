@@ -44,4 +44,8 @@ for the full record.
 
 - Single-user mode by default (no sign-in); multi-workspace auth, API keys, and roles when needed.
 - Bring your own Postgres and providers; local embedder runs with no API key.
+- Connector and provider credentials encrypted at rest (AES-256-GCM) when `CREDENTIALS_KEY` is
+  set; login throttled to slow credential brute-force.
+- LLM generations (chat and playbook synthesis) rate-limited per principal on a shared budget
+  (`LLM_RATE_LIMIT_PER_MIN`, default 60) so a leaked key or a runaway loop can't run up provider cost.
 - One-command self-host (`npx companybrain`); Docker and cloud deploy blueprints.

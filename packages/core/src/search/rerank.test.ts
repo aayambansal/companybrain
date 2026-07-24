@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { applyRerankOrder, parseOrder, parseScores, llmRerankPointwise } from './rerank.js';
+import {
+  applyRerankOrder,
+  parseOrder,
+  parseScores,
+  llmRerankPointwise,
+  llmRerank,
+} from './rerank.js';
 import type { SearchHit } from '../types.js';
 import type { LlmProvider } from '../llm/types.js';
 
@@ -83,5 +89,27 @@ describe('applyRerankOrder', () => {
   it('ignores duplicates and out-of-range indices', () => {
     const out = applyRerankOrder(hits, [0, 0, 5, 2]);
     expect(out.map((h) => h.chunkId)).toEqual(['a', 'c', 'b']);
+  });
+});
+
+describe('rerank LLM-error fallback', () => {
+  const throwing = {
+    name: 'stub',
+    model: 'stub',
+    available: true,
+    async complete() {
+      throw new Error('llm down');
+    },
+  } as unknown as LlmProvider;
+  const hits = [hit('a'), hit('b'), hit('c')];
+
+  it('llmRerankPointwise keeps the retrieval order when the LLM errors', async () => {
+    const r = await llmRerankPointwise(throwing, 'q', hits);
+    expect(r.map((h) => h.documentId)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('llmRerank keeps the retrieval order when the LLM errors', async () => {
+    const r = await llmRerank(throwing, 'q', hits);
+    expect(r.map((h) => h.documentId)).toEqual(['a', 'b', 'c']);
   });
 });

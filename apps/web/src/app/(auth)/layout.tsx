@@ -7,7 +7,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         style={{ background: 'radial-gradient(circle, var(--color-primary), transparent 60%)' }}
         aria-hidden
       />
-      <div className="relative w-full max-w-sm">{children}</div>
+      <main className="relative w-full max-w-sm">{children}</main>
     </div>
   );
 }

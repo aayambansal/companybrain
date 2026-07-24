@@ -129,6 +129,9 @@ export class MemoryEngine {
 
   /** Get a space by slug within the org, creating it if it does not exist. */
   async getOrCreateSpaceBySlug(orgId: string, slug: string): Promise<string> {
+    // Cap to the slug column width so an oversized value degrades instead of
+    // failing the insert; lookup and insert then use the same trimmed slug.
+    slug = slug.slice(0, 128);
     const existing = await this.db
       .select({ id: spaces.id })
       .from(spaces)
@@ -205,7 +208,7 @@ export class MemoryEngine {
         spaceId,
         connectionId: input.connectionId ?? null,
         connector: input.connector ?? 'api',
-        sourceType: input.sourceType ?? input.format ?? 'text',
+        sourceType: (input.sourceType ?? input.format ?? 'text').slice(0, 64),
         sourceId: input.sourceId ?? null,
         sourceUrl: input.sourceUrl ?? null,
         title: input.title ?? deriveTitle(normalized),
@@ -389,6 +392,13 @@ export class MemoryEngine {
     const hash = contentHash(normalized);
     const existing = src.sourceId ? await findBySource(this.db, connectionId, src.sourceId) : null;
 
+    // Don't create a brand-new document with no usable content (a reaction-only
+    // message, an empty file). An existing document still updates normally so a
+    // source edited down to nothing is reflected rather than left stale.
+    if (!existing && !normalized.trim()) {
+      return { documentId: '', action: 'skipped' };
+    }
+
     if (existing) {
       if (existing.contentHash === hash) return { documentId: existing.id, action: 'skipped' };
       await this.db
@@ -400,7 +410,7 @@ export class MemoryEngine {
           sourceUrl: src.sourceUrl ?? null,
           tags: src.tags ?? [],
           metadata: src.metadata ?? {},
-          sourceUpdatedAt: src.sourceUpdatedAt ?? null,
+          sourceUpdatedAt: validDate(src.sourceUpdatedAt),
           status: 'pending',
           updatedAt: new Date(),
         })
@@ -423,7 +433,7 @@ export class MemoryEngine {
         spaceId,
         connectionId,
         connector,
-        sourceType: src.sourceType ?? 'text',
+        sourceType: (src.sourceType ?? 'text').slice(0, 64),
         sourceId: src.sourceId ?? null,
         sourceUrl: src.sourceUrl ?? null,
         title: src.title ?? deriveTitle(normalized),
@@ -431,8 +441,8 @@ export class MemoryEngine {
         contentHash: hash,
         tags: src.tags ?? [],
         metadata: src.metadata ?? {},
-        sourceCreatedAt: src.sourceCreatedAt ?? null,
-        sourceUpdatedAt: src.sourceUpdatedAt ?? null,
+        sourceCreatedAt: validDate(src.sourceCreatedAt),
+        sourceUpdatedAt: validDate(src.sourceUpdatedAt),
         status: 'pending',
       })
       .returning();
@@ -805,6 +815,16 @@ function toMemory(doc: typeof documents.$inferSelect): Memory {
     createdAt: doc.createdAt.toISOString(),
     updatedAt: doc.updatedAt.toISOString(),
   };
+}
+
+/**
+ * Pure: keep a Date only if it is valid, else null. Connectors build source
+ * timestamps with `new Date(sourceField)`, which yields an Invalid Date (not
+ * undefined) when the source value is malformed. Passing that straight to the
+ * timestamptz column throws and loses the whole document, so null it out.
+ */
+export function validDate(d: Date | null | undefined): Date | null {
+  return d instanceof Date && !Number.isNaN(d.getTime()) ? d : null;
 }
 
 /** Pure: derive a memory title from the first non-empty line, capped at 120 chars. */
