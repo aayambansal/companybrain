@@ -46,7 +46,19 @@ export default function ChatPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: q, history, limit: 8 }),
       });
-      if (!res.ok || !res.body) throw new Error('stream failed');
+      if (!res.ok || !res.body) {
+        // Surface the API's reason (rate limit, no LLM configured, ...) instead
+        // of a generic failure, so the user knows what to do.
+        const errText = await res.text().catch(() => '');
+        let reason = 'Something went wrong reaching the brain.';
+        try {
+          const e = JSON.parse(errText) as { message?: string; error?: string };
+          if (e.message ?? e.error) reason = (e.message ?? e.error) as string;
+        } catch {
+          /* keep the generic reason */
+        }
+        throw new Error(reason);
+      }
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
@@ -91,14 +103,18 @@ export default function ChatPage() {
         }
       }
       update((a) => ({ ...a, streaming: false }));
-    } catch {
+    } catch (err) {
+      const reason =
+        err instanceof Error && err.message
+          ? err.message
+          : 'Something went wrong reaching the brain.';
       setTurns((t) => {
         const copy = t.slice();
         const last = copy[copy.length - 1];
         if (last && last.role === 'assistant')
           copy[copy.length - 1] = {
             ...last,
-            content: 'Something went wrong reaching the brain.',
+            content: reason,
             streaming: false,
           };
         return copy;

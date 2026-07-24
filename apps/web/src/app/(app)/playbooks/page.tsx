@@ -67,7 +67,18 @@ export default function PlaybooksPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic: q, limit: 12 }),
       });
-      if (!res.ok || !res.body) throw new Error('failed');
+      if (!res.ok || !res.body) {
+        // Surface the API's reason (rate limit, no LLM configured, ...).
+        const errText = await res.text().catch(() => '');
+        let reason = 'Could not generate a playbook. Is the API reachable and an LLM configured?';
+        try {
+          const e = JSON.parse(errText) as { message?: string; error?: string };
+          if (e.message ?? e.error) reason = (e.message ?? e.error) as string;
+        } catch {
+          /* keep the generic reason */
+        }
+        throw new Error(reason);
+      }
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
@@ -104,9 +115,13 @@ export default function PlaybooksPage() {
         }
       }
       setPlaybook({ title: q, content, citations });
-    } catch {
+    } catch (err) {
       setPlaybook(null);
-      setError('Could not generate a playbook. Is the API reachable and an LLM configured?');
+      setError(
+        err instanceof Error && err.message
+          ? err.message
+          : 'Could not generate a playbook. Is the API reachable and an LLM configured?',
+      );
     } finally {
       setBusy(false);
     }
