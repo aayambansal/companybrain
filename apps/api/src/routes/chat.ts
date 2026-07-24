@@ -7,7 +7,7 @@ import { getEngine, type Variables } from '../context.js';
 const app = new Hono<{ Variables: Variables }>();
 
 const chatSchema = z.object({
-  message: z.string().min(1),
+  message: z.string().min(1).max(8000),
   spaceId: z.string().uuid().optional(),
   space: z.string().optional(),
   limit: z.number().int().min(1).max(50).optional(),

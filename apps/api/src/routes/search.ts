@@ -5,7 +5,7 @@ import { getEngine, type Variables } from '../context.js';
 const app = new Hono<{ Variables: Variables }>();
 
 const searchSchema = z.object({
-  q: z.string().min(1),
+  q: z.string().min(1).max(1000),
   mode: z.enum(['hybrid', 'semantic', 'keyword']).optional(),
   spaceId: z.string().uuid().optional(),
   space: z.string().optional(),
