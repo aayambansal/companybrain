@@ -90,7 +90,12 @@ app.post('/login', async (c) => {
     return c.json({ error: 'invalid_credentials' }, 401);
   }
   clearRateLimit(rlKey);
-  void engine.db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, user.id));
+  // Best-effort last-login stamp; a failed write must not reject unhandled.
+  void engine.db
+    .update(users)
+    .set({ lastLoginAt: new Date() })
+    .where(eq(users.id, user.id))
+    .catch(() => {});
   const token = await signSession(user.id, user.orgId);
   setCookie(c, SESSION_COOKIE, token, {
     httpOnly: true,

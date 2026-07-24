@@ -93,8 +93,12 @@ async function resolveApiKey(token: string): Promise<AuthContext | null> {
     .limit(1);
   const key = rows[0];
   if (!key) return null;
-  // Best-effort last-used stamp.
-  void engine.db.update(apiKeys).set({ lastUsedAt: now }).where(eq(apiKeys.id, key.id));
+  // Best-effort last-used stamp; a failed write must not reject unhandled.
+  void engine.db
+    .update(apiKeys)
+    .set({ lastUsedAt: now })
+    .where(eq(apiKeys.id, key.id))
+    .catch(() => {});
   return { orgId: key.orgId, apiKeyId: key.id, scopes: key.scopes ?? ['*'], via: 'apiKey' };
 }
 

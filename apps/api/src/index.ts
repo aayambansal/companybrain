@@ -10,6 +10,12 @@ import { banner } from './banner.js';
 async function main() {
   const env = getEnv();
 
+  // Backstop: a stray unhandled promise rejection (e.g. a best-effort background
+  // write that failed) should be logged, not take the whole server down.
+  process.on('unhandledRejection', (reason) => {
+    console.error('[api] unhandled rejection:', reason);
+  });
+
   // Auto-migrate on boot unless disabled. Keeps `docker compose up` a one-liner.
   if (process.env.AUTO_MIGRATE !== 'false') {
     // Wait for the database first: outside docker-compose (which gates us on a
