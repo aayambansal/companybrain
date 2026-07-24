@@ -15,9 +15,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://api.fontshare.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* One UI family across the dashboard; hierarchy comes from weight. */}
         <link
           rel="stylesheet"
-          href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=switzer@400,500,600,700&display=swap"
+          href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700&display=swap"
         />
         <link
           rel="stylesheet"

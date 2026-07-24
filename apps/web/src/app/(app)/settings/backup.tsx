@@ -50,7 +50,7 @@ export function BackupSection() {
 
   return (
     <section>
-      <h2 className="mb-1 font-mono text-sm text-ink-muted">Backup</h2>
+      <h2 className="mb-1 text-sm font-medium text-ink-muted">Backup</h2>
       <p className="mb-3 text-[13px] text-ink-faint">
         Export every memory as JSON, or import from a previous export.
       </p>

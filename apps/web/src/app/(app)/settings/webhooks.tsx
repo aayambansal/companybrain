@@ -76,7 +76,7 @@ export function WebhooksSection() {
 
   return (
     <section>
-      <h2 className="mb-1 font-mono text-sm text-ink-muted">Webhooks</h2>
+      <h2 className="mb-1 text-sm font-medium text-ink-muted">Webhooks</h2>
       <p className="mb-3 text-[13px] text-ink-faint">
         Get a signed POST when a memory is created. Verify with the x-companybrain-signature header.
       </p>

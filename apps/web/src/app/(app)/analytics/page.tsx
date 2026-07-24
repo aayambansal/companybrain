@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Page } from '@/components/app-shell';
 import { Badge, Skeleton, EmptyState, cx } from '@/components/ui';
-import { IconLayers, IconMemory, IconSpaces, IconPlug } from '@/components/icons';
+import { IconMemory } from '@/components/icons';
 
 interface Analytics {
   totals: { documents: number; chunks: number; spaces: number; connections: number };
@@ -44,11 +44,13 @@ export default function AnalyticsPage() {
 
   return (
     <Page title="Analytics" subtitle="What's in your brain and how it's growing.">
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat icon={<IconMemory size={16} />} label="Memories" value={data.totals.documents} />
-        <Stat icon={<IconLayers size={16} />} label="Chunks" value={data.totals.chunks} />
-        <Stat icon={<IconSpaces size={16} />} label="Spaces" value={data.totals.spaces} />
-        <Stat icon={<IconPlug size={16} />} label="Connections" value={data.totals.connections} />
+      {/* One instrument strip, matching Overview: these totals describe the
+          same instance, so they read as one line rather than four tiles. */}
+      <div className="panel mb-6 flex flex-wrap items-center gap-x-8 gap-y-3 px-4 py-3">
+        <Reading label="memories" value={data.totals.documents} />
+        <Reading label="chunks" value={data.totals.chunks} />
+        <Reading label="spaces" value={data.totals.spaces} />
+        <Reading label="connections" value={data.totals.connections} />
       </div>
 
       {empty ? (
@@ -61,7 +63,7 @@ export default function AnalyticsPage() {
         <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
           {/* Activity */}
           <section className="card p-5">
-            <h2 className="mb-4 font-mono text-sm text-ink-muted">Added, last 14 days</h2>
+            <h2 className="mb-4 text-sm font-medium text-ink-muted">Added, last 14 days</h2>
             <div className="flex h-40 items-end gap-1.5">
               {data.activity.length === 0 ? (
                 <p className="text-[13px] text-ink-faint">No recent activity.</p>
@@ -91,7 +93,7 @@ export default function AnalyticsPage() {
 
           {/* Status */}
           <section className="card p-5">
-            <h2 className="mb-4 font-mono text-sm text-ink-muted">Status</h2>
+            <h2 className="mb-4 text-sm font-medium text-ink-muted">Status</h2>
             <ul className="space-y-2.5">
               {data.byStatus.map((s) => (
                 <li key={s.status} className="flex items-center justify-between text-sm">
@@ -114,7 +116,7 @@ export default function AnalyticsPage() {
 
           {/* By connector */}
           <section className="card p-5">
-            <h2 className="mb-4 font-mono text-sm text-ink-muted">By source</h2>
+            <h2 className="mb-4 text-sm font-medium text-ink-muted">By source</h2>
             <ul className="space-y-2.5">
               {data.byConnector.map((c) => (
                 <li key={c.connector}>
@@ -135,7 +137,7 @@ export default function AnalyticsPage() {
 
           {/* Top tags */}
           <section className="card p-5">
-            <h2 className="mb-4 font-mono text-sm text-ink-muted">Top tags</h2>
+            <h2 className="mb-4 text-sm font-medium text-ink-muted">Top tags</h2>
             {data.topTags.length === 0 ? (
               <p className="text-[13px] text-ink-faint">
                 No tags yet. Connect an LLM to auto-tag on ingest.
@@ -165,14 +167,14 @@ export default function AnalyticsPage() {
   );
 }
 
-function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+/** One reading on the instrument strip: the count leads, the noun follows. */
+function Reading({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg border border-border bg-surface px-4 py-3">
-      <div className="flex items-center gap-1.5 text-ink-faint">
-        {icon}
-        <span className="text-[11px] uppercase tracking-wide">{label}</span>
-      </div>
-      <p className="mt-1.5 font-mono text-2xl font-semibold text-ink">{value.toLocaleString()}</p>
+    <div className="flex items-baseline gap-1.5">
+      <span data-numeric className="text-xl font-semibold text-ink">
+        {value.toLocaleString()}
+      </span>
+      <span className="text-sm text-ink-muted">{label}</span>
     </div>
   );
 }
