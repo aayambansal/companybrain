@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { requestSignal, fetchJson, fetchText, retryDelayMs } from './http.js';
+import { requestSignal, fetchJson, fetchText, retryDelayMs, redactUrl } from './http.js';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -66,6 +66,27 @@ describe('retryDelayMs', () => {
   it('uses exponential backoff when Retry-After is absent', () => {
     expect(retryDelayMs(null, 0)).toBe(1000);
     expect(retryDelayMs(null, 2)).toBe(4000);
+  });
+});
+
+describe('redactUrl', () => {
+  it('redacts credential-looking query params (so tokens do not leak into errors)', () => {
+    expect(redactUrl('https://x.com/api?api_token=SECRET&limit=100')).toBe(
+      'https://x.com/api?api_token=REDACTED&limit=100',
+    );
+    expect(redactUrl('https://x.com/a?access_token=abc&key=def&secret=ghi')).toBe(
+      'https://x.com/a?access_token=REDACTED&key=REDACTED&secret=REDACTED',
+    );
+  });
+
+  it('leaves non-sensitive params intact', () => {
+    expect(redactUrl('https://x.com/api?limit=100&start=5')).toBe(
+      'https://x.com/api?limit=100&start=5',
+    );
+  });
+
+  it('drops the query string when the URL is not parseable', () => {
+    expect(redactUrl('not a url?token=SECRET')).toBe('not a url');
   });
 });
 
