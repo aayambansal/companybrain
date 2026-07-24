@@ -1,5 +1,5 @@
 import { serve } from '@hono/node-server';
-import { runMigrations, organizations } from '@companybrain/db';
+import { runMigrations, waitForDatabase, organizations } from '@companybrain/db';
 import { createApp } from './app.js';
 import { getEngine, getEnv, ensureDefaultOrg } from './context.js';
 import { applyProviders } from './routes/providers.js';
@@ -12,10 +12,18 @@ async function main() {
 
   // Auto-migrate on boot unless disabled. Keeps `docker compose up` a one-liner.
   if (process.env.AUTO_MIGRATE !== 'false') {
-    try {
-      await runMigrations({ logger: () => {} });
-    } catch (err) {
-      console.error('[api] migration failed:', err);
+    // Wait for the database first: outside docker-compose (which gates us on a
+    // Postgres healthcheck) it may not accept connections for a few seconds, and
+    // migrating too early would fail once and leave the app with no schema.
+    const ready = await waitForDatabase({ logger: (m) => console.error(`[api] ${m}`) });
+    if (!ready) {
+      console.error('[api] database did not become reachable; skipping migrations');
+    } else {
+      try {
+        await runMigrations({ logger: () => {} });
+      } catch (err) {
+        console.error('[api] migration failed:', err);
+      }
     }
   }
 
