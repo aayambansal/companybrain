@@ -28,12 +28,15 @@ class CompanyBrainError(Exception):
         code: Optional[str],
         message: str,
         details: Any = None,
+        retry_after: Optional[int] = None,
     ) -> None:
         super().__init__(message)
         self.status = status
         self.code = code
         self.message = message
         self.details = details
+        #: Seconds to wait before retrying, from the ``Retry-After`` header (429s).
+        self.retry_after = retry_after
 
     def __str__(self) -> str:
         prefix = f"[{self.status}]"
@@ -68,11 +71,23 @@ def compact(data: Dict[str, Any]) -> Dict[str, Any]:
     return {k: v for k, v in data.items() if v is not None}
 
 
-def error_from(status: int, data: Any) -> CompanyBrainError:
+def error_from(status: int, data: Any, retry_after: Optional[int] = None) -> CompanyBrainError:
     if isinstance(data, dict):
         message = data.get("message") or data.get("error") or f"Request failed ({status})"
-        return CompanyBrainError(status, data.get("error"), message, data.get("issues"))
-    return CompanyBrainError(status, None, f"Request failed ({status})", data)
+        return CompanyBrainError(status, data.get("error"), message, data.get("issues"), retry_after)
+    return CompanyBrainError(status, None, f"Request failed ({status})", data, retry_after)
+
+
+def parse_retry_after(header: Optional[str]) -> Optional[int]:
+    """Parse a ``Retry-After`` header into whole seconds.
+
+    The API emits the numeric delta-seconds form. Returns ``None`` when the
+    header is absent or not a non-negative integer.
+    """
+    if not header:
+        return None
+    text = header.strip()
+    return int(text) if text.isdigit() else None
 
 
 # --- request body / query builders --------------------------------------

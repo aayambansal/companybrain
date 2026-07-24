@@ -363,7 +363,8 @@ class AsyncApiKeysResource:
 def _handle(response: httpx.Response) -> Any:
     data = _read_json(response)
     if not response.is_success:
-        raise _c.error_from(response.status_code, data)
+        retry_after = _c.parse_retry_after(response.headers.get("Retry-After"))
+        raise _c.error_from(response.status_code, data, retry_after)
     return data
 
 
@@ -377,4 +378,5 @@ def _read_json(response: httpx.Response) -> Any:
 
 
 async def error_from_response(response: httpx.Response) -> CompanyBrainError:
-    return _c.error_from(response.status_code, _read_json(response))
+    retry_after = _c.parse_retry_after(response.headers.get("Retry-After"))
+    return _c.error_from(response.status_code, _read_json(response), retry_after)
