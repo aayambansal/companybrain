@@ -29,15 +29,30 @@ at publish time via `publishConfig`, so consumers get plain JavaScript with type
 
 ## Procedure
 
+Releases run from CI, so no one needs an npm token on their machine. Bump the
+version, push a matching tag, and the `Release` workflow does the rest:
+
 ```bash
-# 1. Authenticate (a granular automation token with publish rights is fine).
-npm whoami                       # confirm you are the intended account
+# 1. Bump packages/launcher/package.json (and any other package you are shipping).
+# 2. Commit it through the normal branch -> PR -> merge flow.
+# 3. Tag the merge commit and push the tag.
+git tag v0.6.0
+git push origin v0.6.0
+```
 
-# 2. Build every package's dist.
+The workflow runs typecheck, test, format, and build, refuses to continue if the
+tag does not match `packages/launcher`'s version, publishes to npm with
+provenance, and opens a GitHub release with generated notes. Re-running a tag is
+safe: versions already on the registry are skipped rather than failing the run.
+
+It needs one repository secret, `NPM_TOKEN`, an npm automation token with
+publish rights (Settings -> Secrets and variables -> Actions).
+
+To publish by hand instead (needs a local token):
+
+```bash
+npm whoami                       # confirm the account
 pnpm -r build
-
-# 3. Publish. pnpm publishes in dependency order and skips private packages and
-#    versions already on the registry, so this is safe to re-run.
 pnpm -r publish --access public --no-git-checks
 ```
 

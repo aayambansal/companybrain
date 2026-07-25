@@ -1,0 +1,90 @@
+name: Release
+
+# Publishing happens here, from a tag, so nobody has to hold an npm token
+# locally. Push a tag that matches the launcher version and this does the rest:
+#
+#   git tag v0.6.0 && git push origin v0.6.0
+#
+# Requires one repository secret, NPM_TOKEN, an npm automation token with
+# publish rights.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to publish (e.g. v0.6.0)'
+        required: true
+
+permissions:
+  contents: write # create the GitHub release
+  id-token: write # npm provenance
+
+jobs:
+  release:
+    name: publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - run: pnpm install --frozen-lockfile
+
+      # Never ship a tag that does not build.
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm format:check
+      - run: pnpm -r build
+
+      # The tag is the source of truth; a mismatch means the bump was forgotten.
+      - name: Check the tag matches the launcher version
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          VERSION="v$(node -p "require('./packages/launcher/package.json').version")"
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "::error::tag $TAG does not match packages/launcher version $VERSION"
+            exit 1
+          fi
+          echo "tag and version agree: $TAG"
+
+      # Only the unscoped packages publish today. The @companybrain/* ones need
+      # the npm organisation to exist first; see docs/publishing.md.
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          for dir in packages/launcher packages/n8n-nodes-companybrain; do
+            name=$(node -p "require('./$dir/package.json').name")
+            version=$(node -p "require('./$dir/package.json').version")
+            # Re-running a release must not fail just because the registry
+            # already has this version.
+            if npm view "$name@$version" version >/dev/null 2>&1; then
+              echo "$name@$version already published, skipping"
+              continue
+            fi
+            echo "publishing $name@$version"
+            pnpm --filter "$name" publish --access public --no-git-checks --provenance
+          done
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          gh release view "$TAG" >/dev/null 2>&1 && exit 0
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --generate-notes \
+            --verify-tag
