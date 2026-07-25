@@ -72,7 +72,21 @@ async function main() {
   // Graceful shutdown on a container stop or Ctrl-C (see ./shutdown).
   const shutdown = createShutdown({
     stopScheduler: scheduler ? () => clearInterval(scheduler) : null,
-    closeServer: () => new Promise<void>((resolve) => server.close(() => resolve())),
+    closeServer: () =>
+      new Promise<void>((resolve) => {
+        server.close(() => resolve());
+        // server.close() alone waits for every keep-alive socket to go idle,
+        // which a browser or dev dashboard holds open for a minute or more. Drop
+        // the idle ones immediately, then cut anything still streaming after a
+        // short grace period, so Ctrl-C exits promptly instead of being force
+        // killed by the process supervisor.
+        const s = server as unknown as {
+          closeIdleConnections?: () => void;
+          closeAllConnections?: () => void;
+        };
+        s.closeIdleConnections?.();
+        setTimeout(() => s.closeAllConnections?.(), 2000).unref?.();
+      }),
     closeEngine: () => engine.close(),
     exit: (code) => process.exit(code),
     log: (message) => console.error(message),
