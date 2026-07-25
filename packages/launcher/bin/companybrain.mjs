@@ -40,22 +40,35 @@ const C = {
   green: '\x1b[32m',
   gray: '\x1b[90m',
 };
-const paint = (c, s) => `${c}${s}${C.reset}`;
+// Colour is dropped when stdout is not a TTY (a pipe, a log file, CI) and when
+// NO_COLOR is set, so captured output stays readable instead of filling with
+// escape codes.
+const COLOR =
+  process.stdout.isTTY === true &&
+  process.env.NO_COLOR === undefined &&
+  process.env.TERM !== 'dumb';
+const paint = (c, s) => (COLOR ? `${c}${s}${C.reset}` : s);
 
 function banner() {
+  // Solid block letterforms under a vertical amber gradient. 71 columns, so it
+  // still fits an 80-column terminal. Colour is dropped when stdout is not a
+  // TTY so piped output stays readable.
+  const rows = [
+    [226, '█████ █████ █   █ █████ █████ █   █ █   █ ████  █████ █████ █████ █   █'],
+    [220, '█     █   █ ██ ██ █   █ █   █ ██  █  █ █  █   █ █   █ █   █   █   ██  █'],
+    [214, '█     █   █ █ █ █ █████ █████ █ █ █   █   ████  █████ █████   █   █ █ █'],
+    [208, '█     █   █ █   █ █     █   █ █  ██   █   █   █ █  █  █   █   █   █  ██'],
+    [172, '█████ █████ █   █ █     █   █ █   █   █   ████  █   █ █   █ █████ █   █'],
+  ];
+  const art = rows
+    .map(([tone, row]) => (COLOR ? `  \x1b[38;5;${tone}m${row}\x1b[0m` : `  ${row}`))
+    .join('\n');
   process.stdout.write(
-    paint(
-      C.amber,
-      `
-       _---~~(~~-_.        companybrain
-     _{        )   )       the open-source memory layer for your company
-   ,   ) -~~- ( ,-' )_
-  (  \`-,_..\`., )-- '_,)    self-hosted · bring your own keys · one command
- ( \` _)  (  -~( -_ \`,  }
- (_-  _  ~_-~~~~\`,  ,' )
-   \`~ -^(    __;-,((()))
-`,
-    ) + '\n',
+    `\n${art}\n\n` +
+      paint(C.gray, '  the open-source memory layer for your company') +
+      '\n' +
+      paint(C.gray, '  self-hosted · bring your own keys · one command') +
+      '\n\n',
   );
 }
 
@@ -142,7 +155,7 @@ async function ensureDockerRunning(flags = {}) {
         ? spawnSync('cmd', ['/c', 'start', '', 'Docker Desktop'], { stdio: 'ignore' }).status === 0
         : false; // Linux daemons usually need `sudo systemctl start docker`, which we can't do unattended
   if (!launched) return dockerReady();
-  process.stdout.write(paint(C.dim, 'Docker is installed but not running — starting it'));
+  process.stdout.write(paint(C.dim, 'Docker is installed but not running, starting it'));
   // 60s is plenty for a healthy Docker Desktop to expose its socket. A Docker
   // that is going to fail (a broken privileged-helper repair, for instance)
   // fails within seconds, and waiting longer just delays the fallback.
@@ -572,10 +585,7 @@ async function up(flags) {
   if (!flags['no-mcp']) {
     log('');
     log(
-      paint(
-        C.bold,
-        '  Wire it into an AI agent (Claude Desktop / Cursor) — add to the MCP config:',
-      ),
+      paint(C.bold, '  Wire it into an AI agent (Claude Desktop / Cursor). Add to the MCP config:'),
     );
     log(
       mcpSnippet()

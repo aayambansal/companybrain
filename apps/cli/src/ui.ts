@@ -14,20 +14,26 @@ export const blue = paint('34');
 export const magenta = paint('35');
 export const cyan = paint('36');
 
-/** The CompanyBrain brain motif, shared with the API startup banner. */
-export function brain(): string {
-  return [
-    '       _---~~(~~-_.',
-    '     _{        )   )',
-    "   ,   ) -~~- ( ,-' )_",
-    "  (  `-,_..`., )-- '_,)",
-    ' ( ` _)  (  -~( -_ `,  }',
-    " (_-  _  ~_-~~~~`,  ,' )",
-    '   `~ -^(    __;-,((()))',
-    '         ~~~~ {_ -_(())',
-    '                `\\  }',
-    '                  { }',
-  ].join('\n');
+/**
+ * The CompanyBrain wordmark, matching the API startup banner: block letterforms
+ * under a vertical amber gradient, bright at the top and deepening toward the
+ * baseline. 71 columns wide, so it still fits an 80-column terminal.
+ *
+ * It carries its own colour rather than taking a paint() wrapper, since the
+ * point of the gradient is that each row differs.
+ */
+const WORDMARK: readonly (readonly [number, string])[] = [
+  [226, '█████ █████ █   █ █████ █████ █   █ █   █ ████  █████ █████ █████ █   █'],
+  [220, '█     █   █ ██ ██ █   █ █   █ ██  █  █ █  █   █ █   █ █   █   █   ██  █'],
+  [214, '█     █   █ █ █ █ █████ █████ █ █ █   █   ████  █████ █████   █   █ █ █'],
+  [208, '█     █   █ █   █ █     █   █ █  ██   █   █   █ █  █  █   █   █   █  ██'],
+  [172, '█████ █████ █   █ █     █   █ █   █   █   ████  █   █ █   █ █████ █   █'],
+];
+
+export function wordmark(): string {
+  return WORDMARK.map(([tone, row]) =>
+    colorEnabled ? `  \x1b[38;5;${tone}m${row}\x1b[0m` : `  ${row}`,
+  ).join('\n');
 }
 
 /** Collapse whitespace and truncate to a single-line snippet. */

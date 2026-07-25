@@ -258,7 +258,14 @@ export const docsPage = `<!doctype html>
   * { box-sizing: border-box; }
   body { margin: 0; background: #0a0a0b; color: #e7e7ea; font: 14px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; }
   header { padding: 28px 32px; border-bottom: 1px solid #1c1c22; }
-  header pre { margin: 0; color: #8b5cf6; font-size: 11px; line-height: 1.2; }
+  /* Wordmark: solid amber, and it shrinks to stay whole on a narrow screen
+     rather than clipping to "COMPANYBRAI". It is 71 monospace columns wide, and
+     the header spends 64px on padding, so the size that just fits is
+     (100vw - 64px) / (71 * 0.602). The divisor rounds up for margin. Horizontal
+     scroll stays as a fallback for anyone with a minimum font size set. */
+  header pre.wordmark { margin: 0; color: #f8ab4f; line-height: 1.15;
+    font-size: min(10px, calc((100vw - 64px) / 44));
+    overflow-x: auto; white-space: pre; }
   h1 { font-size: 18px; margin: 12px 0 2px; letter-spacing: .5px; }
   .sub { color: #8a8a94; }
   main { max-width: 920px; margin: 0 auto; padding: 24px 32px 80px; }
@@ -276,14 +283,11 @@ export const docsPage = `<!doctype html>
 </head>
 <body>
 <header>
-<pre>       _---~~(~~-_.
-     _{        )   )
-   ,   ) -~~- ( ,-' )_
-  (  \`-,_..\`., )-- '_,)
- ( \` _)  (  -~( -_ \`,  }
- (_-  _  ~_-~~~~\`,  ,' )
-   \`~ -^(    __;-,((()))
-         ~~~~ {_ -_(())</pre>
+<pre class="wordmark" aria-hidden="true">█████ █████ █   █ █████ █████ █   █ █   █ ████  █████ █████ █████ █   █
+█     █   █ ██ ██ █   █ █   █ ██  █  █ █  █   █ █   █ █   █   █   ██  █
+█     █   █ █ █ █ █████ █████ █ █ █   █   ████  █████ █████   █   █ █ █
+█     █   █ █   █ █     █   █ █  ██   █   █   █ █  █  █   █   █   █  ██
+█████ █████ █   █ █     █   █ █   █   █   ████  █   █ █   █ █████ █   █</pre>
 <h1>CompanyBrain API</h1>
 <div class="sub">Authenticate with <code>Authorization: Bearer cb_...</code>. Full spec at <a href="/v1/openapi.json">/v1/openapi.json</a>.</div>
 </header>
