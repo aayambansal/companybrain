@@ -90,6 +90,9 @@ try {
           for (const el of document.querySelectorAll('a, button, [role="button"], input, select')) {
             const r = el.getBoundingClientRect();
             if (r.width === 0 || r.height === 0) continue;
+            // Visually-hidden helpers (skip links) are 1px until focused, which
+            // is the point; they are not touch targets.
+            if (el.classList.contains('sr-only') || r.width <= 2 || r.height <= 2) continue;
             if (r.height < 36)
               out.push(
                 `${el.tagName.toLowerCase()}${el.className ? '.' + String(el.className).split(' ')[0] : ''} ${Math.round(r.height)}px "${(el.textContent ?? '').trim().slice(0, 24)}"`,

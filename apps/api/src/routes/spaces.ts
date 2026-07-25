@@ -21,10 +21,15 @@ app.get('/', async (c) => {
       color: spaces.color,
       isDefault: spaces.isDefault,
       createdAt: spaces.createdAt,
-      documentCount: sql<number>`(select count(*)::int from ${documents} d where d.space_id = ${spaces.id})`,
+      // Counted with a real join rather than a raw correlated subquery: the
+      // interpolated form silently returned 0 for every space even though the
+      // documents were there.
+      documentCount: sql<number>`count(${documents.id})::int`,
     })
     .from(spaces)
+    .leftJoin(documents, eq(documents.spaceId, spaces.id))
     .where(eq(spaces.orgId, auth.orgId))
+    .groupBy(spaces.id)
     .orderBy(desc(spaces.isDefault), spaces.name);
   return c.json({ spaces: rows });
 });

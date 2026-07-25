@@ -96,6 +96,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <TooltipProvider delayDuration={300}>
       <CommandPalette />
+      {/* Ten navigation items sit before the content in the tab order, so give
+          keyboard users one keystroke past them. */}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[var(--z-toast)] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2.5 focus:text-sm focus:font-medium focus:text-[var(--color-primary-ink)]"
+      >
+        Skip to content
+      </a>
       <div className="grid min-h-dvh grid-cols-[minmax(0,1fr)] md:grid-cols-[15rem_minmax(0,1fr)]">
         {/* Rail. Deeper than the canvas so navigation reads as chassis. */}
         <aside className="sticky top-0 hidden h-dvh flex-col border-r border-border bg-[var(--color-rail)] md:flex">
@@ -238,7 +246,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <main className="flex-1">{children}</main>
+          <main id="main" tabIndex={-1} className="flex-1">
+            {children}
+          </main>
         </div>
       </div>
     </TooltipProvider>

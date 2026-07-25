@@ -128,7 +128,13 @@ export default function OverviewPage() {
       title="Overview"
       subtitle={
         status
-          ? `${status.embedding.provider} embeddings, ${status.llm.available ? status.llm.provider + ' llm' : 'no llm'}`
+          ? // Say what the user gets, not which subsystem is wired up. "llm" is
+            // our word, not theirs.
+            `Search runs on ${status.embedding.provider} embeddings. ${
+              status.llm.available
+                ? `Answers are written by ${status.llm.provider}.`
+                : 'Answers are quoted from your memories.'
+            }`
           : undefined
       }
     >
