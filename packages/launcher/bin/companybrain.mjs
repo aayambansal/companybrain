@@ -98,17 +98,28 @@ async function ensureDockerRunning() {
         : false; // Linux daemons usually need `sudo systemctl start docker`, which we can't do unattended
   if (!launched) return dockerReady();
   process.stdout.write(paint(C.dim, 'Docker is installed but not running — starting it'));
-  const deadline = Date.now() + 120_000;
+  // 60s is plenty for a healthy Docker Desktop to expose its socket. A Docker
+  // that is going to fail (a broken privileged-helper repair, for instance)
+  // fails within seconds, and waiting longer just delays the fallback.
+  const deadline = Date.now() + 60_000;
   while (Date.now() < deadline) {
     if (dockerReady()) {
       process.stdout.write('\n');
       return true;
     }
+    // Docker Desktop quitting after its crash dialog means it will not recover
+    // on this run; stop waiting out the full deadline.
+    if (process.platform === 'darwin' && !dockerDesktopAlive()) break;
     process.stdout.write(paint(C.dim, '.'));
     await new Promise((r) => setTimeout(r, 3000));
   }
   process.stdout.write('\n');
   return dockerReady();
+}
+
+/** True while a Docker Desktop process is still alive (macOS). */
+function dockerDesktopAlive() {
+  return spawnSync('pgrep', ['-f', 'Docker Desktop'], { stdio: 'ignore' }).status === 0;
 }
 
 function runStream(cmd, args, opts = {}) {
@@ -249,17 +260,38 @@ async function up(flags) {
     writeEnv(dir, ans);
   }
   if (!(await ensureDockerRunning())) {
+    // Docker is unavailable. Rather than dead-end here, fall back to the local
+    // Postgres path when one is actually reachable: a broken Docker install
+    // (Docker Desktop's privileged-helper repair is a common one on macOS)
+    // should not stop the product from starting.
+    const dbUrl = envFileVars(dir).DATABASE_URL || defaultDbUrl();
+    if (!flags['no-fallback'] && (await pgReachable(dbUrl))) {
+      log('');
+      log(paint(C.amber, '  Docker is not available, but a local Postgres is.'));
+      log(paint(C.dim, `  Starting without Docker against ${dbUrl}`));
+      log(paint(C.dim, '  (force Docker instead with --no-fallback, once Docker is fixed.)'));
+      log('');
+      return devWith(dir, dbUrl);
+    }
     die(
       has('docker')
-        ? 'Docker is installed but did not become ready. Open Docker Desktop and wait for it to\n' +
-            '  finish starting, then re-run `npx companybrain up`. If Docker Desktop keeps crashing,\n' +
-            '  restart it, or reset it (Settings > Troubleshoot > Reset to factory defaults) / reinstall.\n' +
-            '  Or skip Docker entirely: `npx companybrain dev` (runs against a local Postgres).\n' +
+        ? 'Docker is installed but did not become ready, and no local Postgres was reachable.\n' +
+            '\n' +
+            '  Fix one of the two:\n' +
+            '   1. Docker: open Docker Desktop and accept the admin prompt. If it keeps crashing on\n' +
+            '      startup, reset it (Settings > Troubleshoot > Reset to factory defaults) or\n' +
+            '      reinstall it from https://docs.docker.com/desktop/setup/install/mac-install/\n' +
+            '   2. No Docker: start a local Postgres with pgvector, then re-run. On macOS:\n' +
+            '        brew install postgresql@14 pgvector && brew services start postgresql@14\n' +
+            '        createdb companybrain && psql -d companybrain -c "CREATE EXTENSION vector"\n' +
+            '\n' +
             `  App directory: ${dir}`
-        : 'Docker is required and was not found. Install Docker Desktop\n' +
-            '  (https://docs.docker.com/get-docker/), then re-run `npx companybrain up`.\n' +
-            `  Or bring your own Postgres+pgvector: set DATABASE_URL in ${join(dir, '.env')},\n` +
-            `  then run \`pnpm install && pnpm db:migrate && pnpm dev\` in ${dir}.`,
+        : 'Docker was not found and no local Postgres was reachable.\n' +
+            '\n' +
+            '  Either install Docker Desktop (https://docs.docker.com/get-docker/),\n' +
+            '  or start a local Postgres with pgvector and re-run. On macOS:\n' +
+            '    brew install postgresql@14 pgvector && brew services start postgresql@14\n' +
+            '    createdb companybrain && psql -d companybrain -c "CREATE EXTENSION vector"',
     );
   }
   log(paint(C.dim, 'Starting the stack (this builds images on first run) ...\n'));
@@ -376,21 +408,32 @@ async function dev(flags) {
     const ans = await prompt(flags);
     writeEnv(dir, ans);
   }
-  const env = envFileVars(dir);
-  let dbUrl = flags.db ? String(flags.db) : env.DATABASE_URL;
-  if (!dbUrl) {
-    dbUrl = `postgres://${process.env.USER || 'postgres'}@127.0.0.1:5432/companybrain`;
-    appendFileSync(join(dir, '.env'), `DATABASE_URL=${dbUrl}\nAUTO_MIGRATE=true\n`);
-    log(paint(C.dim, `Using local Postgres: ${dbUrl}`));
-  }
+  const dbUrl = flags.db ? String(flags.db) : envFileVars(dir).DATABASE_URL || defaultDbUrl();
   if (!(await pgReachable(dbUrl))) {
     die(
       `Cannot reach Postgres at ${dbUrl}.\n` +
         '  Start it and create the database with the vector extension, e.g. on macOS:\n' +
-        '    brew services start postgresql@14\n' +
+        '    brew install postgresql@14 pgvector && brew services start postgresql@14\n' +
         '    createdb companybrain && psql -d companybrain -c "CREATE EXTENSION vector"\n' +
         '  then re-run `npx companybrain dev`. (Or fix Docker and use `npx companybrain up`.)',
     );
+  }
+  return devWith(dir, dbUrl);
+}
+
+/** The default local Postgres URL when the config does not name one. */
+function defaultDbUrl() {
+  return `postgres://${process.env.USER || 'postgres'}@127.0.0.1:5432/companybrain`;
+}
+
+/**
+ * Bring the stack up without Docker against an already-reachable Postgres.
+ * Shared by `dev` and by `up`'s fallback, so both behave identically.
+ */
+async function devWith(dir, dbUrl) {
+  // Persist the connection so later runs (and `up`'s fallback) reuse it.
+  if (!envFileVars(dir).DATABASE_URL) {
+    appendFileSync(join(dir, '.env'), `DATABASE_URL=${dbUrl}\nAUTO_MIGRATE=true\n`);
   }
   if (!has('pnpm'))
     die('pnpm is required for the no-Docker path. Install it with `npm i -g pnpm`.');
@@ -554,7 +597,8 @@ async function main() {
       log('  mcp        print an MCP client config snippet');
       log('  uninstall  stop, remove containers + volumes, and the install');
       log('  help       this message\n');
-      log('Flags: --yes (accept defaults / skip confirms), --dir=<path>, --no-mcp\n');
+      log('Flags: --yes (accept defaults / skip confirms), --dir=<path>, --no-mcp,');
+      log('       --no-fallback (fail instead of running without Docker), --db=<url>\n');
       break;
     default:
       die(`Unknown command "${cmd}". Try: npx companybrain help`);
