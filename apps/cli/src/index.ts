@@ -231,7 +231,7 @@ async function cmdStatus(): Promise<void> {
   const cb = await getClient();
   const s = (await cb.status()) as StatusShape;
 
-  out(ui.cyan(ui.brain()));
+  out(ui.wordmark());
   out('');
   field('name', `${s.name ?? 'companybrain'}  ${ui.dim(`v${s.version ?? '?'}`)}`);
   field('api', cfg.apiUrl);
@@ -325,9 +325,9 @@ async function cmdTopics(args: Args): Promise<void> {
 }
 
 function printHelp(): void {
-  out(ui.cyan(ui.brain()));
+  out(ui.wordmark());
   out('');
-  out(ui.bold('CompanyBrain') + ui.dim(' — the open-source memory layer'));
+  out(ui.bold('CompanyBrain') + ui.dim(', the open-source memory layer'));
   out('');
   out('Usage: companybrain <command> [options]   (alias: cb)');
   out('');
