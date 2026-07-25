@@ -200,7 +200,12 @@ function parseArgs(argv) {
       flags[a.slice(1)] = true;
     } else positionals.push(a);
   }
-  return { cmd: positionals[0] ?? 'up', flags };
+  // `--help` and `--version` look like flags but mean a command. Without this
+  // they land in `flags`, cmd falls back to `up`, and the most common way to
+  // probe an unfamiliar CLI kicks off a full install instead of printing text.
+  const asked = (...names) => names.some((n) => flags[n]);
+  const fallback = asked('help', 'h') ? 'help' : asked('version', 'v') ? 'version' : 'up';
+  return { cmd: positionals[0] ?? fallback, flags };
 }
 
 function appDir(flags) {
@@ -930,15 +935,18 @@ async function main() {
       }
       break;
     }
+    case 'version':
+      log(JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version);
+      break;
     case 'mcp':
       banner();
       log('Add this to your MCP client config (Claude Desktop / Cursor):\n');
       log(mcpSnippet());
       log('');
       break;
+    // parseArgs already folds --help / -h into this, and a positional can never
+    // start with a dash, so the flag spellings are not listed here.
     case 'help':
-    case '--help':
-    case '-h':
       banner();
       log('Usage: npx companybrain <command>\n');
       log('  up         set up (clone if needed) and start the stack   [default]');
@@ -951,6 +959,7 @@ async function main() {
       log('  status     check the API health');
       log('  mcp        print an MCP client config snippet');
       log('  uninstall  stop, remove containers + volumes, and the install');
+      log('  version    print the launcher version');
       log('  help       this message\n');
       log('Flags: --yes (accept defaults / skip confirms), --dir=<path>, --no-mcp,');
       log('       --no-fallback (fail instead of running without Docker), --db=<url>,');
