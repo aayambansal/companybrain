@@ -44,7 +44,7 @@ const LLM_OPTIONS = [
     provider: 'anthropic',
     label: 'Anthropic Claude',
     needsKey: true,
-    models: ['claude-sonnet-5', 'claude-opus-4-8', 'claude-haiku-4-5-20251001'],
+    models: ['claude-sonnet-5', 'claude-opus-5', 'claude-haiku-4-5-20251001'],
   },
   { provider: 'openai', label: 'OpenAI', needsKey: true, models: ['gpt-4o-mini', 'gpt-4o'] },
   {

@@ -82,14 +82,59 @@ function dockerReady() {
   return info.status === 0;
 }
 
+/** Where we remember that starting Docker failed, so we stop re-triggering it. */
+function dockerFailFlag() {
+  return join(homedir(), '.companybrain', 'docker-unavailable');
+}
+
+/** True if Docker failed to start recently (within a week). */
+function dockerRecentlyFailed() {
+  try {
+    const at = Number(readFileSync(dockerFailFlag(), 'utf8').trim());
+    return Number.isFinite(at) && Date.now() - at < 7 * 24 * 60 * 60 * 1000;
+  } catch {
+    return false;
+  }
+}
+
+function rememberDockerFailure(failed) {
+  try {
+    if (failed) {
+      mkdirSync(join(homedir(), '.companybrain'), { recursive: true });
+      writeFileSync(dockerFailFlag(), String(Date.now()));
+    } else {
+      rmSync(dockerFailFlag(), { force: true });
+    }
+  } catch {
+    /* remembering is best effort */
+  }
+}
+
 /**
  * Ensure the Docker daemon is reachable. If Docker is installed but not running
  * (the common case on a fresh machine where Docker Desktop hasn't been opened),
  * start it and wait, rather than making the user stop, launch Docker, and re-run.
+ *
+ * If a previous run already found Docker unable to start, don't launch it again:
+ * on a broken install (Docker Desktop's privileged-helper repair is the common
+ * one) that just pops its crash dialog on every single run. `--retry-docker`
+ * forces another attempt once the user has fixed it.
  */
-async function ensureDockerRunning() {
-  if (dockerReady()) return true;
+async function ensureDockerRunning(flags = {}) {
+  if (dockerReady()) {
+    rememberDockerFailure(false);
+    return true;
+  }
   if (!has('docker')) return false; // not installed at all
+  if (dockerRecentlyFailed() && !flags['retry-docker']) {
+    log(
+      paint(
+        C.dim,
+        'Skipping Docker: it failed to start on a previous run (--retry-docker to try again).',
+      ),
+    );
+    return false;
+  }
   const launched =
     process.platform === 'darwin'
       ? spawnSync('open', ['-a', 'Docker'], { stdio: 'ignore' }).status === 0
@@ -114,7 +159,9 @@ async function ensureDockerRunning() {
     await new Promise((r) => setTimeout(r, 3000));
   }
   process.stdout.write('\n');
-  return dockerReady();
+  const ok = dockerReady();
+  rememberDockerFailure(!ok);
+  return ok;
 }
 
 /** True while a Docker Desktop process is still alive (macOS). */
@@ -159,38 +206,232 @@ function ensureRepo(dir) {
   if (r.status !== 0) die('git clone failed.');
 }
 
+/**
+ * Model menus, kept in step with the provider options the API exposes at
+ * /v1/providers so the terminal never offers something the server rejects.
+ * The first entry of each list is the default.
+ */
+const EMBED_MODELS = {
+  local: [['cb-hash-embed-v1', 'built in, no key, good for most notes']],
+  openai: [
+    ['text-embedding-3-small', 'fast and cheap'],
+    ['text-embedding-3-large', 'most accurate'],
+  ],
+  google: [['text-embedding-004', "Gemini's embedding model"]],
+  ollama: [
+    ['nomic-embed-text', 'solid general purpose'],
+    ['mxbai-embed-large', 'larger, more accurate'],
+  ],
+};
+const CHAT_MODELS = {
+  anthropic: [
+    ['claude-sonnet-5', 'balanced speed and quality'],
+    ['claude-opus-5', 'most capable'],
+    ['claude-haiku-4-5-20251001', 'fastest and cheapest'],
+  ],
+  openai: [
+    ['gpt-4o-mini', 'fast and cheap'],
+    ['gpt-4o', 'most capable'],
+  ],
+  ollama: [
+    ['llama3.1', 'good default'],
+    ['qwen2.5', 'strong at reasoning'],
+  ],
+  none: [['none', 'answers are quoted straight from your memories']],
+};
+
+/** A numbered menu. Returns the chosen entry's key. Enter takes the default. */
+async function select(rl, title, rows, { hint } = {}) {
+  log('');
+  log(paint(C.bold, '  ' + title));
+  if (hint) log(paint(C.gray, '  ' + hint));
+  log('');
+  // Size the label column to the longest entry so a long model id never runs
+  // into its description.
+  const width = Math.max(...rows.map((r) => r.label.length)) + 2;
+  rows.forEach((r, i) => {
+    const n = paint(C.amber, String(i + 1).padStart(3));
+    const name = r.note ? r.label.padEnd(width) : r.label;
+    log(`${n}  ${name}${paint(C.gray, r.note ?? '')}`);
+    if (r.sub) log(`     ${paint(C.gray, r.sub)}`);
+  });
+  log('');
+  for (;;) {
+    const raw = (
+      await rl.question(paint(C.amber, '  > ') + paint(C.gray, `1-${rows.length} (1) `))
+    ).trim();
+    if (!raw) return rows[0].key;
+    const n = Number.parseInt(raw, 10);
+    if (Number.isInteger(n) && n >= 1 && n <= rows.length) return rows[n - 1].key;
+    log(paint(C.red, `  Enter a number between 1 and ${rows.length}.`));
+  }
+}
+
+/** Ask for an API key, re-prompting until it is non-empty. */
+async function askKey(rl, label, url) {
+  log('');
+  log(paint(C.gray, `  Get one at ${url}`));
+  for (;;) {
+    const v = (await rl.question(paint(C.amber, `  ${label} `))).trim();
+    if (v) return v;
+    log(paint(C.red, '  That cannot be empty. Paste the key, or Ctrl-C to start over.'));
+  }
+}
+
+/** Pick a model for a provider, showing what each one is good for. */
+async function pickModel(rl, kind, provider, table) {
+  const list = table[provider];
+  if (!list || list.length <= 1) return list?.[0]?.[0] ?? '';
+  return select(
+    rl,
+    `Which ${kind} model?`,
+    list.map(([id, note]) => ({ key: id, label: id, note })),
+  );
+}
+
+/**
+ * First-run setup. One question at a time, each with a plain-language reason,
+ * so the choice is obvious without knowing the provider matrix by heart.
+ */
 async function prompt(flags) {
   if (flags.yes || flags.y) {
-    return { embedding: 'local', openaiKey: '', anthropicKey: '' };
+    return {
+      embedding: 'local',
+      embeddingModel: 'cb-hash-embed-v1',
+      llm: 'none',
+      llmModel: 'none',
+    };
   }
   const rl = createInterface({ input: process.stdin, output: process.stdout });
-  const ask = async (q, def) => {
-    const a = (
-      await rl.question(paint(C.amber, '? ') + q + (def ? paint(C.gray, ` (${def})`) : '') + ' ')
-    ).trim();
-    return a || def || '';
-  };
-  log('');
-  const embedding = (await ask('Embeddings: local (no key) or openai?', 'local'))
-    .toLowerCase()
-    .startsWith('o')
-    ? 'openai'
-    : 'local';
-  let openaiKey = '';
-  if (embedding === 'openai') openaiKey = await ask('OpenAI API key (for embeddings)', '');
-  const wantLlm = (
-    await ask('Enable chat with an LLM key? (anthropic/openai/none)', 'none')
-  ).toLowerCase();
-  let anthropicKey = '';
-  if (wantLlm.startsWith('a')) anthropicKey = await ask('Anthropic API key', '');
-  if (wantLlm.startsWith('o') && !openaiKey) openaiKey = await ask('OpenAI API key', '');
-  rl.close();
-  return {
-    embedding,
-    openaiKey,
-    anthropicKey,
-    llm: wantLlm.startsWith('a') ? 'anthropic' : wantLlm.startsWith('o') ? 'openai' : 'none',
-  };
+  try {
+    const choice = await select(
+      rl,
+      'How should CompanyBrain think?',
+      [
+        {
+          key: 'local',
+          label: 'Local only',
+          note: 'no API key, works offline',
+          sub: 'Search runs on a built-in embedder. Answers quote your memories directly.',
+        },
+        {
+          key: 'anthropic',
+          label: 'Anthropic Claude',
+          note: 'needs an Anthropic key',
+          sub: 'Claude writes the answers. Embeddings stay local, so search still needs no key.',
+        },
+        {
+          key: 'openai',
+          label: 'OpenAI',
+          note: 'needs an OpenAI key',
+          sub: 'One key covers both search embeddings and chat answers.',
+        },
+        {
+          key: 'google',
+          label: 'Google Gemini',
+          note: 'needs a Google key',
+          sub: 'Gemini handles embeddings. Gemini chat is not wired up yet, so answers stay local.',
+        },
+        {
+          key: 'ollama',
+          label: 'Ollama',
+          note: 'needs Ollama running',
+          sub: 'Everything runs on your own machine through an Ollama server.',
+        },
+        {
+          key: 'custom',
+          label: 'Mix providers',
+          note: 'choose each separately',
+          sub: 'Pick the embedding provider and the chat provider independently.',
+        },
+      ],
+      { hint: 'Embeddings power search. A chat model turns what it finds into an answer.' },
+    );
+
+    const ans = {
+      embedding: 'local',
+      embeddingModel: 'cb-hash-embed-v1',
+      llm: 'none',
+      llmModel: 'none',
+      openaiKey: '',
+      anthropicKey: '',
+      googleKey: '',
+    };
+
+    const needKey = async (provider) => {
+      if (provider === 'openai' && !ans.openaiKey)
+        ans.openaiKey = await askKey(rl, 'OpenAI API key', 'https://platform.openai.com/api-keys');
+      if (provider === 'anthropic' && !ans.anthropicKey)
+        ans.anthropicKey = await askKey(
+          rl,
+          'Anthropic API key',
+          'https://console.anthropic.com/settings/keys',
+        );
+      if (provider === 'google' && !ans.googleKey)
+        ans.googleKey = await askKey(
+          rl,
+          'Google API key',
+          'https://aistudio.google.com/app/apikey',
+        );
+    };
+
+    const setEmbedding = async (provider) => {
+      ans.embedding = provider;
+      await needKey(provider);
+      ans.embeddingModel = await pickModel(rl, 'embedding', provider, EMBED_MODELS);
+    };
+    const setChat = async (provider) => {
+      ans.llm = provider;
+      if (provider === 'none') {
+        ans.llmModel = 'none';
+        return;
+      }
+      await needKey(provider);
+      ans.llmModel = await pickModel(rl, 'chat', provider, CHAT_MODELS);
+    };
+
+    if (choice === 'local') {
+      // defaults already describe this
+    } else if (choice === 'anthropic') {
+      await setChat('anthropic');
+    } else if (choice === 'openai') {
+      await setEmbedding('openai');
+      await setChat('openai');
+    } else if (choice === 'google') {
+      await setEmbedding('google');
+    } else if (choice === 'ollama') {
+      await setEmbedding('ollama');
+      await setChat('ollama');
+    } else {
+      await setEmbedding(
+        await select(rl, 'Which provider should power search?', [
+          { key: 'local', label: 'Local', note: 'no key' },
+          { key: 'openai', label: 'OpenAI', note: 'needs a key' },
+          { key: 'google', label: 'Google Gemini', note: 'needs a key' },
+          { key: 'ollama', label: 'Ollama', note: 'local server' },
+        ]),
+      );
+      await setChat(
+        await select(rl, 'Which provider should write answers?', [
+          { key: 'none', label: 'None', note: 'quote memories directly' },
+          { key: 'anthropic', label: 'Anthropic Claude', note: 'needs a key' },
+          { key: 'openai', label: 'OpenAI', note: 'needs a key' },
+          { key: 'ollama', label: 'Ollama', note: 'local server' },
+        ]),
+      );
+    }
+
+    log('');
+    log(paint(C.green, '  Ready'));
+    log(`    search  ${paint(C.amber, ans.embedding)} ${paint(C.gray, ans.embeddingModel)}`);
+    log(
+      `    answers ${paint(C.amber, ans.llm)} ${paint(C.gray, ans.llm === 'none' ? 'extractive, no model' : ans.llmModel)}`,
+    );
+    log(paint(C.gray, '    Change any of this later in Settings, or by editing .env.'));
+    return ans;
+  } finally {
+    rl.close();
+  }
 }
 
 function writeEnv(dir, ans) {
@@ -200,9 +441,12 @@ function writeEnv(dir, ans) {
     'AUTH_MODE=single',
     `JWT_SECRET=${secret}`,
     `EMBEDDING_PROVIDER=${ans.embedding}`,
+    `EMBEDDING_MODEL=${ans.embeddingModel ?? ''}`,
     `LLM_PROVIDER=${ans.llm ?? 'none'}`,
-    ans.openaiKey ? `OPENAI_API_KEY=${ans.openaiKey}` : 'OPENAI_API_KEY=',
-    ans.anthropicKey ? `ANTHROPIC_API_KEY=${ans.anthropicKey}` : 'ANTHROPIC_API_KEY=',
+    `LLM_MODEL=${ans.llmModel ?? 'none'}`,
+    `OPENAI_API_KEY=${ans.openaiKey ?? ''}`,
+    `ANTHROPIC_API_KEY=${ans.anthropicKey ?? ''}`,
+    `GOOGLE_API_KEY=${ans.googleKey ?? ''}`,
     'NEXT_PUBLIC_API_URL=http://localhost:3333',
     'CORS_ORIGINS=http://localhost:3000',
   ];
@@ -259,7 +503,7 @@ async function up(flags) {
     const ans = await prompt(flags);
     writeEnv(dir, ans);
   }
-  if (!(await ensureDockerRunning())) {
+  if (!(await ensureDockerRunning(flags))) {
     // Docker is unavailable. Rather than dead-end here, fall back to the local
     // Postgres path when one is actually reachable: a broken Docker install
     // (Docker Desktop's privileged-helper repair is a common one on macOS)
@@ -486,7 +730,7 @@ async function upgrade(flags) {
     die(
       'git pull failed. If you edited files in the app directory, stash or discard them, then retry.',
     );
-  if (!(await ensureDockerRunning())) die('Docker is not available; start Docker and retry.');
+  if (!(await ensureDockerRunning(flags))) die('Docker is not available; start Docker and retry.');
   log(paint(C.dim, 'Rebuilding and restarting ...\n'));
   const code = await runStream('docker', ['compose', 'up', '-d', '--build'], { cwd: dir });
   if (code !== 0) die('docker compose failed.');
@@ -542,7 +786,8 @@ async function main() {
       break;
     case 'restart':
       requireInstall(dir);
-      if (!(await ensureDockerRunning())) die('Docker is not available; start Docker and retry.');
+      if (!(await ensureDockerRunning(flags)))
+        die('Docker is not available; start Docker and retry.');
       log(paint(C.dim, 'Restarting the stack ...'));
       process.exit(await runStream('docker', ['compose', 'restart'], { cwd: dir }));
       break;
@@ -598,7 +843,8 @@ async function main() {
       log('  uninstall  stop, remove containers + volumes, and the install');
       log('  help       this message\n');
       log('Flags: --yes (accept defaults / skip confirms), --dir=<path>, --no-mcp,');
-      log('       --no-fallback (fail instead of running without Docker), --db=<url>\n');
+      log('       --no-fallback (fail instead of running without Docker), --db=<url>,');
+      log('       --retry-docker (try Docker again after fixing it)\n');
       break;
     default:
       die(`Unknown command "${cmd}". Try: npx companybrain help`);
