@@ -35,6 +35,11 @@ two captures show the dashboard. Auth screens need `AUTH_MODE=multi` to audit.
 | 3 | 60 | grid tracks -> minmax(0,1fr) |
 | 4 | 54 | overflow-wrap: anywhere + min-w-0 on text holders |
 | 5 | 52 | content block + shouted labels; **zero overflow findings** |
+| 8 | 0 | 44px targets via Button cva + shared Chip/Tab |
+| 9 | 0 | real loading skeleton + API-unreachable state |
+| 11 | 0 | skip link, space-count bug, copy |
+| 12 | 0 | connector filter |
+| final-a / final-b | 0 | **two consecutive clean audits** |
 
 ## Closed
 
@@ -52,13 +57,42 @@ two captures show the dashboard. Auth screens need `AUTH_MODE=multi` to audit.
 - **[bad] Mobile nav / logo / search targets at 20-34px.** Now `min-h-11` / `size-11`.
 - **[bad] Shouted `CONTENT` / `RELATED` / playbook labels.** Sentence case now.
 
+- **[bad] Tap targets under 44px.** Fixed in the component layer: Button's cva
+  sizes carry `min-h-11` and relax from `sm` up; new shared `Chip` and `Tab`
+  replaced four ad-hoc copies whose padding had already drifted. List rows that
+  were text-height are now padded blocks.
+- **[blocker] App shell gated every route behind a lonely centred spinner.** Now
+  renders the real frame (navigation does not depend on the request) with
+  skeletons only where data goes.
+- **[blocker] An unreachable API was treated as "logged out"**, bouncing to a
+  login that could not work either. Now classified: 401/403 -> sign in, anything
+  else -> a screen naming the URL that did not answer, the three usual causes,
+  and a retry.
+- **[blocker] Spaces reported "General 0"** with nine memories in that space. The
+  correlated subquery built from an interpolated table returned 0 for every
+  space; replaced with leftJoin + groupBy.
+- **[bad] No way to find a connector** among 44 identical cards. Name filter plus
+  category tabs derived from what the server registers.
+- **[bad] Copy:** "local embeddings, no llm" was lowercase and named our
+  subsystem. Now says what search runs on and where answers come from.
+- **[bad] Keyboard:** ten nav items preceded content on every page. Added a skip
+  link as the first tab stop.
+- **[blocker] CI red since iteration 5.** A local `next build` rewrites
+  `next-env.d.ts` and `tsconfig.json`; those rewrites were committed and prettier
+  disagreed. Both are prettierignored now, so building cannot break the check.
+
+## Verified
+
+- Keyboard: tab order logical, focus ring on every stop, Cmd-K opens and
+  autofocuses the palette, Escape closes, `/` jumps to search focused.
+- Forced states: API-down and loading skeleton both captured by aborting or
+  delaying `/v1/` requests (`.goal/states/`).
+- CI green: typecheck / test / format, python sdk, db migrate + api smoke, and
+  both Docker image builds.
+
 ## Open
 
-- **[bad] Tap targets under 44px on mobile** (~52 findings): Button `sm` is 32px
-  and `md` 38px; filter chips and mode tabs 30-32px; inline list links 16-23px.
-  Fix at the component level (Button cva + a shared chip), not per page.
-- **[todo] Forced states** not yet audited: loading, error, api-down, 10k items.
-  The app-shell auth gate is a full-page lonely spinner, which the rubric bans;
-  needs a real shell + skeleton.
-- **[todo] Keyboard pass** on the core flows.
-- **[todo] `landing/`** not yet audited.
+- **[todo] `landing/`** not audited in this loop; it is a separate brand surface
+  and still on its own light theme, verified at Lighthouse 100 earlier.
+- **[note] Auth screens** cannot be audited in single-user mode (`/login` and
+  `/register` redirect into the app). They need `AUTH_MODE=multi`.
