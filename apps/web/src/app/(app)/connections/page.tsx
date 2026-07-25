@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Page } from '@/components/app-shell';
-import { Button, Input, Field, Skeleton, EmptyState, Badge } from '@/components/ui';
+import { Button, Input, Field, Skeleton, EmptyState, Badge, Tab } from '@/components/ui';
 import { useToast } from '@/components/toast';
 import { timeAgo } from '@/lib/format';
 import { IconPlug, IconArrowRight } from '@/components/icons';
@@ -36,6 +36,8 @@ interface Connection {
 export default function ConnectionsPage() {
   const toast = useToast();
   const [available, setAvailable] = useState<ConnectorInfo[] | null>(null);
+  const [filter, setFilter] = useState('');
+  const [category, setCategory] = useState<string>('all');
   const [connections, setConnections] = useState<Connection[]>([]);
   const [selected, setSelected] = useState<ConnectorInfo | null>(null);
   const [form, setForm] = useState<Record<string, string>>({});
@@ -94,6 +96,23 @@ export default function ConnectionsPage() {
       toast('error', 'No sync runner is registered on the server yet.');
     }
   }
+
+  // Category tabs come from what is actually registered, so the list cannot
+  // drift from the connectors the server offers.
+  const categories = [
+    'all',
+    ...Array.from(
+      new Set((available ?? []).map((c) => c.category).filter(Boolean) as string[]),
+    ).sort(),
+  ];
+  const needle = filter.trim().toLowerCase();
+  const visible = (available ?? []).filter(
+    (c) =>
+      (category === 'all' || c.category === category) &&
+      (!needle ||
+        c.displayName.toLowerCase().includes(needle) ||
+        (c.description ?? '').toLowerCase().includes(needle)),
+  );
 
   return (
     <Page
@@ -187,8 +206,30 @@ export default function ConnectionsPage() {
         </form>
       )}
 
-      {/* Available connectors */}
-      <h2 className="mb-2.5 text-sm font-medium text-ink-muted">Available</h2>
+      {/* Available connectors. Forty-plus of them, so finding one by scanning is
+          not a plan: filter by name and by what the source is. */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <h2 className="mr-auto text-sm font-medium text-ink-muted">
+          Available
+          {available ? <span className="ml-1.5 text-ink-faint">{visible.length}</span> : null}
+        </h2>
+        <Input
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          aria-label="Filter connectors"
+          placeholder="Filter sources"
+          className="h-9 w-full sm:w-56"
+        />
+      </div>
+      {available && categories.length > 1 && (
+        <div className="mb-3 flex flex-wrap items-center gap-1.5">
+          {categories.map((cat) => (
+            <Tab key={cat} selected={category === cat} onClick={() => setCategory(cat)}>
+              {cat === 'all' ? 'All' : cat}
+            </Tab>
+          ))}
+        </div>
+      )}
       {available === null ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -203,7 +244,7 @@ export default function ConnectionsPage() {
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {available.map((c) => (
+          {visible.map((c) => (
             <button
               key={c.id}
               onClick={() => pick(c)}
