@@ -35,11 +35,13 @@ const buttonVariants = cva(
           'bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger-soft)] ' +
           'hover:border-[var(--color-danger)]',
       },
+      // Touch first: every control clears a 44px target on phones, then relaxes
+      // to the tighter desktop rhythm from `sm` up, where a pointer is precise.
       size: {
-        sm: 'h-8 px-3 text-xs gap-1.5 rounded-md',
-        md: 'h-9.5 px-4 text-sm gap-2 rounded-md',
-        lg: 'h-11 px-5 text-base gap-2 rounded-lg',
-        icon: 'size-9 rounded-md',
+        sm: 'min-h-11 px-3 text-xs gap-1.5 rounded-md sm:h-8 sm:min-h-0',
+        md: 'min-h-11 px-4 text-sm gap-2 rounded-md sm:h-9.5 sm:min-h-0',
+        lg: 'min-h-11 px-5 text-base gap-2 rounded-lg sm:h-11',
+        icon: 'size-11 rounded-md sm:size-9',
       },
     },
     defaultVariants: { variant: 'secondary', size: 'md' },
@@ -181,6 +183,64 @@ export function Badge({
 }) {
   return (
     <span className={cn(badgeVariants({ tone }), mono && 'font-mono', className)}>{children}</span>
+  );
+}
+
+/**
+ * A pill that navigates or applies a filter: topics, tag suggestions, example
+ * prompts. One definition so the padding and radius cannot drift between the
+ * four surfaces that use it, and so the touch target is right everywhere.
+ */
+export const Chip = forwardRef<
+  HTMLElement,
+  {
+    asChild?: boolean;
+    className?: string;
+    children: React.ReactNode;
+  } & React.HTMLAttributes<HTMLElement>
+>(function Chip({ asChild, className, children, ...rest }, ref) {
+  const Comp = (asChild ? Slot : 'span') as React.ElementType;
+  return (
+    <Comp
+      ref={ref}
+      className={cn(
+        'inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-surface px-3',
+        'text-sm text-ink-muted transition-colors',
+        'hover:border-border-strong hover:text-ink sm:min-h-8',
+        className,
+      )}
+      {...rest}
+    >
+      {children}
+    </Comp>
+  );
+});
+
+/**
+ * One option in a segmented control (search mode, memory space filter). Selected
+ * state is carried by fill plus text weight, not hue alone.
+ */
+export function Tab({
+  selected,
+  className,
+  children,
+  ...rest
+}: { selected?: boolean } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      className={cn(
+        'inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium transition-colors sm:min-h-9',
+        selected
+          ? 'bg-[var(--color-primary-soft)] text-primary'
+          : 'text-ink-muted hover:bg-surface-2 hover:text-ink',
+        className,
+      )}
+      {...rest}
+    >
+      {children}
+    </button>
   );
 }
 

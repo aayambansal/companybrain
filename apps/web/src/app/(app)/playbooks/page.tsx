@@ -144,7 +144,7 @@ export default function PlaybooksPage() {
           onChange={(e) => setTopic(e.target.value)}
           aria-label="Playbook topic"
           placeholder="A topic to write up — e.g. how we ship a release"
-          className="h-11 flex-1 text-[15px]"
+          className="h-11 text-[15px] sm:flex-1"
         />
         <Button
           variant="primary"
@@ -165,7 +165,7 @@ export default function PlaybooksPage() {
               <button
                 key={s}
                 onClick={() => generate(s)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-[13px] text-ink-muted transition-colors hover:border-border-strong hover:text-ink"
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-surface px-3 text-sm text-ink-muted transition-colors hover:border-border-strong hover:text-ink sm:min-h-8"
               >
                 {s}
                 <IconArrowRight size={13} className="text-ink-faint" />

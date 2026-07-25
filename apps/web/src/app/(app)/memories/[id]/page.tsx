@@ -56,7 +56,7 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
     <div className="mx-auto w-full max-w-3xl px-5 py-6 md:px-8 md:py-8">
       <Link
         href="/memories"
-        className="mb-5 inline-flex items-center gap-1.5 text-[13px] text-ink-faint hover:text-ink"
+        className="mb-5 inline-flex min-h-11 items-center gap-1.5 text-sm text-ink-faint hover:text-ink sm:min-h-0"
       >
         <IconArrowRight size={13} className="rotate-180" /> Memories
       </Link>
@@ -129,7 +129,7 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
               <h2 className="text-sm font-medium text-ink-muted">Content</h2>
               <button
                 onClick={() => copyContent(memory.content ?? '')}
-                className="text-[12px] text-ink-faint transition-colors hover:text-ink"
+                className="inline-flex min-h-11 items-center text-xs text-ink-faint transition-colors hover:text-ink sm:min-h-0"
               >
                 {copied ? 'Copied' : 'Copy'}
               </button>

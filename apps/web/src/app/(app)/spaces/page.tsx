@@ -155,7 +155,7 @@ export default function SpacesPage() {
                 </span>
                 <Link
                   href={`/memories?spaceId=${s.id}`}
-                  className="flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
+                  className="inline-flex min-h-11 items-center gap-1 sm:min-h-0 flex items-center gap-1 text-[12px] text-ink-muted hover:text-ink"
                 >
                   Open <IconArrowRight size={12} />
                 </Link>

@@ -173,7 +173,7 @@ export default function OverviewPage() {
         <div className="mb-6 flex flex-wrap items-center gap-2">
           <Link
             href="/topics"
-            className="mr-1 flex items-center gap-1 text-xs text-ink-faint hover:text-ink"
+            className="mr-1 flex min-h-11 items-center gap-1 text-xs text-ink-faint hover:text-ink sm:min-h-0"
           >
             <IconHash size={13} /> topics
           </Link>
@@ -181,7 +181,7 @@ export default function OverviewPage() {
             <Link
               key={t.topic}
               href={`/search?q=${encodeURIComponent(t.topic)}`}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-1 text-[13px] text-ink-muted transition-colors hover:border-[var(--color-primary-line)] hover:text-ink"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-surface px-3 text-sm text-ink-muted transition-colors hover:border-border-strong hover:text-ink sm:min-h-8"
             >
               {t.topic}
               <span className="font-mono text-[10px] text-ink-faint">{t.count}</span>
@@ -197,7 +197,7 @@ export default function OverviewPage() {
             <h2 className="text-sm font-medium text-ink-muted">Recent</h2>
             <Link
               href="/memories"
-              className="flex items-center gap-1 text-[13px] text-ink-faint hover:text-ink"
+              className="flex min-h-11 items-center gap-1 text-[13px] text-ink-faint hover:text-ink sm:min-h-0"
             >
               All memories <IconArrowRight size={13} />
             </Link>
@@ -312,7 +312,7 @@ export default function OverviewPage() {
               <button
                 onClick={loadDigest}
                 disabled={digestBusy}
-                className="text-[12px] text-ink-faint hover:text-ink disabled:opacity-50"
+                className="inline-flex min-h-11 items-center text-xs text-ink-faint hover:text-ink disabled:opacity-50 sm:min-h-0"
               >
                 {digestBusy ? 'Summarizing…' : digest ? 'Refresh' : 'Summarize recent'}
               </button>
@@ -350,7 +350,7 @@ export default function OverviewPage() {
                   <li key={s.id}>
                     <Link
                       href={`/memories?spaceId=${s.id}`}
-                      className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
+                      className="flex min-h-11 items-center justify-between rounded-md px-2 text-sm text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink sm:min-h-9"
                     >
                       <span className="flex items-center gap-2">
                         <span

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { api, type Memory, type Space } from '@/lib/api';
 import { Page } from '@/components/app-shell';
-import { Badge, StatusDot, Skeleton, EmptyState, Button, cx } from '@/components/ui';
+import { Badge, StatusDot, Skeleton, EmptyState, Button, cx, Tab } from '@/components/ui';
 import { timeAgo, hostname } from '@/lib/format';
 import { IconMemory, IconPlus } from '@/components/icons';
 
@@ -231,17 +231,9 @@ function FilterChip({
   children: React.ReactNode;
 }) {
   return (
-    <button
-      onClick={onClick}
-      className={cx(
-        'rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors',
-        active
-          ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]'
-          : 'text-ink-muted hover:bg-surface-2 hover:text-ink',
-      )}
-    >
+    <Tab selected={active} onClick={onClick}>
       {children}
-    </button>
+    </Tab>
   );
 }
 

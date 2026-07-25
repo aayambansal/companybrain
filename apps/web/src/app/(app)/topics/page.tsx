@@ -50,7 +50,7 @@ export default function TopicsPage() {
               <div className="mb-3 flex items-center justify-between gap-2">
                 <Link
                   href={`/search?q=${encodeURIComponent(t.topic)}`}
-                  className="min-w-0 truncate text-[15px] font-semibold text-ink hover:text-[var(--color-primary-strong)]"
+                  className="flex min-h-11 min-w-0 items-center truncate text-[15px] font-semibold text-ink hover:text-primary sm:min-h-0"
                 >
                   {t.topic}
                 </Link>
@@ -63,7 +63,7 @@ export default function TopicsPage() {
                   <li key={m.id}>
                     <Link
                       href={`/memories/${m.id}`}
-                      className="flex items-center gap-1.5 text-[13px] text-ink-muted transition-colors hover:text-ink"
+                      className="-mx-2 flex min-h-11 items-center gap-1.5 rounded-md px-2 text-sm text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink sm:min-h-8"
                     >
                       <span className="size-1 shrink-0 rounded-full bg-ink-faint" />
                       <span className="truncate">{m.title ?? 'Untitled'}</span>

@@ -6,7 +6,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, useReducedMotion } from 'motion/react';
 import { api, type SearchResponse, type SearchHit } from '@/lib/api';
 import { Page } from '@/components/app-shell';
-import { Badge, Skeleton, EmptyState, cx } from '@/components/ui';
+import { Badge, Skeleton, EmptyState, Tab, cx } from '@/components/ui';
 import { IconSearch, IconExternal } from '@/components/icons';
 import { hostname } from '@/lib/format';
 
@@ -85,19 +85,9 @@ function SearchInner() {
 
       <div className="mt-3 flex flex-wrap items-center gap-1.5">
         {MODES.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => changeMode(m.id)}
-            title={m.hint}
-            className={cx(
-              'rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors',
-              mode === m.id
-                ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]'
-                : 'text-ink-muted hover:bg-surface-2 hover:text-ink',
-            )}
-          >
+          <Tab key={m.id} selected={mode === m.id} onClick={() => changeMode(m.id)} title={m.hint}>
             {m.label}
-          </button>
+          </Tab>
         ))}
         {res && !loading && (
           <span className="ml-auto font-mono text-[11px] text-ink-faint">
@@ -191,7 +181,7 @@ function Hit({ hit, query }: { hit: SearchHit; query: string }) {
       <div className="flex items-start justify-between gap-3">
         <Link
           href={`/memories/${hit.documentId}`}
-          className="min-w-0 font-medium text-ink hover:text-[var(--color-primary)]"
+          className="flex min-h-11 min-w-0 items-center font-medium text-ink hover:text-primary sm:min-h-0"
         >
           {hit.document.title ?? 'Untitled'}
         </Link>
