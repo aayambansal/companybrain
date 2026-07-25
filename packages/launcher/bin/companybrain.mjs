@@ -640,6 +640,44 @@ function runWithEnv(dir, cmd, args) {
 }
 
 /**
+ * Run the dev servers, rewriting turbo's task prefixes into short coloured
+ * labels. `@companybrain/api:dev:` costs 22 columns on every line and pushes
+ * the actual message off narrow terminals; `api ` reads better and keeps the
+ * two streams distinguishable.
+ */
+function runDev(dir, args) {
+  return new Promise((resolve) => {
+    const p = spawn('pnpm', args, {
+      cwd: dir,
+      stdio: ['inherit', 'pipe', 'pipe'],
+      env: { ...process.env, ...envFileVars(dir) },
+    });
+    const label = (line) =>
+      line
+        .replace(/^@companybrain\/api:dev:\s?/, paint(C.amber, 'api ') + ' ')
+        .replace(/^@companybrain\/web:dev:\s?/, paint(C.green, 'web ') + ' ');
+    const pipe = (stream, out) => {
+      let buf = '';
+      stream.setEncoding('utf8');
+      stream.on('data', (chunk) => {
+        buf += chunk;
+        const lines = buf.split('\n');
+        buf = lines.pop() ?? '';
+        for (const l of lines) out.write(label(l) + '\n');
+      });
+      stream.on('end', () => {
+        if (buf) out.write(label(buf) + '\n');
+      });
+    };
+    pipe(p.stdout, process.stdout);
+    pipe(p.stderr, process.stderr);
+    // Ctrl-C reaches the child through the shared process group; wait for it to
+    // exit so its own shutdown output is not cut off.
+    p.on('close', (code) => resolve(code ?? 1));
+  });
+}
+
+/**
  * Run the stack without Docker, against a local Postgres. For machines where
  * Docker isn't available or won't start. Installs deps, migrates, and runs the
  * API + dashboard in the foreground (Ctrl-C to stop).
@@ -685,24 +723,51 @@ async function devWith(dir, dbUrl) {
     log(paint(C.dim, 'Installing dependencies (first run, a few minutes) ...'));
     if ((await runStream('pnpm', ['install'], { cwd: dir })) !== 0) die('pnpm install failed.');
   }
+  // A leftover server from an earlier run holds the port, and Next would fail
+  // with a raw EADDRINUSE stack trace. Say what is wrong and how to clear it.
+  for (const [port, what] of [
+    [3000, 'dashboard'],
+    [3333, 'API'],
+  ]) {
+    if (await tcpReachable('127.0.0.1', port, 700)) {
+      die(
+        `Port ${port} is already in use, so the ${what} cannot start.\n` +
+          '  Something from an earlier run is probably still going. Stop it with:\n' +
+          `    lsof -ti tcp:${port} | xargs kill\n` +
+          '  then re-run. If that is another app of yours, stop that instead.',
+      );
+    }
+  }
+
   log(paint(C.dim, 'Running database migrations ...'));
   await runWithEnv(dir, 'pnpm', ['--filter', '@companybrain/db', 'migrate']);
   log('');
-  log(paint(C.green, '  Starting CompanyBrain without Docker. Press Ctrl-C to stop.'));
+  log(paint(C.green, '  CompanyBrain is starting (no Docker).'));
+  log('');
   log('  Dashboard   ' + paint(C.amber, 'http://localhost:3000'));
   log(
     '  API         ' + paint(C.amber, 'http://localhost:3333') + paint(C.gray, '  (docs at /docs)'),
   );
   log('');
+  log(paint(C.gray, '  Logs stream below. Leave this window open; Ctrl-C stops both servers.'));
+  log(paint(C.gray, '  ────────────────────────────────────────────────────────────────'));
+  log('');
   // Run only the API + dashboard (not every package's dev task), in the
   // foreground, until the user presses Ctrl-C.
-  await runWithEnv(dir, 'pnpm', [
+  //
+  // --ui=stream, not turbo's interactive TUI: the TUI takes over the terminal,
+  // hides the URLs behind a pane you have to navigate, and makes it unclear
+  // that quitting it stops the servers. Plain prefixed lines scroll back, copy,
+  // and pipe like any other log.
+  await runDev(dir, [
     'exec',
     'turbo',
     'run',
     'dev',
     '--filter=@companybrain/api',
     '--filter=@companybrain/web',
+    '--ui=stream',
+    '--log-prefix=task',
   ]);
 }
 
