@@ -7,3 +7,9 @@ coverage
 pnpm-lock.yaml
 *.md
 CHANGELOG.md
+
+# Next.js rewrites these on every build (it pins jsx: react-jsx and injects the
+# generated routes type). Formatting them means `pnpm build` dirties the tree
+# and breaks the format check for the next person.
+apps/web/next-env.d.ts
+apps/web/tsconfig.json
