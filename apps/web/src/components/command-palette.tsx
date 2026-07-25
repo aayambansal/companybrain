@@ -135,7 +135,7 @@ export function CommandPalette() {
                       )}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="truncate text-sm font-medium text-ink">
+                        <span className="min-w-0 truncate text-sm font-medium text-ink">
                           {hit.document.title ?? 'Untitled memory'}
                         </span>
                         <span

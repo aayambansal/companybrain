@@ -223,9 +223,7 @@ export default function PlaybooksPage() {
             <Markdown source={playbook.content} />
             {playbook.citations.length > 0 && (
               <div className="mt-8 border-t border-border pt-5">
-                <p className="mb-3 font-mono text-[11px] uppercase tracking-wider text-ink-faint">
-                  Sources
-                </p>
+                <p className="mb-3 text-sm font-medium text-ink-muted">Sources</p>
                 <div className="flex flex-wrap gap-1.5">
                   {playbook.citations.map((c) => (
                     <Link

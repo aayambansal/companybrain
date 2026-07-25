@@ -191,7 +191,7 @@ function Hit({ hit, query }: { hit: SearchHit; query: string }) {
       <div className="flex items-start justify-between gap-3">
         <Link
           href={`/memories/${hit.documentId}`}
-          className="font-medium text-ink hover:text-[var(--color-primary)]"
+          className="min-w-0 font-medium text-ink hover:text-[var(--color-primary)]"
         >
           {hit.document.title ?? 'Untitled'}
         </Link>

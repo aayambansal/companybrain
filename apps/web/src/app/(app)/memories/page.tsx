@@ -161,10 +161,10 @@ function MemoriesInner() {
                 </button>
                 <Link
                   href={`/memories/${m.id}`}
-                  className="block flex-1 rounded-lg border border-border bg-surface px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-hover"
+                  className="block min-w-0 flex-1 rounded-lg border border-border bg-surface px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-hover"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <p className="truncate font-medium text-ink">{m.title ?? 'Untitled'}</p>
+                    <p className="min-w-0 truncate font-medium text-ink">{m.title ?? 'Untitled'}</p>
                     <span className="shrink-0 font-mono text-[11px] text-ink-faint">
                       {timeAgo(m.createdAt)}
                     </span>

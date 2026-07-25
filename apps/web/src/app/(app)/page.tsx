@@ -190,7 +190,7 @@ export default function OverviewPage() {
         </div>
       )}
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
         {/* Recent memories */}
         <section>
           <div className="mb-2.5 flex items-center justify-between">
@@ -223,7 +223,9 @@ export default function OverviewPage() {
                     className="block rounded-lg border border-border bg-surface px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-hover"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <p className="truncate font-medium text-ink">{m.title ?? 'Untitled'}</p>
+                      <p className="min-w-0 truncate font-medium text-ink">
+                        {m.title ?? 'Untitled'}
+                      </p>
                       <span className="shrink-0 font-mono text-[11px] text-ink-faint">
                         {timeAgo(m.createdAt)}
                       </span>

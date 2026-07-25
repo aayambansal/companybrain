@@ -60,7 +60,7 @@ export default function AnalyticsPage() {
           icon={<IconMemory size={28} />}
         />
       ) : (
-        <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           {/* Activity */}
           <section className="card p-5">
             <h2 className="mb-4 text-sm font-medium text-ink-muted">Added, last 14 days</h2>

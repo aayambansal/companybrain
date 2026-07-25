@@ -108,7 +108,7 @@ export function WebhooksSection() {
           {hooks.map((h) => (
             <li key={h.id} className="flex items-center justify-between gap-3 px-4 py-3">
               <div className="min-w-0">
-                <p className="truncate font-mono text-[13px] text-ink">{h.url}</p>
+                <p className="min-w-0 truncate font-mono text-[13px] text-ink">{h.url}</p>
                 <p className="mt-0.5 flex items-center gap-2 font-mono text-[11px] text-ink-faint">
                   {h.events.join(', ')}
                   {h.hasSecret && <Badge tone="primary">signed</Badge>}

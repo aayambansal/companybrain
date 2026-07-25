@@ -87,7 +87,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <TooltipProvider delayDuration={300}>
       <CommandPalette />
-      <div className="grid min-h-dvh grid-cols-1 md:grid-cols-[15rem_1fr]">
+      <div className="grid min-h-dvh grid-cols-[minmax(0,1fr)] md:grid-cols-[15rem_minmax(0,1fr)]">
         {/* Rail. Deeper than the canvas so navigation reads as chassis. */}
         <aside className="sticky top-0 hidden h-dvh flex-col border-r border-border bg-[var(--color-rail)] md:flex">
           <div className="flex h-14 items-center px-4">
@@ -192,14 +192,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex min-w-0 flex-col">
           {/* Mobile bar */}
           <header className="sticky top-0 z-[var(--z-sticky)] flex h-14 items-center justify-between border-b border-border bg-[var(--color-bg)]/90 px-4 backdrop-blur md:hidden">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/" className="-ml-2 flex min-h-11 items-center gap-2 rounded-md px-2">
               <BrainMark size={20} className="text-primary" />
               <span className="text-sm font-semibold">CompanyBrain</span>
             </Link>
             <Link
               href="/search"
               aria-label="Search"
-              className="rounded-md p-2 text-ink-muted hover:bg-surface-2 hover:text-ink"
+              className="grid size-11 place-items-center rounded-md text-ink-muted hover:bg-surface-2 hover:text-ink"
             >
               <IconSearch size={18} />
             </Link>
@@ -217,7 +217,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'shrink-0 rounded-md px-3 py-1.5 text-sm',
+                    'flex min-h-11 shrink-0 items-center rounded-md px-3 text-sm',
                     active
                       ? 'bg-[var(--color-primary-soft)] text-primary'
                       : 'text-ink-muted hover:text-ink',

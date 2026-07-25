@@ -108,7 +108,10 @@ export default function RegisterPage() {
 
       <p className="mt-5 text-center text-sm text-ink-muted">
         Already have one?{' '}
-        <Link href="/login" className="text-[var(--color-primary)] hover:underline">
+        <Link
+          href="/login"
+          className="inline-block py-2.5 font-medium text-primary hover:underline"
+        >
           Sign in
         </Link>
       </p>

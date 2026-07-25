@@ -87,7 +87,10 @@ export default function LoginPage() {
 
       <p className="mt-5 text-center text-sm text-ink-muted">
         No workspace yet?{' '}
-        <Link href="/register" className="text-[var(--color-primary)] hover:underline">
+        <Link
+          href="/register"
+          className="inline-block py-2.5 font-medium text-primary hover:underline"
+        >
           Create one
         </Link>
       </p>

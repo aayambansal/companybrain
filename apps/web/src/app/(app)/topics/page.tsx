@@ -29,7 +29,7 @@ export default function TopicsPage() {
       subtitle="The projects, people, and themes running through your brain — grouped automatically from what you've indexed. Nothing to file."
     >
       {topics === null ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-32 w-full" />
           ))}
@@ -41,16 +41,16 @@ export default function TopicsPage() {
           icon={<IconSpaces size={28} />}
         />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {topics.map((t) => (
             <div
               key={t.topic}
-              className="flex flex-col rounded-xl border border-border bg-surface p-4 transition-colors hover:border-border-strong"
+              className="flex min-w-0 flex-col rounded-xl border border-border bg-surface p-4 transition-colors hover:border-border-strong"
             >
               <div className="mb-3 flex items-center justify-between gap-2">
                 <Link
                   href={`/search?q=${encodeURIComponent(t.topic)}`}
-                  className="truncate text-[15px] font-semibold text-ink hover:text-[var(--color-primary-strong)]"
+                  className="min-w-0 truncate text-[15px] font-semibold text-ink hover:text-[var(--color-primary-strong)]"
                 >
                   {t.topic}
                 </Link>

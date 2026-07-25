@@ -161,6 +161,24 @@
   p {
     text-wrap: pretty;
   }
+  /* Titles and body copy come from the user's own documents, so a single
+     unbroken token (a URL, a hash, a pasted identifier) must wrap rather than
+     widen the page. `anywhere` rather than `break-word` on purpose: only
+     `anywhere` also shrinks the element's min-content size, which is what lets
+     a flex or grid child actually give up the space instead of forcing the
+     track wider. Applies everywhere so no surface has to remember. */
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  li,
+  dd,
+  dt,
+  figcaption,
+  code {
+    overflow-wrap: anywhere;
+  }
   /* Numerals line up in tables, counts, and scores. */
   [data-numeric],
   table {

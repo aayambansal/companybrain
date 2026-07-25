@@ -76,7 +76,7 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
       ) : (
         <article>
           <div className="flex items-start justify-between gap-4">
-            <h1 className="text-2xl font-semibold tracking-[-0.02em] text-ink">
+            <h1 className="min-w-0 text-2xl font-semibold tracking-[-0.02em] text-ink">
               {memory.title ?? 'Untitled'}
             </h1>
             <Button variant="danger" size="sm" onClick={remove} loading={deleting}>
@@ -119,16 +119,14 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
 
           {memory.summary && (
             <div className="mt-6 rounded-lg border border-[var(--color-primary-line)] bg-[var(--color-primary-soft)] p-4">
-              <h2 className="mb-1.5 text-[12px] uppercase tracking-wide text-[var(--color-primary-strong)]">
-                Summary
-              </h2>
+              <h2 className="mb-1.5 text-sm font-medium text-primary">Summary</h2>
               <p className="text-[14px] leading-relaxed text-ink">{memory.summary}</p>
             </div>
           )}
 
           <div className="mt-6">
             <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-[12px] uppercase tracking-wide text-ink-faint">Content</h2>
+              <h2 className="text-sm font-medium text-ink-muted">Content</h2>
               <button
                 onClick={() => copyContent(memory.content ?? '')}
                 className="text-[12px] text-ink-faint transition-colors hover:text-ink"
@@ -136,14 +134,14 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
                 {copied ? 'Copied' : 'Copy'}
               </button>
             </div>
-            <div className="whitespace-pre-wrap rounded-lg border border-border bg-surface p-5 text-[14px] leading-relaxed text-ink">
+            <div className="overflow-wrap-anywhere min-w-0 whitespace-pre-wrap rounded-lg border border-border bg-surface p-5 text-[14px] leading-relaxed text-ink [overflow-wrap:anywhere]">
               {memory.content}
             </div>
           </div>
 
           {related.length > 0 && (
             <div className="mt-6">
-              <h2 className="mb-2 text-[12px] uppercase tracking-wide text-ink-faint">Related</h2>
+              <h2 className="mb-2 text-sm font-medium text-ink-muted">Related</h2>
               <ul className="space-y-2">
                 {related.map((h) => (
                   <li key={h.documentId}>
@@ -151,7 +149,7 @@ export default function MemoryDetail({ params }: { params: Promise<{ id: string 
                       href={`/memories/${h.documentId}`}
                       className="block rounded-lg border border-border bg-surface px-4 py-3 transition-colors hover:border-border-strong hover:bg-surface-hover"
                     >
-                      <p className="truncate text-[14px] font-medium text-ink">
+                      <p className="min-w-0 truncate text-[14px] font-medium text-ink">
                         {h.document.title ?? 'Untitled'}
                       </p>
                       <p className="mt-1 line-clamp-1 text-[13px] text-ink-muted">
