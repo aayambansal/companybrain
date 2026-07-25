@@ -515,7 +515,7 @@ async function up(flags) {
       log(paint(C.dim, `  Starting without Docker against ${dbUrl}`));
       log(paint(C.dim, '  (force Docker instead with --no-fallback, once Docker is fixed.)'));
       log('');
-      return devWith(dir, dbUrl);
+      return devWith(dir, dbUrl, flags);
     }
     die(
       has('docker')
@@ -552,9 +552,11 @@ async function up(flags) {
     ),
   );
   log('');
-  log('  Dashboard   ' + paint(C.amber, 'http://localhost:3000'));
+  log('  Dashboard   ' + paint(C.amber, `http://localhost:${webPort}`));
   log(
-    '  API         ' + paint(C.amber, 'http://localhost:3333') + paint(C.gray, '  (docs at /docs)'),
+    '  API         ' +
+      paint(C.amber, `http://localhost:${apiPort}`) +
+      paint(C.gray, '  (docs at /docs)'),
   );
   log('');
   log(paint(C.dim, '  No sign-in required (single-user mode). Add memories from the dashboard,'));
@@ -618,6 +620,18 @@ function tcpReachable(host, port, timeoutMs = 2500) {
   });
 }
 
+/**
+ * First port at or after `preferred` that nothing is listening on, skipping any
+ * already claimed in this run. Returns null if the range is exhausted.
+ */
+async function findFreePort(preferred, taken = [], span = 20) {
+  for (let port = preferred; port < preferred + span; port++) {
+    if (taken.includes(port)) continue;
+    if (!(await tcpReachable('127.0.0.1', port, 400))) return port;
+  }
+  return null;
+}
+
 async function pgReachable(dbUrl) {
   try {
     const u = new URL(dbUrl);
@@ -645,12 +659,14 @@ function runWithEnv(dir, cmd, args) {
  * the actual message off narrow terminals; `api ` reads better and keeps the
  * two streams distinguishable.
  */
-function runDev(dir, args) {
+function runDev(dir, args, extraEnv = {}) {
   return new Promise((resolve) => {
     const p = spawn('pnpm', args, {
       cwd: dir,
       stdio: ['inherit', 'pipe', 'pipe'],
-      env: { ...process.env, ...envFileVars(dir) },
+      // Chosen ports win over the file, so a busy 3000 does not strand the
+      // dashboard pointing at the wrong API.
+      env: { ...process.env, ...envFileVars(dir), ...extraEnv },
     });
     const label = (line) =>
       line
@@ -700,7 +716,7 @@ async function dev(flags) {
         '  then re-run `npx companybrain dev`. (Or fix Docker and use `npx companybrain up`.)',
     );
   }
-  return devWith(dir, dbUrl);
+  return devWith(dir, dbUrl, flags);
 }
 
 /** The default local Postgres URL when the config does not name one. */
@@ -712,7 +728,7 @@ function defaultDbUrl() {
  * Bring the stack up without Docker against an already-reachable Postgres.
  * Shared by `dev` and by `up`'s fallback, so both behave identically.
  */
-async function devWith(dir, dbUrl) {
+async function devWith(dir, dbUrl, flags = {}) {
   // Persist the connection so later runs (and `up`'s fallback) reuse it.
   if (!envFileVars(dir).DATABASE_URL) {
     appendFileSync(join(dir, '.env'), `DATABASE_URL=${dbUrl}\nAUTO_MIGRATE=true\n`);
@@ -723,30 +739,45 @@ async function devWith(dir, dbUrl) {
     log(paint(C.dim, 'Installing dependencies (first run, a few minutes) ...'));
     if ((await runStream('pnpm', ['install'], { cwd: dir })) !== 0) die('pnpm install failed.');
   }
-  // A leftover server from an earlier run holds the port, and Next would fail
-  // with a raw EADDRINUSE stack trace. Say what is wrong and how to clear it.
-  for (const [port, what] of [
-    [3000, 'dashboard'],
-    [3333, 'API'],
-  ]) {
-    if (await tcpReachable('127.0.0.1', port, 700)) {
-      die(
-        `Port ${port} is already in use, so the ${what} cannot start.\n` +
-          '  Something from an earlier run is probably still going. Stop it with:\n' +
-          `    lsof -ti tcp:${port} | xargs kill\n` +
-          '  then re-run. If that is another app of yours, stop that instead.',
-      );
-    }
+  // Something else may hold the usual ports (an earlier run, another project).
+  // Move to the next free pair rather than refusing to start; Next would
+  // otherwise fail with a raw EADDRINUSE stack trace.
+  const webPort = await findFreePort(Number(flags.port) || 3000);
+  const apiPort = await findFreePort(Number(flags['api-port']) || 3333, [webPort]);
+  if (webPort === null || apiPort === null) {
+    die(
+      'Could not find a free port for the dashboard and API.\n' +
+        '  Free one up, or choose them yourself: --port=4000 --api-port=4333',
+    );
   }
+  // Only mention what actually moved; claiming both were busy when one was not
+  // sends people hunting for a process that does not exist.
+  const moved = [
+    webPort !== 3000 ? `dashboard on ${webPort}` : null,
+    apiPort !== 3333 ? `API on ${apiPort}` : null,
+  ].filter(Boolean);
+  if (moved.length) {
+    log(paint(C.amber, `  Default port in use, so the ${moved.join(' and the ')} instead.`));
+  }
+  // The two halves have to agree: the dashboard calls the API by URL, and the
+  // API only accepts the origins it is told about.
+  const portEnv = {
+    PORT: String(webPort),
+    API_PORT: String(apiPort),
+    NEXT_PUBLIC_API_URL: `http://localhost:${apiPort}`,
+    CORS_ORIGINS: `http://localhost:${webPort},http://127.0.0.1:${webPort}`,
+  };
 
   log(paint(C.dim, 'Running database migrations ...'));
   await runWithEnv(dir, 'pnpm', ['--filter', '@companybrain/db', 'migrate']);
   log('');
   log(paint(C.green, '  CompanyBrain is starting (no Docker).'));
   log('');
-  log('  Dashboard   ' + paint(C.amber, 'http://localhost:3000'));
+  log('  Dashboard   ' + paint(C.amber, `http://localhost:${webPort}`));
   log(
-    '  API         ' + paint(C.amber, 'http://localhost:3333') + paint(C.gray, '  (docs at /docs)'),
+    '  API         ' +
+      paint(C.amber, `http://localhost:${apiPort}`) +
+      paint(C.gray, '  (docs at /docs)'),
   );
   log('');
   log(paint(C.gray, '  Logs stream below. Leave this window open; Ctrl-C stops both servers.'));
@@ -759,16 +790,20 @@ async function devWith(dir, dbUrl) {
   // hides the URLs behind a pane you have to navigate, and makes it unclear
   // that quitting it stops the servers. Plain prefixed lines scroll back, copy,
   // and pipe like any other log.
-  await runDev(dir, [
-    'exec',
-    'turbo',
-    'run',
-    'dev',
-    '--filter=@companybrain/api',
-    '--filter=@companybrain/web',
-    '--ui=stream',
-    '--log-prefix=task',
-  ]);
+  await runDev(
+    dir,
+    [
+      'exec',
+      'turbo',
+      'run',
+      'dev',
+      '--filter=@companybrain/api',
+      '--filter=@companybrain/web',
+      '--ui=stream',
+      '--log-prefix=task',
+    ],
+    portEnv,
+  );
 }
 
 function openUrl(url) {
@@ -909,7 +944,8 @@ async function main() {
       log('  help       this message\n');
       log('Flags: --yes (accept defaults / skip confirms), --dir=<path>, --no-mcp,');
       log('       --no-fallback (fail instead of running without Docker), --db=<url>,');
-      log('       --retry-docker (try Docker again after fixing it)\n');
+      log('       --retry-docker (try Docker again after fixing it),');
+      log('       --port=<n> --api-port=<n> (pin the ports)\n');
       break;
     default:
       die(`Unknown command "${cmd}". Try: npx companybrain help`);
