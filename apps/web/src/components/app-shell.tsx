@@ -5,23 +5,25 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'motion/react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { api, type Me } from '@/lib/api';
+import { api, API_URL, type Me } from '@/lib/api';
 import { Logo, BrainMark } from './logo';
-import { Spinner, TooltipProvider } from './ui';
+import { Button, Skeleton, TooltipProvider } from './ui';
 import { CommandPalette } from './command-palette';
 import { NAV_ITEMS, NAV_GROUPS } from './nav-items';
-import { IconLogout, IconSearch, IconSettings } from './icons';
+import { IconLogout, IconPlug, IconSearch, IconSettings } from './icons';
 import { cn } from '@/lib/utils';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [me, setMe] = useState<Me | null>(null);
-  const [state, setState] = useState<'loading' | 'ready' | 'anon'>('loading');
+  const [state, setState] = useState<'loading' | 'ready' | 'anon' | 'unreachable'>('loading');
+  const [attempt, setAttempt] = useState(0);
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     let alive = true;
+    setState('loading');
     api
       .get<Me>('/v1/auth/me')
       .then((m) => {
@@ -34,15 +36,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           setState('ready');
         }
       })
-      .catch(() => {
+      .catch((err: unknown) => {
         if (!alive) return;
-        setState('anon');
-        router.replace('/login');
+        // A 401 means sign in. Anything else (the API is down, CORS is
+        // misconfigured, DNS is wrong) is not an auth problem, and bouncing to a
+        // login screen that cannot work either would hide the real cause.
+        const status = (err as { status?: number })?.status;
+        if (status === 401 || status === 403) {
+          setState('anon');
+          router.replace('/login');
+        } else {
+          setState('unreachable');
+        }
       });
     return () => {
       alive = false;
     };
-  }, [router]);
+  }, [router, attempt]);
 
   // "/" jumps to search from anywhere outside a text field. Cmd-K opens the
   // palette and is owned by CommandPalette.
@@ -59,15 +69,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [router]);
 
+  if (state === 'unreachable') {
+    return <ApiUnreachable apiUrl={API_URL} onRetry={() => setAttempt((n) => n + 1)} />;
+  }
   if (state !== 'ready' || !me) {
-    return (
-      <div className="grid min-h-dvh place-items-center bg-bg">
-        <div className="flex items-center gap-2.5 text-ink-faint">
-          <Spinner className="size-4" />
-          <span className="text-sm">Loading your brain</span>
-        </div>
-      </div>
-    );
+    // The navigation is static, so show the real frame and skeleton only what
+    // actually depends on the request. A centred spinner on an empty page tells
+    // the user nothing and makes the app feel slower than it is.
+    return <ShellSkeleton />;
   }
 
   async function logout() {
@@ -233,6 +242,98 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     </TooltipProvider>
+  );
+}
+
+/**
+ * The frame, with only the request-dependent parts skeletoned. Matches the real
+ * shell's geometry so nothing shifts when the data lands.
+ */
+function ShellSkeleton() {
+  return (
+    <div className="grid min-h-dvh grid-cols-[minmax(0,1fr)] md:grid-cols-[15rem_minmax(0,1fr)]">
+      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-border bg-[var(--color-rail)] md:flex">
+        <div className="flex h-14 items-center px-4">
+          <Logo />
+        </div>
+        <div className="px-3 pb-2">
+          <Skeleton className="h-9 w-full" />
+        </div>
+        <nav className="flex-1 px-3 pb-2" aria-hidden>
+          {NAV_GROUPS.map((group) => (
+            <div key={group.key} className="mb-4">
+              <p className="px-2.5 pb-1 text-2xs font-medium text-ink-faint">{group.label}</p>
+              <div className="space-y-0.5">
+                {NAV_ITEMS.filter((i) => i.group === group.key).map((item) => (
+                  <div key={item.href} className="flex items-center gap-2.5 px-2.5 py-2">
+                    <item.icon size={16} className="shrink-0 text-ink-faint" />
+                    <span className="text-sm text-ink-faint">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </nav>
+        <div className="border-t border-border p-3">
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </aside>
+      <div className="flex min-w-0 flex-col">
+        <main className="mx-auto w-full max-w-6xl px-5 py-6 md:px-8 md:py-8">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="mt-3 h-4 w-72" />
+          <Skeleton className="mt-7 h-12 w-full" />
+          <div className="mt-5 space-y-2">
+            {[0, 1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-16 w-full" />
+            ))}
+          </div>
+        </main>
+      </div>
+      <span className="sr-only" role="status">
+        Loading your workspace
+      </span>
+    </div>
+  );
+}
+
+/**
+ * The API could not be reached. This is an infrastructure problem, not an auth
+ * one, so say what failed, where it was looking, and what to do about it.
+ */
+function ApiUnreachable({ apiUrl, onRetry }: { apiUrl: string; onRetry: () => void }) {
+  return (
+    <div className="grid min-h-dvh place-items-center bg-bg px-6">
+      <div className="w-full max-w-md text-center">
+        <div className="mx-auto grid size-11 place-items-center rounded-xl bg-[var(--color-danger-soft)] text-[var(--color-danger)]">
+          <IconPlug size={22} />
+        </div>
+        <h1 className="mt-4 text-lg font-semibold text-ink">Cannot reach the API</h1>
+        <p className="mt-1.5 text-sm text-ink-muted">
+          The dashboard is running, but nothing answered at{' '}
+          <code className="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-xs text-ink">
+            {apiUrl}
+          </code>
+          {'.'}
+        </p>
+        <ul className="mx-auto mt-5 max-w-sm space-y-2 text-left text-sm text-ink-muted">
+          <li className="flex gap-2">
+            <span className="text-ink-faint">1.</span> Check the API is running, then reload.
+          </li>
+          <li className="flex gap-2">
+            <span className="text-ink-faint">2.</span> If it is on another host, set{' '}
+            <code className="font-mono text-xs">NEXT_PUBLIC_API_URL</code>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-ink-faint">3.</span> If the origins differ, add this one to{' '}
+            <code className="font-mono text-xs">CORS_ORIGINS</code>
+          </li>
+        </ul>
+        <Button variant="primary" className="mt-6" onClick={onRetry}>
+          Try again
+        </Button>
+      </div>
+    </div>
   );
 }
 
