@@ -18,7 +18,7 @@
     "@companybrain/connectors": "workspace:*",
     "@companybrain/core": "workspace:*",
     "@companybrain/db": "workspace:*",
-    "@hono/node-server": "^1.13.1",
+    "@hono/node-server": "^2.0.12",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.6.3",
     "zod": "^3.23.8"
