@@ -56,3 +56,26 @@ jobs:
           file: apps/web/Dockerfile
           push: false
           tags: companybrain/web:ci
+
+  stack:
+    name: boot the compose stack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The two jobs above prove each Dockerfile builds. They cannot tell
+      # whether the container then starts: an image missing a runtime
+      # dependency builds cleanly and crash-loops on a user's machine. Bring
+      # the real stack up and wait for every healthcheck to pass.
+      - name: Start the stack
+        run: docker compose up -d --build --wait --wait-timeout 300
+
+      - name: API answers
+        run: curl -fsS http://localhost:3333/health
+
+      - name: Dashboard answers
+        run: curl -fsS -o /dev/null http://localhost:3000/
+
+      - name: Container logs
+        if: failure()
+        run: docker compose logs --no-color --tail 200
