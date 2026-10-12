@@ -1,7 +1,10 @@
 # Design
 
 Visual system for the CompanyBrain dashboard (`apps/web`). The landing page
-(`landing/`) is a separate brand surface and keeps its own light treatment.
+(`landing/`) is a separate surface: one static page in the installer's amber and
+navy, light and dark, set in IBM Plex served from the page itself. Every result
+it quotes is recorded output; the comment at the top of `landing/index.html` says
+where it came from and when to record it again.
 
 ## Theme
 
