@@ -35,6 +35,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    # Everything in .env reaches the API, not only the names listed below, so
+    # AUTH_MODE, ACCESS_TOKEN, CREDENTIALS_KEY, the model names, and the rest of
+    # .env.example take effect. The file is optional: with none, the defaults
+    # run. Entries under `environment` win over the file.
+    env_file:
+      - path: .env
+        required: false
     environment:
       NODE_ENV: production
       DATABASE_URL: postgres://${POSTGRES_USER:-companybrain}:${POSTGRES_PASSWORD:-companybrain}@db:5432/${POSTGRES_DB:-companybrain}
@@ -46,6 +53,12 @@ services:
       LLM_PROVIDER: ${LLM_PROVIDER:-none}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # Inside the container, localhost is the container. An Ollama server on
+      # the host machine is reached through host.docker.internal instead.
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+    extra_hosts:
+      # Docker Desktop defines this name already; Linux needs it spelled out.
+      - "host.docker.internal:host-gateway"
     ports:
       - "${API_PORT:-3333}:3333"
 

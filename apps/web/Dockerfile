@@ -16,6 +16,10 @@ RUN pnpm --filter @companybrain/web build
 FROM base AS runner
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+# Next's standalone server binds to $HOSTNAME, and Docker sets that to the
+# container id, so it listens on the container's own address and nothing on
+# 127.0.0.1. The healthcheck below then fails forever. Bind every interface.
+ENV HOSTNAME=0.0.0.0
 WORKDIR /app
 # Next.js standalone output bundles a minimal server + only the deps it needs.
 # For a monorepo it mirrors the workspace layout under `standalone/`. Copy with
