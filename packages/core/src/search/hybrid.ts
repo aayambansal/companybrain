@@ -1,6 +1,6 @@
 import type { Sql } from 'postgres';
 import type { SearchHit, SearchMode } from '../types.js';
-import { toPgVector } from '../embeddings/index.js';
+import { toPgVector, toStorageVector } from '../embeddings/index.js';
 import { reciprocalRankFusion } from './rrf.js';
 
 interface Candidate {
@@ -91,7 +91,11 @@ async function vectorArm(
   tags: string[] | null,
   pool: number,
 ): Promise<Candidate[]> {
-  const vec = toPgVector(params.queryEmbedding);
+  // Stored vectors are padded to the column width on ingest. The query has to
+  // be padded the same way, or pgvector refuses the comparison outright
+  // ("different vector dimensions 1536 and 768") for any model narrower than
+  // the column, which is every Ollama and Google embedding model.
+  const vec = toPgVector(toStorageVector(params.queryEmbedding));
   const rows = await sql<Candidate[]>`
     SELECT c.id AS chunk_id, c.document_id, c.space_id, c.content, c.chunk_index,
            c.metadata, d.title AS doc_title, d.source_url AS doc_url,
