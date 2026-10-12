@@ -81,11 +81,13 @@ function die(s) {
 }
 
 function has(cmd) {
-  const r = spawnSync(
-    process.platform === 'win32' ? 'where' : 'command',
-    process.platform === 'win32' ? [cmd] : ['-v', cmd],
-    { stdio: 'ignore', shell: process.platform !== 'win32' },
-  );
+  // `command` is a shell builtin, so it has to go through a shell. Passing it
+  // as one string (cmd is always one of our own literals) rather than as args
+  // keeps Node from printing a DEP0190 warning into the install output.
+  const r =
+    process.platform === 'win32'
+      ? spawnSync('where', [cmd], { stdio: 'ignore' })
+      : spawnSync(`command -v ${cmd}`, { stdio: 'ignore', shell: true });
   return r.status === 0;
 }
 
@@ -559,16 +561,17 @@ async function up(flags) {
   log(paint(C.dim, 'Starting the stack (this builds images on first run) ...\n'));
   const code = await runStream('docker', ['compose', 'up', '-d', '--build'], { cwd: dir });
   if (code !== 0) die('docker compose failed.');
-  const ok = await waitHealth('http://localhost:3333');
+  const { webPort, apiPort } = composePorts(dir);
+  const ok = await waitHealth(`http://localhost:${apiPort}`);
   log('');
-  log(
-    paint(
-      C.green,
-      ok
-        ? '  CompanyBrain is up.'
-        : '  Stack started (health check timed out; it may still be warming up).',
-    ),
-  );
+  if (ok) {
+    log(paint(C.green, '  CompanyBrain is up.'));
+  } else {
+    // Do not call a stack that never answered "started": a crash-looping API
+    // looks exactly like a slow one from here, and the logs tell them apart.
+    log(paint(C.amber, '  The containers started, but the API has not answered yet.'));
+    log(paint(C.gray, '  It may still be warming up. If it stays down: npx companybrain logs'));
+  }
   log('');
   log('  Dashboard   ' + paint(C.amber, `http://localhost:${webPort}`));
   log(
@@ -618,6 +621,17 @@ function envFileVars(dir) {
     if (m) out[m[1]] = m[2];
   }
   return out;
+}
+
+/**
+ * The host ports the compose stack publishes. Compose takes WEB_PORT and
+ * API_PORT from the shell first and the app's .env second, so read them in the
+ * same order and the URLs we print match what Docker actually bound.
+ */
+function composePorts(dir) {
+  const file = envFileVars(dir);
+  const pick = (key, fallback) => Number(process.env[key] || file[key]) || fallback;
+  return { webPort: pick('WEB_PORT', 3000), apiPort: pick('API_PORT', 3333) };
 }
 
 /** Best-effort TCP reachability check (zero-dependency, no pg client needed). */
@@ -849,9 +863,10 @@ async function upgrade(flags) {
   log(paint(C.dim, 'Rebuilding and restarting ...\n'));
   const code = await runStream('docker', ['compose', 'up', '-d', '--build'], { cwd: dir });
   if (code !== 0) die('docker compose failed.');
-  const ok = await waitHealth('http://localhost:3333');
+  const { webPort, apiPort } = composePorts(dir);
+  const ok = await waitHealth(`http://localhost:${apiPort}`);
   log(paint(C.green, ok ? '\n  Upgraded and running.' : '\n  Upgraded (still warming up).'));
-  log('  Dashboard   ' + paint(C.amber, 'http://localhost:3000') + '\n');
+  log('  Dashboard   ' + paint(C.amber, `http://localhost:${webPort}`) + '\n');
 }
 
 async function uninstall(flags) {
@@ -912,17 +927,20 @@ async function main() {
     case 'uninstall':
     case 'remove':
       return uninstall(flags);
-    case 'open':
-      openUrl('http://localhost:3000');
-      log('Opening ' + paint(C.amber, 'http://localhost:3000'));
+    case 'open': {
+      const url = `http://localhost:${composePorts(dir).webPort}`;
+      openUrl(url);
+      log('Opening ' + paint(C.amber, url));
       break;
+    }
     case 'logs':
       requireInstall(dir);
       process.exit(await runStream('docker', ['compose', 'logs', '-f'], { cwd: dir }));
       break;
     case 'status': {
+      const { apiPort } = composePorts(dir);
       try {
-        const r = await fetch('http://localhost:3333/health', {
+        const r = await fetch(`http://localhost:${apiPort}/health`, {
           signal: AbortSignal.timeout(3000),
         });
         const j = await r.json().catch(() => ({}));
@@ -931,7 +949,7 @@ async function main() {
         if (r.ok) log(paint(C.green, 'up') + ' ' + JSON.stringify(j));
         else log(paint(C.red, 'degraded') + ' ' + JSON.stringify(j));
       } catch {
-        log(paint(C.red, 'down') + ' (API not reachable on :3333)');
+        log(paint(C.red, 'down') + ` (API not reachable on :${apiPort})`);
       }
       break;
     }
