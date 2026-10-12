@@ -3,956 +3,1679 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f9fafe" />
-    <meta name="color-scheme" content="light" />
-    <title>Ask your company anything · CompanyBrain</title>
+    <title>CompanyBrain: search your team's documents on your own machine</title>
     <meta
       name="description"
-      content="Self-hosted semantic memory for your team. Index everything from Slack to Google Docs to PDFs, then get cited answers over an API, an SDK, or MCP. 40+ connectors, hybrid search, one command to run."
+      content="CompanyBrain is a free, MIT-licensed search index for your team's notes and documents that you run yourself. Everything stays in your own Postgres, and every result comes with its source."
     />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Ask your company anything · CompanyBrain" />
-    <meta property="og:description" content="Self-hosted semantic memory. Hybrid search with reranking, 40+ connectors, MCP, SDKs. State-of-the-art retrieval on BEIR, reproducibly." />
     <link rel="canonical" href="https://aayambansal.github.io/companybrain/" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#ffaf00" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#070b19" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
     <meta property="og:url" content="https://aayambansal.github.io/companybrain/" />
+    <meta property="og:title" content="CompanyBrain" />
+    <meta
+      property="og:description"
+      content="A search index for your team's notes and documents that you run yourself. Free and open source."
+    />
     <meta property="og:image" content="https://aayambansal.github.io/companybrain/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Ask your company anything · CompanyBrain" />
-    <meta name="twitter:description" content="Self-hosted semantic memory. Hybrid search with reranking, 40+ connectors, MCP. SOTA retrieval on BEIR." />
-    <meta name="twitter:image" content="https://aayambansal.github.io/companybrain/og.png" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ffffff'/%3E%3Cg fill='none' stroke='%235b45e4' stroke-width='1.6' stroke-linejoin='round'%3E%3Cpath d='M12 6.5C9.4 6.5 7.4 8.4 7.4 10.8c0 .4.05.9.15 1.3C6.3 12.8 5.5 14 5.5 15.4c0 1.2.55 2.3 1.5 3-.2.45-.28.95-.28 1.45 0 2.2 1.85 3.95 4.25 3.95.65 0 1.3-.18 1.85-.46.46 1 1.55 1.65 2.85 1.65V6.85c-.92-.28-2.4-.35-3.6-.35Z'/%3E%3Cpath d='M20 6.5c2.6 0 4.6 1.9 4.6 4.3 0 .4-.05.9-.15 1.3 1.25.7 2.05 1.9 2.05 3.3 0 1.2-.55 2.3-1.5 3 .2.45.28.95.28 1.45 0 2.2-1.85 3.95-4.25 3.95-.65 0-1.3-.18-1.85-.46-.46 1-1.55 1.65-2.85 1.65'/%3E%3C/g%3E%3Cpath d='M16 7v18' stroke='%23f0a63c' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E" />
-    <link rel="preconnect" href="https://api.fontshare.com" />
-    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=switzer@400,500,600,700&display=swap" rel="stylesheet" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23101936'/%3E%3Cg fill='%23ffaf00'%3E%3Crect x='6' y='6' width='4.2' height='4.2'/%3E%3Crect x='10' y='6' width='4.2' height='4.2'/%3E%3Crect x='14' y='6' width='4.2' height='4.2'/%3E%3Crect x='18' y='6' width='4.2' height='4.2'/%3E%3Crect x='22' y='6' width='4.2' height='4.2'/%3E%3Crect x='6' y='10' width='4.2' height='4.2'/%3E%3Crect x='6' y='14' width='4.2' height='4.2'/%3E%3Crect x='6' y='18' width='4.2' height='4.2'/%3E%3Crect x='6' y='22' width='4.2' height='4.2'/%3E%3Crect x='10' y='22' width='4.2' height='4.2'/%3E%3Crect x='14' y='22' width='4.2' height='4.2'/%3E%3Crect x='18' y='22' width='4.2' height='4.2'/%3E%3Crect x='22' y='22' width='4.2' height='4.2'/%3E%3C/g%3E%3C/svg%3E" />
+    <link rel="preload" href="fonts/ibm-plex-sans-var.woff2" as="font" type="font/woff2" crossorigin />
+    <!--
+      Everything quoted on this page is real output. The table of twelve questions, the search
+      results, and both answers were recorded on 13 October 2026 from a fresh install of commit e1945a0,
+      using the sample notes in bench/. `node bench/run.mjs --verbose` prints the same ranks.
+      Record them again whenever retrieval changes; do not edit the numbers by hand.
+    -->
     <style>
+      @font-face {
+        font-family: "IBM Plex Sans";
+        src: url("fonts/ibm-plex-sans-var.woff2") format("woff2");
+        font-weight: 100 700;
+        font-stretch: 75% 100%;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "IBM Plex Mono";
+        src: url("fonts/ibm-plex-mono-400.woff2") format("woff2");
+        font-weight: 400;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "IBM Plex Mono";
+        src: url("fonts/ibm-plex-mono-500.woff2") format("woff2");
+        font-weight: 500;
+        font-display: swap;
+      }
+
       :root {
-        --paper: oklch(0.986 0.005 264);
-        --paper-2: oklch(0.966 0.008 264);
-        --surface: #ffffff;
-        --ink: oklch(0.205 0.024 266);
-        --ink-2: oklch(0.37 0.021 266);
-        --muted: oklch(0.52 0.019 266);
-        --line: oklch(0.905 0.008 266);
-        --line-2: oklch(0.85 0.012 266);
-        --iris: oklch(0.54 0.21 264);
-        --iris-strong: oklch(0.47 0.22 264);
-        --iris-soft: oklch(0.54 0.21 264 / 0.1);
-        --iris-line: oklch(0.54 0.21 264 / 0.26);
-        --spark: oklch(0.77 0.16 66);
-        --spark-ink: oklch(0.42 0.11 62);
-        --cyan: oklch(0.66 0.11 210);
-        --display: "Clash Display", ui-sans-serif, system-ui, sans-serif;
-        --sans: "Switzer", ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
-        --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-        --maxw: 1140px;
-        --ease: cubic-bezier(0.16, 1, 0.3, 1);
-        --z-nav: 50;
+        color-scheme: light dark;
+        --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+        --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        --gutter: clamp(1rem, 4vw, 3rem);
+
+        /* Amber is the colour the installer prints its name in (xterm 214). */
+        --amber: #ffaf00;
+        --paper: #ffffff;
+        --ink: #101936;
+        --quiet: #49546f;
+        --line: #cdd3e0;
+        --tint: #f2f4f9;
+        --mark: #ffdf8a;
+        --band: var(--amber);
+        --band-ink: #101936;
+        --box: #ffffff;
+        --focus: #101936;
+        --row1: #101936;
+        --row2: #101936;
+        --row3: #101936;
+        --row4: #101936;
+        --row5: #101936;
       }
-      * { box-sizing: border-box; }
-      html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --paper: #0c1124;
+          --ink: #eef1f8;
+          --quiet: #b9c1d6;
+          --line: #303a5c;
+          --tint: #161d38;
+          --mark: #7a5200;
+          --band: #070b19;
+          --band-ink: #eef1f8;
+          --box: #161d38;
+          --focus: #ffaf00;
+          /* The five tones the terminal banner steps through, top row to bottom. */
+          --row1: #ffff00;
+          --row2: #ffd700;
+          --row3: #ffaf00;
+          --row4: #ff8700;
+          --row5: #d78700;
+        }
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+        scroll-padding-top: 1rem;
+      }
       body {
-        margin: 0; background: var(--paper); color: var(--ink);
-        font-family: var(--sans); font-size: 17px; line-height: 1.6;
-        -webkit-font-smoothing: antialiased; overflow-x: hidden;
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font: 400 1.0625rem/1.6 var(--sans);
+        -webkit-font-smoothing: antialiased;
       }
-      a { color: var(--iris-strong); text-decoration: none; }
-      a:hover { color: var(--iris); }
-      ::selection { background: var(--iris-soft); color: var(--iris-strong); }
-      :focus-visible { outline: 2px solid var(--iris); outline-offset: 3px; border-radius: 6px; }
-      button { font: inherit; }
-      .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
-      h1, h2, h3 { font-family: var(--display); font-weight: 600; letter-spacing: -0.025em; margin: 0; text-wrap: balance; }
-      p { text-wrap: pretty; }
-      .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
-
-      /* ── Nav ── */
-      nav {
-        position: sticky; top: 0; z-index: var(--z-nav);
-        background: color-mix(in oklab, var(--paper) 78%, transparent);
-        backdrop-filter: saturate(1.5) blur(14px);
-        border-bottom: 1px solid transparent; transition: border-color 0.3s;
+      h1,
+      h2,
+      h3,
+      p,
+      ul,
+      ol,
+      dl,
+      dd,
+      figure,
+      pre,
+      table {
+        margin: 0;
       }
-      nav.scrolled { border-color: var(--line); }
-      nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 68px; }
-      .brand { display: flex; align-items: center; gap: 11px; font-family: var(--display); font-weight: 600; font-size: 19px; letter-spacing: -0.02em; color: var(--ink); }
-      .brand .mark { width: 30px; height: 30px; }
-      .nav-links { display: flex; align-items: center; gap: 28px; font-size: 15px; font-weight: 500; }
-      .nav-links a.q { color: var(--ink-2); }
-      .nav-links a.q:hover { color: var(--ink); }
-      .btn {
-        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-        font-family: var(--sans); font-weight: 600; font-size: 15px;
-        border-radius: 11px; padding: 11px 18px; cursor: pointer; border: 1px solid transparent;
-        transition: transform 0.16s var(--ease), box-shadow 0.22s var(--ease), background 0.2s, border-color 0.2s, color 0.2s;
+      ul,
+      ol {
+        padding: 0;
+        list-style: none;
       }
-      .btn-primary { background: var(--ink); color: var(--paper); box-shadow: 0 1px 2px oklch(0.2 0.02 266 / 0.22); }
-      .btn-primary:hover { color: var(--paper); transform: translateY(-1px); box-shadow: 0 10px 26px oklch(0.2 0.02 266 / 0.22); }
-      .btn-iris { background: var(--iris); color: #fff; box-shadow: 0 8px 22px oklch(0.54 0.21 264 / 0.34); }
-      .btn-iris:hover { background: var(--iris-strong); color: #fff; transform: translateY(-1px); box-shadow: 0 12px 30px oklch(0.54 0.21 264 / 0.4); }
-      .btn-ghost { background: var(--surface); color: var(--ink); border-color: var(--line-2); }
-      .btn-ghost:hover { border-color: var(--iris-line); color: var(--iris-strong); }
-      @media (max-width: 760px) { .nav-links a.q { display: none; } }
-
-      /* ── Hero ── */
-      header { position: relative; padding: clamp(48px, 8vw, 92px) 0 clamp(40px, 6vw, 72px); overflow: hidden; }
-      #constellation { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.85; }
-      header .veil { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(90% 70% at 50% 30%, transparent 34%, var(--paper) 88%); }
-      header .wrap { position: relative; z-index: 2; }
-      .pill {
-        display: inline-flex; align-items: center; gap: 9px;
-        background: var(--surface); border: 1px solid var(--line-2); border-radius: 999px;
-        padding: 6px 14px 6px 8px; font-size: 13.5px; font-weight: 500; color: var(--ink-2);
-        box-shadow: 0 2px 12px oklch(0.2 0.02 266 / 0.05);
+      a {
+        color: inherit;
+        text-decoration-line: underline;
+        text-decoration-thickness: 0.09em;
+        text-underline-offset: 0.2em;
       }
-      .pill .tag { font-family: var(--mono); font-size: 11px; background: var(--iris-soft); color: var(--iris-strong); padding: 3px 8px; border-radius: 999px; }
-      .pill b { color: var(--ink); font-weight: 600; }
-      .hero-head { max-width: 780px; }
-      h1 { font-size: clamp(2.5rem, 6.4vw, 4.9rem); line-height: 1.0; margin: 22px 0 0; font-weight: 600; }
-      h1 .g { color: var(--iris); }
-      @media (min-width: 680px) { h1 .g { display: block; } }
-      .lede { font-size: clamp(1.08rem, 2vw, 1.32rem); color: var(--ink-2); max-width: 56ch; margin: 20px 0 0; line-height: 1.5; }
-      .hero-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 30px; }
-      .cmd {
-        display: inline-flex; align-items: center; gap: 12px;
-        background: var(--surface); border: 1px solid var(--line-2); border-radius: 12px;
-        padding: 11px 11px 11px 17px; font-family: var(--mono); font-size: 15px;
-        box-shadow: 0 4px 20px oklch(0.2 0.02 266 / 0.06);
+      a:hover {
+        background: var(--mark);
       }
-      .cmd .p { color: var(--muted); }
-      .cmd .k { color: var(--iris-strong); }
-      .cmd .copy { border: 1px solid var(--line-2); background: var(--paper-2); color: var(--muted); border-radius: 8px; padding: 5px 10px; font-family: var(--mono); font-size: 12px; cursor: pointer; transition: all 0.15s; }
-      .cmd .copy:hover { color: var(--iris-strong); border-color: var(--iris-line); }
-      .trust { margin-top: 22px; font-size: 13.5px; color: var(--muted); font-family: var(--mono); }
-      .trust b { color: var(--ink-2); font-weight: 500; }
-
-      /* ── Ask console (hero centerpiece) ── */
-      .console {
-        position: relative; z-index: 2; margin: clamp(40px, 6vw, 64px) auto 0; max-width: 940px;
-        background: var(--surface); border: 1px solid var(--line-2); border-radius: 22px;
-        box-shadow: 0 2px 4px oklch(0.2 0.02 266 / 0.04), 0 30px 70px -30px oklch(0.35 0.06 266 / 0.28);
+      /* Vertical padding on an inline link grows its hit area past 24px without moving the line. */
+      main a {
+        padding-block: 0.2em;
+      }
+      :focus-visible {
+        outline: 3px solid var(--focus);
+        outline-offset: 3px;
+      }
+      code,
+      pre,
+      kbd {
+        font-family: var(--mono);
+        font-size: 0.92em;
+      }
+      p code,
+      li code,
+      dd code,
+      figcaption code {
+        background: var(--tint);
+        padding: 0.1em 0.3em;
+        overflow-wrap: anywhere;
+      }
+      mark {
+        background: var(--mark);
+        color: inherit;
+        padding: 0 0.1em;
+      }
+      .wrap {
+        width: min(100% - 2 * var(--gutter), 68rem);
+        margin-inline: auto;
+      }
+      .skip {
+        position: absolute;
+        left: var(--gutter);
+        top: -4rem;
+        background: var(--ink);
+        color: var(--paper);
+        padding: 0.6rem 0.9rem;
+        z-index: 2;
+      }
+      .skip:focus {
+        top: 0.5rem;
+      }
+      .sr {
+        position: absolute;
+        width: 1px;
+        height: 1px;
         overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
       }
-      .console-bar { display: flex; align-items: center; gap: 10px; padding: 13px 18px; border-bottom: 1px solid var(--line); background: var(--paper); }
-      .console-bar .dots { display: flex; gap: 6px; }
-      .console-bar .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line-2); display: block; }
-      .console-bar .title { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
-      .console-bar .live { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11.5px; color: var(--iris-strong); }
-      .console-bar .live .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--iris); box-shadow: 0 0 0 4px var(--iris-soft); animation: breathe 2.4s var(--ease) infinite; }
-      .console-bar .live.done { color: var(--spark-ink); }
-      .console-bar .live.done .dot { background: var(--spark); box-shadow: 0 0 0 4px oklch(0.77 0.16 66 / 0.18); animation: none; }
-      @keyframes breathe { 50% { box-shadow: 0 0 0 7px transparent; } }
 
-      .console-body { display: grid; grid-template-columns: 1fr 1fr; }
-      @media (max-width: 800px) { .console-body { grid-template-columns: 1fr; } }
-      .console-left { padding: 22px; display: flex; flex-direction: column; }
-      .console-right { border-left: 1px solid var(--line); background: linear-gradient(180deg, var(--paper) 0%, var(--surface) 100%); display: grid; place-items: center; padding: 8px; min-height: 260px; }
-      @media (max-width: 800px) { .console-right { border-left: 0; border-top: 1px solid var(--line); order: -1; } }
-
-      .field { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line-2); border-radius: 12px; padding: 12px 14px; background: var(--paper); }
-      .field svg { width: 18px; height: 18px; color: var(--muted); flex: none; }
-      .field .q { font-size: 15px; color: var(--ink); min-height: 22px; line-height: 22px; }
-      .field .caret { display: inline-block; width: 2px; height: 17px; background: var(--iris); margin-left: 1px; vertical-align: -3px; animation: blink 1.1s steps(1) infinite; }
-      @keyframes blink { 50% { opacity: 0; } }
-      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-      .chip-q {
-        font-size: 13px; font-weight: 500; color: var(--ink-2); cursor: pointer;
-        background: var(--surface); border: 1px solid var(--line-2); border-radius: 999px; padding: 7px 13px;
-        transition: all 0.16s var(--ease);
+      /* ---------- band ---------- */
+      .band {
+        background: var(--band);
+        color: var(--band-ink);
+        padding-block: clamp(1rem, 2.5vw, 1.5rem) clamp(2.5rem, 6vw, 4.25rem);
+        --focus: var(--band-ink);
       }
-      .chip-q:hover { border-color: var(--iris-line); color: var(--iris-strong); transform: translateY(-1px); }
-      .chip-q[aria-pressed="true"] { background: var(--iris); border-color: var(--iris); color: #fff; }
+      .band a:hover {
+        background: var(--band-ink);
+        color: var(--band);
+      }
+      .ways {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.25rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .ways a {
+        display: inline-block;
+        padding-block: 0.6rem;
+      }
+      .wordmark {
+        display: block;
+        width: 100%;
+        height: auto;
+        margin-block: clamp(1.25rem, 4vw, 2.75rem) clamp(1.75rem, 4.5vw, 3rem);
+      }
+      .r1 {
+        fill: var(--row1);
+      }
+      .r2 {
+        fill: var(--row2);
+      }
+      .r3 {
+        fill: var(--row3);
+      }
+      .r4 {
+        fill: var(--row4);
+      }
+      .r5 {
+        fill: var(--row5);
+      }
+      h1 {
+        font-size: clamp(1.85rem, 1.05rem + 3.3vw, 3.2rem);
+        line-height: 1.08;
+        font-weight: 600;
+        font-stretch: 90%;
+        letter-spacing: -0.018em;
+        max-width: 30ch;
+        text-wrap: balance;
+      }
+      .lead {
+        margin-top: 1.25rem;
+        max-width: 62ch;
+        font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.2rem);
+        line-height: 1.55;
+      }
+      .start {
+        margin-top: 1.9rem;
+        display: grid;
+        gap: 0.9rem 1.75rem;
+        align-items: center;
+      }
+      @media (min-width: 56rem) {
+        .start {
+          grid-template-columns: auto minmax(0, 1fr);
+        }
+      }
+      .command {
+        display: flex;
+        align-items: stretch;
+        width: fit-content;
+        max-width: 100%;
+        background: var(--box);
+        color: var(--ink);
+        border: 2px solid var(--band-ink);
+      }
+      .command code {
+        padding: 0.75rem 1.1rem;
+        font-size: clamp(0.95rem, 0.6rem + 1.6vw, 1.15rem);
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .copy {
+        font: 600 0.95rem var(--sans);
+        min-width: 5.25rem;
+        padding: 0 1rem;
+        border: 0;
+        border-left: 2px solid var(--band-ink);
+        background: var(--band-ink);
+        color: var(--band);
+        cursor: pointer;
+      }
+      .copy:hover {
+        background: var(--box);
+        color: var(--ink);
+      }
+      .needs {
+        font-size: 0.95rem;
+        max-width: 46ch;
+      }
 
-      .answer { margin-top: 18px; padding-top: 18px; border-top: 1px dashed var(--line-2); flex: 1; min-height: 132px; }
-      .answer .lbl { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px; }
-      .answer .lbl .spin { width: 12px; height: 12px; border: 2px solid var(--iris-soft); border-top-color: var(--iris); border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
-      .answer.thinking .lbl .spin { display: inline-block; }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      .answer .text { margin: 10px 0 0; font-size: 15px; color: var(--ink); line-height: 1.62; }
-      .answer .text .hint { color: var(--muted); }
-      .answer .text sup { color: var(--iris-strong); font-weight: 700; font-size: 11px; font-family: var(--mono); padding: 0 1px; }
-      .answer .cites { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; opacity: 0; transition: opacity 0.4s var(--ease); }
-      .answer .cites.show { opacity: 1; }
-      .cite { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); background: var(--paper-2); border: 1px solid var(--line); border-radius: 7px; padding: 4px 9px; }
-      .cite .n { color: var(--spark-ink); font-weight: 600; }
+      /* ---------- sections ---------- */
+      main > section {
+        padding-block: clamp(2.5rem, 5vw, 3.75rem);
+      }
+      main > section + section {
+        border-top: 2px solid var(--ink);
+      }
+      h2 {
+        font-size: clamp(1.5rem, 1.15rem + 1.5vw, 2.1rem);
+        line-height: 1.12;
+        font-weight: 600;
+        font-stretch: 90%;
+        letter-spacing: -0.012em;
+        max-width: 28ch;
+        text-wrap: balance;
+      }
+      h3 {
+        font-size: 1.0625rem;
+        line-height: 1.3;
+        font-weight: 600;
+      }
+      .prose {
+        max-width: 66ch;
+      }
+      .prose > * + * {
+        margin-top: 1rem;
+      }
+      h2 + .prose,
+      h2 + p {
+        margin-top: 1.25rem;
+      }
+      .aside {
+        font-size: 0.95rem;
+        color: var(--quiet);
+        max-width: 66ch;
+      }
+      .output {
+        background: var(--tint);
+        padding: 0.9rem 1.05rem;
+        overflow-x: auto;
+        font-size: 0.875rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        tab-size: 2;
+      }
 
-      #graph { width: 100%; height: auto; max-width: 460px; display: block; }
-      .node circle.core { fill: color-mix(in oklab, var(--iris) 26%, var(--surface)); stroke: var(--iris-line); stroke-width: 1; transition: fill 0.4s var(--ease), stroke 0.4s; }
-      .node text { font-family: var(--mono); font-size: 9.5px; fill: var(--muted); transition: fill 0.4s; }
-      .node circle.ring { fill: none; stroke: var(--spark); stroke-width: 1.5; opacity: 0; transform-box: fill-box; transform-origin: center; }
-      .node.lit circle.core { fill: var(--spark); stroke: var(--spark); }
-      .node.lit text { fill: var(--spark-ink); font-weight: 600; }
-      .node.lit circle.ring { animation: ring 1.4s var(--ease) infinite; }
-      @keyframes ring { 0% { opacity: 0.7; r: 6; } 100% { opacity: 0; r: 15; } }
-      .edge { stroke: var(--spark); stroke-width: 1.4; opacity: 0; transition: opacity 0.35s, stroke-dashoffset 0.7s var(--ease); }
-      .edge.on { opacity: 0.6; }
-      .brain-node circle { fill: var(--surface); stroke: var(--iris); stroke-width: 1.4; }
+      /* ---------- how it works ---------- */
+      .stages {
+        margin-top: 2.25rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+        gap: 1.75rem 1.5rem;
+        counter-reset: stage;
+      }
+      .stages li {
+        counter-increment: stage;
+      }
+      .stages svg {
+        display: block;
+        width: 100%;
+        max-width: 15rem;
+        height: auto;
+        background: var(--tint);
+      }
+      .stages h3 {
+        margin-top: 0.85rem;
+      }
+      .stages h3::before {
+        content: counter(stage) ". ";
+      }
+      .stages p {
+        margin-top: 0.2rem;
+        font-size: 0.95rem;
+        color: var(--quiet);
+      }
+      .pen {
+        fill: none;
+        stroke: var(--ink);
+        stroke-width: 2;
+      }
+      .sheetfill {
+        fill: var(--paper);
+        stroke: var(--ink);
+        stroke-width: 2;
+      }
+      .inkfill {
+        fill: var(--ink);
+      }
+      .amberfill {
+        fill: var(--amber);
+        stroke: var(--ink);
+        stroke-width: 2;
+      }
+      .faint {
+        fill: var(--line);
+      }
 
-      /* ── Sections ── */
-      section { padding: clamp(60px, 8vw, 104px) 0; }
-      .band { background: var(--paper-2); border-block: 1px solid var(--line); }
-      h2 { font-size: clamp(1.85rem, 4vw, 2.85rem); line-height: 1.05; }
-      .deck { color: var(--ink-2); max-width: 60ch; margin: 16px 0 0; font-size: 1.12rem; }
-      .sec-top { max-width: 62ch; }
+      /* ---------- twelve questions ---------- */
+      .bench {
+        margin-top: 2rem;
+        display: grid;
+        gap: 2rem 2.5rem;
+        align-items: start;
+      }
+      @media (min-width: 66rem) {
+        .bench {
+          grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+        }
+        .back {
+          position: sticky;
+          top: 1.25rem;
+        }
+      }
+      .sheet {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+        line-height: 1.35;
+      }
+      .sheet th,
+      .sheet td {
+        padding: 0;
+        text-align: left;
+        font-weight: 400;
+        border-bottom: 1px solid var(--line);
+      }
+      .sheet thead th {
+        padding: 0 0.6rem 0.6rem 0;
+        vertical-align: bottom;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border-bottom: 2px solid var(--ink);
+      }
+      .sheet thead span {
+        display: block;
+        font-weight: 400;
+        color: var(--quiet);
+      }
+      .sheet td {
+        padding: 0.45rem 0.6rem 0.45rem 0;
+        white-space: nowrap;
+        width: 1%;
+      }
+      .pick {
+        font: inherit;
+        color: inherit;
+        text-align: left;
+        display: block;
+        width: 100%;
+        min-height: 2.75rem;
+        padding: 0.5rem 0.9rem 0.5rem 0.7rem;
+        border: 0;
+        border-left: 0.3rem solid transparent;
+        background: none;
+        cursor: pointer;
+      }
+      .pick:hover {
+        background: var(--tint);
+      }
+      .pick[aria-pressed="true"] {
+        border-left-color: var(--amber);
+        background: var(--tint);
+        font-weight: 600;
+      }
+      .slots {
+        display: inline-grid;
+        grid-auto-flow: column;
+        gap: 2px;
+        vertical-align: -1px;
+      }
+      .slots i {
+        width: 0.7rem;
+        height: 0.7rem;
+        border: 1.5px solid var(--line);
+      }
+      .slots i[data-on] {
+        background: var(--amber);
+        border-color: var(--ink);
+      }
+      .rank {
+        display: inline-block;
+        min-width: 2.1rem;
+        margin-left: 0.35rem;
+        font: 500 0.8rem var(--mono);
+      }
+      .back {
+        border: 2px solid var(--ink);
+        padding: 1.1rem 1.2rem 1.25rem;
+      }
+      .back h3 {
+        font-size: 0.82rem;
+        color: var(--quiet);
+        font-weight: 600;
+      }
+      .asked {
+        margin-top: 0.2rem;
+        font-size: 1.2rem;
+        line-height: 1.3;
+        font-weight: 600;
+      }
+      .hits {
+        margin-top: 0.9rem;
+      }
+      .hits li {
+        padding-block: 0.85rem;
+        border-top: 1px solid var(--line);
+      }
+      .hit-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.2rem 0.75rem;
+      }
+      .hit-title {
+        font-weight: 600;
+      }
+      .right {
+        font-size: 0.8rem;
+        font-weight: 600;
+        background: var(--amber);
+        color: #101936;
+        padding: 0.05rem 0.4rem;
+      }
+      .score {
+        margin-left: auto;
+        font: 500 0.8rem var(--mono);
+      }
+      .parts {
+        font: 400 0.78rem var(--mono);
+        color: var(--quiet);
+      }
+      .passage {
+        margin-top: 0.35rem;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+      .note {
+        margin-top: 0.9rem;
+        font-size: 0.85rem;
+        color: var(--quiet);
+      }
+      .after {
+        margin-top: 2.25rem;
+      }
 
-      /* Retrieval explainer (asymmetric) */
-      .explain { display: grid; grid-template-columns: 0.92fr 1.08fr; gap: clamp(28px, 5vw, 64px); align-items: center; margin-top: 8px; }
-      @media (max-width: 900px) { .explain { grid-template-columns: 1fr; } }
-      .explain .lead h2 { margin-bottom: 16px; }
-      .explain .lead p { color: var(--ink-2); font-size: 1.06rem; }
-      .explain .lead .facts { list-style: none; padding: 0; margin: 22px 0 0; display: flex; flex-direction: column; gap: 13px; }
-      .explain .lead .facts li { display: flex; gap: 12px; align-items: flex-start; font-size: 0.98rem; color: var(--ink-2); }
-      .explain .lead .facts svg { width: 20px; height: 20px; color: var(--iris); flex: none; margin-top: 1px; }
-      .explain .lead .facts b { color: var(--ink); font-weight: 600; }
+      /* ---------- answers ---------- */
+      .pair {
+        margin-top: 1.75rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+        gap: 1.75rem 2rem;
+      }
+      .pair h3 {
+        margin-bottom: 0.6rem;
+      }
+      .pair p {
+        margin-top: 0.7rem;
+        font-size: 0.95rem;
+        color: var(--quiet);
+      }
 
-      .diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 26px; box-shadow: 0 20px 50px -30px oklch(0.35 0.06 266 / 0.3); }
-      .lane { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 14px; }
-      .lane + .lane { margin-top: 14px; }
-      .lane .tag { font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 8px; text-align: center; }
-      .lane.vec .tag { background: var(--iris-soft); color: var(--iris-strong); }
-      .lane.kw .tag { background: color-mix(in oklab, var(--cyan) 15%, var(--surface)); color: color-mix(in oklab, var(--cyan) 72%, black); }
-      .lane .cells { display: flex; gap: 6px; }
-      .lane .cells i { height: 30px; flex: 1; border-radius: 6px; display: block; }
-      .lane.vec .cells i { background: color-mix(in oklab, var(--iris) 16%, var(--surface)); }
-      .lane.vec .cells i:nth-child(1) { background: color-mix(in oklab, var(--iris) 62%, var(--surface)); }
-      .lane.vec .cells i:nth-child(3) { background: color-mix(in oklab, var(--iris) 40%, var(--surface)); }
-      .lane.kw .cells i { background: color-mix(in oklab, var(--cyan) 14%, var(--surface)); }
-      .lane.kw .cells i:nth-child(2) { background: color-mix(in oklab, var(--cyan) 55%, var(--surface)); }
-      .lane.kw .cells i:nth-child(4) { background: color-mix(in oklab, var(--cyan) 36%, var(--surface)); }
-      .fuse { text-align: center; margin: 18px 0; font-family: var(--mono); font-size: 12px; color: var(--muted); position: relative; }
-      .fuse span { background: var(--surface); padding: 0 12px; position: relative; z-index: 1; }
-      .fuse::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--line); }
-      .result { display: flex; flex-direction: column; gap: 8px; }
-      .result .r { display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); }
-      .result .r.top { border-color: var(--iris-line); background: linear-gradient(90deg, var(--iris-soft), transparent 60%); }
-      .result .r .rk { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-      .result .r .rt { font-size: 14px; font-weight: 500; }
-      .result .r.top .rt { color: var(--iris-strong); }
-      .result .r .sc { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
-      .result .r.top .sc { color: var(--iris-strong); font-weight: 600; }
+      /* ---------- run it ---------- */
+      .steps {
+        margin-top: 1.75rem;
+        max-width: 66ch;
+        counter-reset: step;
+      }
+      .steps li {
+        counter-increment: step;
+        display: grid;
+        grid-template-columns: 2.25rem minmax(0, 1fr);
+        padding-block: 0.8rem;
+        border-top: 1px solid var(--line);
+      }
+      .steps li::before {
+        content: counter(step);
+        font: 500 1rem var(--mono);
+      }
+      .shot {
+        margin-top: 2.25rem;
+      }
+      .shot img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border: 2px solid var(--ink);
+      }
+      .shot figcaption {
+        margin-top: 0.6rem;
+        font-size: 0.9rem;
+        color: var(--quiet);
+      }
+      .split {
+        margin-top: 2.25rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+        gap: 1.75rem 2.5rem;
+      }
+      .split p {
+        margin-top: 0.4rem;
+        font-size: 0.98rem;
+      }
 
-      /* Capabilities (editorial, varied) */
-      .caps { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; margin-top: 44px; }
-      .cap { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px; transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s; }
-      .cap:hover { transform: translateY(-3px); box-shadow: 0 18px 44px -20px oklch(0.35 0.06 266 / 0.28); border-color: var(--line-2); }
-      .cap .ic { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: var(--iris-soft); color: var(--iris-strong); margin-bottom: 16px; }
-      .cap h3 { font-size: 1.24rem; }
-      .cap p { color: var(--ink-2); margin: 9px 0 0; font-size: 1rem; }
-      .cap.c6 { grid-column: span 6; }
-      .cap.c4 { grid-column: span 4; }
-      .cap.c8 { grid-column: span 8; display: grid; grid-template-columns: 1.05fr 1fr; gap: 26px; align-items: center; }
-      .cap.c8 .art { align-self: stretch; }
-      @media (max-width: 880px) { .caps { grid-template-columns: repeat(6, 1fr); } .cap.c6, .cap.c4 { grid-column: span 6; } .cap.c8 { grid-column: span 6; grid-template-columns: 1fr; } }
-      @media (max-width: 520px) { .caps { grid-template-columns: 1fr; } .cap.c6, .cap.c4, .cap.c8 { grid-column: span 1; } }
+      /* ---------- sources ---------- */
+      .sources {
+        margin-top: 1.75rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+        gap: 1.5rem 2rem;
+      }
+      .sources h3 {
+        font-size: 0.82rem;
+        color: var(--quiet);
+        padding-bottom: 0.35rem;
+        border-bottom: 1px solid var(--line);
+      }
+      .sources p {
+        margin-top: 0.45rem;
+        font-size: 0.98rem;
+        line-height: 1.55;
+      }
 
-      /* temporal mini-visual */
-      .temporal { font-family: var(--mono); font-size: 12.5px; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; line-height: 2; }
-      .temporal .old { color: var(--muted); text-decoration: line-through; }
-      .temporal .new { color: var(--iris-strong); font-weight: 600; }
-      .temporal .flag { color: var(--spark-ink); }
+      /* ---------- ways in ---------- */
+      .reach {
+        margin-top: 1.75rem;
+        max-width: 54rem;
+      }
+      .reach > div {
+        display: grid;
+        gap: 0.2rem 1.5rem;
+        padding-block: 0.9rem;
+        border-top: 1px solid var(--line);
+      }
+      @media (min-width: 46rem) {
+        .reach > div {
+          grid-template-columns: 13rem minmax(0, 1fr);
+        }
+      }
+      .reach dt {
+        font-weight: 600;
+      }
+      .reach dd p + p,
+      .reach dd pre {
+        margin-top: 0.6rem;
+      }
+      .state {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-bottom: 0.15rem;
+      }
+      .state::before {
+        content: "";
+        width: 0.7rem;
+        height: 0.7rem;
+        border: 1.5px solid var(--ink);
+      }
+      .state[data-state="on"]::before {
+        background: var(--amber);
+      }
 
-      /* Pipeline (a real sequence -> numbers earn their place) */
-      .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 44px; counter-reset: step; }
-      @media (max-width: 820px) { .pipeline { grid-template-columns: 1fr 1fr; } }
-      @media (max-width: 460px) { .pipeline { grid-template-columns: 1fr; } }
-      .pstep { position: relative; padding: 22px 20px; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); }
-      .pstep .no { font-family: var(--mono); font-size: 12px; color: var(--iris-strong); font-weight: 600; }
-      .pstep h3 { font-family: var(--display); font-weight: 600; font-size: 1.06rem; margin: 10px 0 6px; letter-spacing: -0.01em; }
-      .pstep p { margin: 0; font-size: 0.92rem; color: var(--muted); }
+      /* ---------- larger test ---------- */
+      .ladders {
+        margin-top: 1.75rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr));
+        gap: 2rem 2.5rem;
+      }
+      .ladders h3 span {
+        font-weight: 400;
+        color: var(--quiet);
+      }
+      .ladder {
+        margin-top: 0.75rem;
+      }
+      .ladder li {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 3.2rem;
+        align-items: center;
+        gap: 0.2rem 0.75rem;
+        padding-block: 0.4rem;
+        font-size: 0.92rem;
+      }
+      .ladder span {
+        grid-column: 1 / -1;
+      }
+      .ladder b {
+        font: 500 0.85rem/1 var(--mono);
+        text-align: right;
+      }
+      .bar {
+        height: 0.8rem;
+        border: 1.5px solid var(--ink);
+        background: linear-gradient(var(--amber), var(--amber)) left / var(--v) 100% no-repeat;
+      }
+      .bar[data-ref] {
+        background-image: linear-gradient(var(--line), var(--line));
+      }
 
-      /* Connector marquee */
-      .marquee { position: relative; margin-top: 40px; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
-      .row { display: flex; gap: 12px; width: max-content; }
-      .row + .row { margin-top: 12px; }
-      .track1 { animation: drift 52s linear infinite; }
-      .track2 { animation: drift 66s linear infinite reverse; }
-      .marquee:hover .row { animation-play-state: paused; }
-      @keyframes drift { to { transform: translateX(-50%); } }
-      .connchip { display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 10px 17px; font-size: 14.5px; font-weight: 500; color: var(--ink); }
-      .connchip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--iris); }
-      .connchip:nth-child(3n) .dot { background: var(--spark); }
-      .connchip:nth-child(4n) .dot { background: var(--cyan); }
+      /* ---------- limits ---------- */
+      .limits {
+        margin-top: 1.5rem;
+        max-width: 66ch;
+      }
+      .limits li {
+        padding-block: 0.9rem;
+        border-top: 1px solid var(--line);
+      }
+      .limits b {
+        font-weight: 600;
+      }
 
-      /* MCP flow */
-      .flow { margin-top: 40px; background: var(--ink); color: oklch(0.94 0.01 265); border-radius: 20px; padding: clamp(26px, 4vw, 40px); position: relative; overflow: hidden; }
-      .flow::before { content: ""; position: absolute; inset: 0; background: radial-gradient(70% 130% at 20% 0%, oklch(0.54 0.21 264 / 0.4), transparent 62%); }
-      .flow > * { position: relative; z-index: 1; }
-      .flow h3 { color: #fff; font-size: 1.5rem; }
-      .flow p { color: oklch(0.82 0.02 265); max-width: 54ch; margin: 12px 0 0; }
-      .flow .track { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 26px; font-family: var(--mono); font-size: 13px; }
-      .flow .box { border: 1px solid oklch(1 0 0 / 0.18); border-radius: 11px; padding: 12px 16px; background: oklch(1 0 0 / 0.05); }
-      .flow .box.hi { border-color: var(--spark); color: var(--spark); }
-      .flow .arrow { color: oklch(0.7 0.03 265); }
-      .flow .arrow.a2 { color: var(--spark); }
+      /* ---------- colophon ---------- */
+      .colophon {
+        border-top: 2px solid var(--ink);
+        padding-block: 2rem 3rem;
+        font-size: 0.95rem;
+      }
+      .colophon p {
+        max-width: 66ch;
+      }
+      .colophon p + p {
+        margin-top: 0.6rem;
+        color: var(--quiet);
+      }
+      .colophon a {
+        display: inline-block;
+        padding-block: 0.35rem;
+      }
 
-      /* Benchmark strip */
-      .benchwrap { display: grid; grid-template-columns: 1fr; gap: 0; margin-top: 40px; }
-      .bench { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--surface); }
-      .stat { padding: 30px 26px; border-right: 1px solid var(--line); }
-      .stat:last-child { border-right: 0; }
-      .stat .n { font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 4vw, 2.9rem); line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
-      .stat .n .u { font-size: 1.1rem; color: var(--muted); font-weight: 600; }
-      .stat .l { color: var(--muted); font-size: 0.9rem; margin-top: 8px; }
-      @media (max-width: 720px) { .bench { grid-template-columns: repeat(2, 1fr); } .stat:nth-child(2) { border-right: 0; } .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--line); } }
+      /* ---------- narrow screens: the table becomes a list of cards ---------- */
+      @media (max-width: 42rem) {
+        .sheet,
+        .sheet tbody,
+        .sheet tr,
+        .sheet th[scope="row"] {
+          display: block;
+        }
+        .sheet thead {
+          display: none;
+        }
+        .sheet tbody tr {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          border-bottom: 1px solid var(--line);
+          padding-bottom: 0.6rem;
+        }
+        .sheet th[scope="row"] {
+          grid-column: 1 / -1;
+          border: 0;
+        }
+        .sheet td {
+          border: 0;
+          width: auto;
+          padding: 0 0 0 0.7rem;
+          white-space: normal;
+        }
+        .sheet td::before {
+          content: attr(data-col);
+          display: block;
+          font-size: 0.72rem;
+          color: var(--quiet);
+          margin-bottom: 0.15rem;
+        }
+        .slots i {
+          width: 0.55rem;
+          height: 0.55rem;
+        }
+        .rank {
+          display: block;
+          margin: 0.1rem 0 0;
+        }
+        .pick {
+          padding-bottom: 0.35rem;
+        }
+      }
 
-      /* Clients */
-      .clients { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 40px; }
-      .client { border: 1px solid var(--line); border-radius: 15px; padding: 19px 21px; background: var(--surface); transition: border-color 0.2s, transform 0.2s var(--ease); }
-      .client:hover { border-color: var(--iris-line); transform: translateY(-2px); }
-      .client .t { font-family: var(--display); font-weight: 600; font-size: 1.04rem; }
-      .client p { color: var(--muted); margin: 4px 0 0; font-size: 0.9rem; font-family: var(--mono); }
-
-      /* CTA */
-      .cta { position: relative; border-radius: 26px; padding: clamp(48px, 7vw, 84px) 28px; text-align: center; overflow: hidden; background: var(--ink); color: var(--paper); }
-      .cta::before { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 120% at 50% 0%, oklch(0.54 0.21 264 / 0.55), transparent 60%); }
-      .cta > * { position: relative; z-index: 1; }
-      .cta h2 { color: #fff; }
-      .cta p { color: oklch(0.85 0.02 266); max-width: 52ch; margin: 14px auto 0; }
-      .cta .hero-actions { justify-content: center; margin-top: 30px; }
-      .cta .cmd { background: oklch(0.28 0.02 266); border-color: oklch(0.4 0.02 266); color: #fff; }
-      .cta .cmd .p { color: oklch(0.7 0.02 266); }
-      .cta .cmd .k { color: var(--spark); }
-      .cta .cmd .copy { background: oklch(0.34 0.02 266); border-color: oklch(0.45 0.02 266); color: oklch(0.8 0.02 266); }
-
-      footer { padding: 44px 0; border-top: 1px solid var(--line); }
-      footer .wrap { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; color: var(--muted); font-size: 14px; }
-      footer a { color: var(--muted); }
-      footer a:hover { color: var(--iris-strong); }
-
-      /* reveal: content is always visible (full opacity); the reveal only slides
-         it into place, so a headless renderer or an un-scrolled section is never
-         invisible. Gating opacity here would hide below-the-fold content from
-         crawlers and assistive tech until JS + scroll fire. */
-      .js .reveal { transform: translateY(16px); transition: transform 0.7s var(--ease); }
-      .js .reveal.in { transform: none; }
-      @media (prefers-reduced-motion: reduce) {
-        html { scroll-behavior: auto; }
-        .js .reveal { transform: none; transition: none; }
-        .row { animation: none !important; }
-        .console-bar .live .dot { animation: none; }
-        .node.lit circle.ring { animation: none; }
+      /* One moment of motion: the name is written in, column by column, the way
+         an index fills. Nothing else on the page moves by itself. */
+      @media (prefers-reduced-motion: no-preference) {
+        .wordmark rect {
+          animation: index-in 0.42s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+          animation-delay: calc(var(--c) * 9ms + 80ms);
+        }
+        @keyframes index-in {
+          from {
+            opacity: 0.1;
+            transform: translateY(-6px);
+          }
+        }
+      }
+      @media print {
+        .band {
+          background: none;
+        }
+        .copy,
+        .ways,
+        .skip {
+          display: none;
+        }
       }
     </style>
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "CompanyBrain",
-        "applicationCategory": "DeveloperApplication",
-        "operatingSystem": "Linux, macOS, Windows",
-        "description": "Self-hosted semantic memory for your team. Index everything from Slack to Google Docs to PDFs, then get cited answers over an API, an SDK, or MCP. 40+ connectors, hybrid search, one command to run.",
-        "url": "https://aayambansal.github.io/companybrain/",
-        "license": "https://opensource.org/licenses/MIT",
-        "isAccessibleForFree": true,
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
-      }
-    </script>
   </head>
   <body>
-    <nav id="nav">
-      <div class="wrap">
-        <a class="brand" href="#top" aria-label="CompanyBrain home">
-          <svg class="mark" viewBox="0 0 32 32" fill="none" stroke="var(--iris)" stroke-width="1.5" aria-hidden="true">
-            <path d="M12 5.5C9.2 5.5 7 7.6 7 10.2c0 .5.1 1 .2 1.5C5.9 12.5 5 13.9 5 15.5c0 1.3.6 2.5 1.6 3.3-.2.5-.3 1-.3 1.6 0 2.4 2 4.3 4.6 4.3.7 0 1.4-.2 2-.5.5 1.1 1.7 1.8 3.1 1.8V5.9c-1-.3-2.6-.4-4-.4Z" stroke-linejoin="round" />
-            <path d="M20 5.5c2.8 0 5 2.1 5 4.7 0 .5-.1 1-.2 1.5 1.3.8 2.2 2.2 2.2 3.8 0 1.3-.6 2.5-1.6 3.3.2.5.3 1 .3 1.6 0 2.4-2 4.3-4.6 4.3-.7 0-1.4-.2-2-.5-.5 1.1-1.7 1.8-3.1 1.8" stroke-linejoin="round" />
-            <path d="M16 6v20" stroke-linecap="round" opacity="0.55" stroke="var(--spark)" />
-          </svg>
-          companybrain
-        </a>
-        <div class="nav-links">
-          <a class="q" href="#retrieval">How it works</a>
-          <a class="q" href="#connectors">Connectors</a>
-          <a class="q" href="./benchmarks.html">Benchmarks</a>
-          <a class="q" href="#run">Run it</a>
-          <a class="btn btn-ghost" href="https://github.com/aayambansal/companybrain">GitHub</a>
-        </div>
-      </div>
-    </nav>
+    <a class="skip" href="#main">Skip to the page</a>
 
-    <main>
-    <header id="top">
-      <canvas id="constellation" aria-hidden="true"></canvas>
-      <div class="veil"></div>
+    <header class="band">
       <div class="wrap">
-        <span class="pill reveal"><span class="tag">MIT</span> open source, self-hosted, <b>no sign-in</b></span>
-        <div class="hero-head">
-          <h1 class="reveal">Ask your company <span class="g">anything.</span></h1>
-        </div>
-        <p class="lede reveal">
-          CompanyBrain indexes everything your team knows, from Slack and Google Docs to GitHub, PDFs, images, and
-          audio, into one private store. Then it answers, with a citation for every claim.
+        <nav class="ways" aria-label="Project links">
+          <a href="https://github.com/aayambansal/companybrain">Source</a>
+          <a href="https://github.com/aayambansal/companybrain/tree/main/docs">Docs</a>
+          <a href="https://www.npmjs.com/package/companybrain">npm</a>
+        </nav>
+        <svg class="wordmark" viewBox="0 0 710 56.0" role="img" aria-label="CompanyBrain" shape-rendering="crispEdges">
+          <rect class="r1" x="0" y="0.0" width="10.4" height="10" style="--c:0" />
+          <rect class="r1" x="10" y="0.0" width="10.4" height="10" style="--c:1" />
+          <rect class="r1" x="20" y="0.0" width="10.4" height="10" style="--c:2" />
+          <rect class="r1" x="30" y="0.0" width="10.4" height="10" style="--c:3" />
+          <rect class="r1" x="40" y="0.0" width="10" height="10" style="--c:4" />
+          <rect class="r1" x="60" y="0.0" width="10.4" height="10" style="--c:6" />
+          <rect class="r1" x="70" y="0.0" width="10.4" height="10" style="--c:7" />
+          <rect class="r1" x="80" y="0.0" width="10.4" height="10" style="--c:8" />
+          <rect class="r1" x="90" y="0.0" width="10.4" height="10" style="--c:9" />
+          <rect class="r1" x="100" y="0.0" width="10" height="10" style="--c:10" />
+          <rect class="r1" x="120" y="0.0" width="10" height="10" style="--c:12" />
+          <rect class="r1" x="160" y="0.0" width="10" height="10" style="--c:16" />
+          <rect class="r1" x="180" y="0.0" width="10.4" height="10" style="--c:18" />
+          <rect class="r1" x="190" y="0.0" width="10.4" height="10" style="--c:19" />
+          <rect class="r1" x="200" y="0.0" width="10.4" height="10" style="--c:20" />
+          <rect class="r1" x="210" y="0.0" width="10.4" height="10" style="--c:21" />
+          <rect class="r1" x="220" y="0.0" width="10" height="10" style="--c:22" />
+          <rect class="r1" x="240" y="0.0" width="10.4" height="10" style="--c:24" />
+          <rect class="r1" x="250" y="0.0" width="10.4" height="10" style="--c:25" />
+          <rect class="r1" x="260" y="0.0" width="10.4" height="10" style="--c:26" />
+          <rect class="r1" x="270" y="0.0" width="10.4" height="10" style="--c:27" />
+          <rect class="r1" x="280" y="0.0" width="10" height="10" style="--c:28" />
+          <rect class="r1" x="300" y="0.0" width="10" height="10" style="--c:30" />
+          <rect class="r1" x="340" y="0.0" width="10" height="10" style="--c:34" />
+          <rect class="r1" x="360" y="0.0" width="10" height="10" style="--c:36" />
+          <rect class="r1" x="400" y="0.0" width="10" height="10" style="--c:40" />
+          <rect class="r1" x="420" y="0.0" width="10.4" height="10" style="--c:42" />
+          <rect class="r1" x="430" y="0.0" width="10.4" height="10" style="--c:43" />
+          <rect class="r1" x="440" y="0.0" width="10.4" height="10" style="--c:44" />
+          <rect class="r1" x="450" y="0.0" width="10" height="10" style="--c:45" />
+          <rect class="r1" x="480" y="0.0" width="10.4" height="10" style="--c:48" />
+          <rect class="r1" x="490" y="0.0" width="10.4" height="10" style="--c:49" />
+          <rect class="r1" x="500" y="0.0" width="10.4" height="10" style="--c:50" />
+          <rect class="r1" x="510" y="0.0" width="10.4" height="10" style="--c:51" />
+          <rect class="r1" x="520" y="0.0" width="10" height="10" style="--c:52" />
+          <rect class="r1" x="540" y="0.0" width="10.4" height="10" style="--c:54" />
+          <rect class="r1" x="550" y="0.0" width="10.4" height="10" style="--c:55" />
+          <rect class="r1" x="560" y="0.0" width="10.4" height="10" style="--c:56" />
+          <rect class="r1" x="570" y="0.0" width="10.4" height="10" style="--c:57" />
+          <rect class="r1" x="580" y="0.0" width="10" height="10" style="--c:58" />
+          <rect class="r1" x="600" y="0.0" width="10.4" height="10" style="--c:60" />
+          <rect class="r1" x="610" y="0.0" width="10.4" height="10" style="--c:61" />
+          <rect class="r1" x="620" y="0.0" width="10.4" height="10" style="--c:62" />
+          <rect class="r1" x="630" y="0.0" width="10.4" height="10" style="--c:63" />
+          <rect class="r1" x="640" y="0.0" width="10" height="10" style="--c:64" />
+          <rect class="r1" x="660" y="0.0" width="10" height="10" style="--c:66" />
+          <rect class="r1" x="700" y="0.0" width="10" height="10" style="--c:70" />
+          <rect class="r2" x="0" y="11.5" width="10" height="10" style="--c:0" />
+          <rect class="r2" x="60" y="11.5" width="10" height="10" style="--c:6" />
+          <rect class="r2" x="100" y="11.5" width="10" height="10" style="--c:10" />
+          <rect class="r2" x="120" y="11.5" width="10.4" height="10" style="--c:12" />
+          <rect class="r2" x="130" y="11.5" width="10" height="10" style="--c:13" />
+          <rect class="r2" x="150" y="11.5" width="10.4" height="10" style="--c:15" />
+          <rect class="r2" x="160" y="11.5" width="10" height="10" style="--c:16" />
+          <rect class="r2" x="180" y="11.5" width="10" height="10" style="--c:18" />
+          <rect class="r2" x="220" y="11.5" width="10" height="10" style="--c:22" />
+          <rect class="r2" x="240" y="11.5" width="10" height="10" style="--c:24" />
+          <rect class="r2" x="280" y="11.5" width="10" height="10" style="--c:28" />
+          <rect class="r2" x="300" y="11.5" width="10.4" height="10" style="--c:30" />
+          <rect class="r2" x="310" y="11.5" width="10" height="10" style="--c:31" />
+          <rect class="r2" x="340" y="11.5" width="10" height="10" style="--c:34" />
+          <rect class="r2" x="370" y="11.5" width="10" height="10" style="--c:37" />
+          <rect class="r2" x="390" y="11.5" width="10" height="10" style="--c:39" />
+          <rect class="r2" x="420" y="11.5" width="10" height="10" style="--c:42" />
+          <rect class="r2" x="460" y="11.5" width="10" height="10" style="--c:46" />
+          <rect class="r2" x="480" y="11.5" width="10" height="10" style="--c:48" />
+          <rect class="r2" x="520" y="11.5" width="10" height="10" style="--c:52" />
+          <rect class="r2" x="540" y="11.5" width="10" height="10" style="--c:54" />
+          <rect class="r2" x="580" y="11.5" width="10" height="10" style="--c:58" />
+          <rect class="r2" x="620" y="11.5" width="10" height="10" style="--c:62" />
+          <rect class="r2" x="660" y="11.5" width="10.4" height="10" style="--c:66" />
+          <rect class="r2" x="670" y="11.5" width="10" height="10" style="--c:67" />
+          <rect class="r2" x="700" y="11.5" width="10" height="10" style="--c:70" />
+          <rect class="r3" x="0" y="23.0" width="10" height="10" style="--c:0" />
+          <rect class="r3" x="60" y="23.0" width="10" height="10" style="--c:6" />
+          <rect class="r3" x="100" y="23.0" width="10" height="10" style="--c:10" />
+          <rect class="r3" x="120" y="23.0" width="10" height="10" style="--c:12" />
+          <rect class="r3" x="140" y="23.0" width="10" height="10" style="--c:14" />
+          <rect class="r3" x="160" y="23.0" width="10" height="10" style="--c:16" />
+          <rect class="r3" x="180" y="23.0" width="10.4" height="10" style="--c:18" />
+          <rect class="r3" x="190" y="23.0" width="10.4" height="10" style="--c:19" />
+          <rect class="r3" x="200" y="23.0" width="10.4" height="10" style="--c:20" />
+          <rect class="r3" x="210" y="23.0" width="10.4" height="10" style="--c:21" />
+          <rect class="r3" x="220" y="23.0" width="10" height="10" style="--c:22" />
+          <rect class="r3" x="240" y="23.0" width="10.4" height="10" style="--c:24" />
+          <rect class="r3" x="250" y="23.0" width="10.4" height="10" style="--c:25" />
+          <rect class="r3" x="260" y="23.0" width="10.4" height="10" style="--c:26" />
+          <rect class="r3" x="270" y="23.0" width="10.4" height="10" style="--c:27" />
+          <rect class="r3" x="280" y="23.0" width="10" height="10" style="--c:28" />
+          <rect class="r3" x="300" y="23.0" width="10" height="10" style="--c:30" />
+          <rect class="r3" x="320" y="23.0" width="10" height="10" style="--c:32" />
+          <rect class="r3" x="340" y="23.0" width="10" height="10" style="--c:34" />
+          <rect class="r3" x="380" y="23.0" width="10" height="10" style="--c:38" />
+          <rect class="r3" x="420" y="23.0" width="10.4" height="10" style="--c:42" />
+          <rect class="r3" x="430" y="23.0" width="10.4" height="10" style="--c:43" />
+          <rect class="r3" x="440" y="23.0" width="10.4" height="10" style="--c:44" />
+          <rect class="r3" x="450" y="23.0" width="10" height="10" style="--c:45" />
+          <rect class="r3" x="480" y="23.0" width="10.4" height="10" style="--c:48" />
+          <rect class="r3" x="490" y="23.0" width="10.4" height="10" style="--c:49" />
+          <rect class="r3" x="500" y="23.0" width="10.4" height="10" style="--c:50" />
+          <rect class="r3" x="510" y="23.0" width="10.4" height="10" style="--c:51" />
+          <rect class="r3" x="520" y="23.0" width="10" height="10" style="--c:52" />
+          <rect class="r3" x="540" y="23.0" width="10.4" height="10" style="--c:54" />
+          <rect class="r3" x="550" y="23.0" width="10.4" height="10" style="--c:55" />
+          <rect class="r3" x="560" y="23.0" width="10.4" height="10" style="--c:56" />
+          <rect class="r3" x="570" y="23.0" width="10.4" height="10" style="--c:57" />
+          <rect class="r3" x="580" y="23.0" width="10" height="10" style="--c:58" />
+          <rect class="r3" x="620" y="23.0" width="10" height="10" style="--c:62" />
+          <rect class="r3" x="660" y="23.0" width="10" height="10" style="--c:66" />
+          <rect class="r3" x="680" y="23.0" width="10" height="10" style="--c:68" />
+          <rect class="r3" x="700" y="23.0" width="10" height="10" style="--c:70" />
+          <rect class="r4" x="0" y="34.5" width="10" height="10" style="--c:0" />
+          <rect class="r4" x="60" y="34.5" width="10" height="10" style="--c:6" />
+          <rect class="r4" x="100" y="34.5" width="10" height="10" style="--c:10" />
+          <rect class="r4" x="120" y="34.5" width="10" height="10" style="--c:12" />
+          <rect class="r4" x="160" y="34.5" width="10" height="10" style="--c:16" />
+          <rect class="r4" x="180" y="34.5" width="10" height="10" style="--c:18" />
+          <rect class="r4" x="240" y="34.5" width="10" height="10" style="--c:24" />
+          <rect class="r4" x="280" y="34.5" width="10" height="10" style="--c:28" />
+          <rect class="r4" x="300" y="34.5" width="10" height="10" style="--c:30" />
+          <rect class="r4" x="330" y="34.5" width="10.4" height="10" style="--c:33" />
+          <rect class="r4" x="340" y="34.5" width="10" height="10" style="--c:34" />
+          <rect class="r4" x="380" y="34.5" width="10" height="10" style="--c:38" />
+          <rect class="r4" x="420" y="34.5" width="10" height="10" style="--c:42" />
+          <rect class="r4" x="460" y="34.5" width="10" height="10" style="--c:46" />
+          <rect class="r4" x="480" y="34.5" width="10" height="10" style="--c:48" />
+          <rect class="r4" x="510" y="34.5" width="10" height="10" style="--c:51" />
+          <rect class="r4" x="540" y="34.5" width="10" height="10" style="--c:54" />
+          <rect class="r4" x="580" y="34.5" width="10" height="10" style="--c:58" />
+          <rect class="r4" x="620" y="34.5" width="10" height="10" style="--c:62" />
+          <rect class="r4" x="660" y="34.5" width="10" height="10" style="--c:66" />
+          <rect class="r4" x="690" y="34.5" width="10.4" height="10" style="--c:69" />
+          <rect class="r4" x="700" y="34.5" width="10" height="10" style="--c:70" />
+          <rect class="r5" x="0" y="46.0" width="10.4" height="10" style="--c:0" />
+          <rect class="r5" x="10" y="46.0" width="10.4" height="10" style="--c:1" />
+          <rect class="r5" x="20" y="46.0" width="10.4" height="10" style="--c:2" />
+          <rect class="r5" x="30" y="46.0" width="10.4" height="10" style="--c:3" />
+          <rect class="r5" x="40" y="46.0" width="10" height="10" style="--c:4" />
+          <rect class="r5" x="60" y="46.0" width="10.4" height="10" style="--c:6" />
+          <rect class="r5" x="70" y="46.0" width="10.4" height="10" style="--c:7" />
+          <rect class="r5" x="80" y="46.0" width="10.4" height="10" style="--c:8" />
+          <rect class="r5" x="90" y="46.0" width="10.4" height="10" style="--c:9" />
+          <rect class="r5" x="100" y="46.0" width="10" height="10" style="--c:10" />
+          <rect class="r5" x="120" y="46.0" width="10" height="10" style="--c:12" />
+          <rect class="r5" x="160" y="46.0" width="10" height="10" style="--c:16" />
+          <rect class="r5" x="180" y="46.0" width="10" height="10" style="--c:18" />
+          <rect class="r5" x="240" y="46.0" width="10" height="10" style="--c:24" />
+          <rect class="r5" x="280" y="46.0" width="10" height="10" style="--c:28" />
+          <rect class="r5" x="300" y="46.0" width="10" height="10" style="--c:30" />
+          <rect class="r5" x="340" y="46.0" width="10" height="10" style="--c:34" />
+          <rect class="r5" x="380" y="46.0" width="10" height="10" style="--c:38" />
+          <rect class="r5" x="420" y="46.0" width="10.4" height="10" style="--c:42" />
+          <rect class="r5" x="430" y="46.0" width="10.4" height="10" style="--c:43" />
+          <rect class="r5" x="440" y="46.0" width="10.4" height="10" style="--c:44" />
+          <rect class="r5" x="450" y="46.0" width="10" height="10" style="--c:45" />
+          <rect class="r5" x="480" y="46.0" width="10" height="10" style="--c:48" />
+          <rect class="r5" x="520" y="46.0" width="10" height="10" style="--c:52" />
+          <rect class="r5" x="540" y="46.0" width="10" height="10" style="--c:54" />
+          <rect class="r5" x="580" y="46.0" width="10" height="10" style="--c:58" />
+          <rect class="r5" x="600" y="46.0" width="10.4" height="10" style="--c:60" />
+          <rect class="r5" x="610" y="46.0" width="10.4" height="10" style="--c:61" />
+          <rect class="r5" x="620" y="46.0" width="10.4" height="10" style="--c:62" />
+          <rect class="r5" x="630" y="46.0" width="10.4" height="10" style="--c:63" />
+          <rect class="r5" x="640" y="46.0" width="10" height="10" style="--c:64" />
+          <rect class="r5" x="660" y="46.0" width="10" height="10" style="--c:66" />
+          <rect class="r5" x="700" y="46.0" width="10" height="10" style="--c:70" />
+        </svg>
+        <h1>A search index for your team's notes and documents that you run yourself.</h1>
+        <p class="lead">
+          CompanyBrain copies text from the places your team already writes (folders of Markdown, Slack,
+          Notion, GitHub and others) into a Postgres database on your machine. Ask it a question and it
+          returns the passages that match, each with a link to where it came from. It is free and MIT
+          licensed, and there is no hosted version to sign up for.
         </p>
-        <div class="hero-actions reveal">
-          <div class="cmd">
-            <span class="p">$</span><code><span class="k">npx</span> companybrain</code>
-            <button class="copy" id="copyBtn" aria-label="Copy install command">copy</button>
+        <div class="start">
+          <div class="command">
+            <code id="command">npx companybrain</code>
+            <button class="copy" type="button" id="copy" hidden>Copy</button>
           </div>
-          <a class="btn btn-iris" href="https://github.com/aayambansal/companybrain">Get started</a>
-        </div>
-        <p class="trust reveal"><b>40+ connectors</b> &middot; hybrid search with reranking &middot; bring your own keys &middot; your Postgres</p>
-
-        <!-- Interactive ask console -->
-        <div class="console reveal" aria-label="Interactive retrieval demo">
-          <div class="console-bar">
-            <span class="dots"><i></i><i></i><i></i></span>
-            <span class="title">companybrain / ask</span>
-            <span class="live" id="liveStatus"><span class="dot"></span> <span class="txt">retrieving</span></span>
-          </div>
-          <div class="console-body">
-            <div class="console-left">
-              <div class="field">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.2-3.2" stroke-linecap="round" /></svg>
-                <span class="q" id="qText"><span class="hint" style="color:var(--muted)">Ask a question</span><span class="caret"></span></span>
-              </div>
-              <div class="chips" id="chips" role="group" aria-label="Example questions"></div>
-              <div class="answer" id="answer">
-                <div class="lbl">Answer <span class="spin" aria-hidden="true"></span></div>
-                <p class="text" id="aText"><span class="hint">Pick a question and watch CompanyBrain retrieve the sources, then answer with citations.</span></p>
-                <div class="cites" id="cites"></div>
-              </div>
-            </div>
-            <div class="console-right">
-              <svg id="graph" viewBox="0 0 480 260" role="img" aria-label="Knowledge graph of company sources"></svg>
-            </div>
-          </div>
+          <p class="needs">
+            Needs Docker, Node 18 or newer, and git. The first run builds two images, which takes a few
+            minutes.
+          </p>
         </div>
       </div>
     </header>
 
-    <!-- How retrieval works -->
-    <section id="retrieval">
-      <div class="wrap">
-        <div class="explain">
-          <div class="lead">
-            <h2 class="reveal">Two ways to find. One ranked answer.</h2>
-            <p class="reveal">Every passage you store carries a vector for meaning and a full-text signal for exact words. A query runs both lanes at once, then reciprocal rank fusion merges them into a single ordering. An optional reranker reads the top candidates and settles the final order.</p>
-            <ul class="facts reveal">
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg><span><b>Meaning and keywords together.</b> Semantic recall finds the idea; full-text catches the exact identifier, code symbol, or name.</span></li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h10M4 18h7" stroke-linecap="round"/></svg><span><b>Fusion, not a toggle.</b> Weighted RRF blends both rankings, so a result strong on either signal surfaces.</span></li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2 5 5 .5-3.8 3.4 1.2 5.1L12 19l-4.6 3 1.2-5.1L4.8 8.5 9.8 8z" stroke-linejoin="round"/></svg><span><b>Reranked for precision.</b> HyDE query expansion and an LLM reranker push the right passage to the top.</span></li>
-            </ul>
+    <main id="main">
+      <section aria-labelledby="h-what">
+        <div class="wrap">
+          <h2 id="h-what">What it does</h2>
+          <div class="prose">
+            <p>
+              It reads a source, cuts the text into passages, and indexes every passage twice: once by its
+              words, using Postgres full-text search, and once as a vector, using pgvector. A question is
+              run against both. The two result lists are merged into one, and you get the passages back
+              with their scores and their source.
+            </p>
+            <p>
+              Connect a language model and it will also write a short answer from those passages. Without
+              one, it shows you the passages and stops there.
+            </p>
+            <p>
+              Other software can use the same index. There is a REST API, and an MCP server so that Claude,
+              Cursor or your own agent can search it and add to it.
+            </p>
           </div>
-          <div class="diagram reveal" aria-hidden="true">
-            <div class="lane vec"><span class="tag">vector</span><div class="cells"><i></i><i></i><i></i><i></i><i></i></div></div>
-            <div class="lane kw"><span class="tag">full-text</span><div class="cells"><i></i><i></i><i></i><i></i><i></i></div></div>
-            <div class="fuse"><span>reciprocal rank fusion + rerank</span></div>
-            <div class="result">
-              <div class="r top"><span class="rk">1</span><span class="rt">Datastore decision, ADR-014</span><span class="sc">0.94</span></div>
-              <div class="r"><span class="rk">2</span><span class="rt">Infra thread, vector store</span><span class="sc">0.71</span></div>
-              <div class="r"><span class="rk">3</span><span class="rt">PR #812, pgvector setup</span><span class="sc">0.63</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- Capabilities -->
-    <section class="band">
-      <div class="wrap">
-        <div class="sec-top">
-          <h2 class="reveal">A real memory backend, not a wrapper.</h2>
-          <p class="deck reveal">Everything you drop in is chunked, embedded, indexed, and kept current. These are the parts that make recall trustworthy.</p>
+          <ol class="stages">
+            <li>
+              <svg viewBox="0 0 150 96" aria-hidden="true">
+                <rect class="sheetfill" x="47" y="10" width="56" height="76" />
+                <rect class="inkfill" x="56" y="21" width="38" height="3" />
+                <rect class="inkfill" x="56" y="30" width="30" height="3" />
+                <rect class="inkfill" x="56" y="39" width="36" height="3" />
+                <rect class="inkfill" x="56" y="48" width="24" height="3" />
+                <rect class="inkfill" x="56" y="57" width="38" height="3" />
+                <rect class="inkfill" x="56" y="66" width="32" height="3" />
+                <rect class="inkfill" x="56" y="75" width="18" height="3" />
+              </svg>
+              <h3>A document comes in</h3>
+              <p>From a connector, an upload, or a call to the API.</p>
+            </li>
+            <li>
+              <svg viewBox="0 0 150 96" aria-hidden="true">
+                <rect class="sheetfill" x="35" y="8" width="80" height="24" />
+                <rect class="inkfill" x="43" y="15" width="56" height="3" />
+                <rect class="amberfill" x="42" y="21.5" width="44" height="5" />
+                <rect class="sheetfill" x="35" y="36" width="80" height="24" />
+                <rect class="amberfill" x="42" y="41.5" width="44" height="5" />
+                <rect class="inkfill" x="43" y="51" width="62" height="3" />
+                <rect class="sheetfill" x="35" y="64" width="80" height="24" />
+                <rect class="inkfill" x="43" y="71" width="50" height="3" />
+                <rect class="inkfill" x="43" y="79" width="34" height="3" />
+              </svg>
+              <h3>It is cut into passages</h3>
+              <p>About 512 tokens each. Neighbours share 64, so a sentence is not lost at a cut.</p>
+            </li>
+            <li>
+              <svg viewBox="0 0 150 96" aria-hidden="true">
+                <rect class="pen" x="20" y="14" width="34" height="14" />
+                <rect class="pen" x="58" y="14" width="22" height="14" />
+                <rect class="pen" x="84" y="14" width="46" height="14" />
+                <rect class="pen" x="20" y="32" width="26" height="14" />
+                <rect class="pen" x="50" y="32" width="40" height="14" />
+                <rect class="amberfill" x="20" y="62" width="8" height="18" />
+                <rect class="sheetfill" x="28" y="62" width="8" height="18" />
+                <rect class="amberfill" x="36" y="62" width="8" height="18" />
+                <rect class="amberfill" x="44" y="62" width="8" height="18" />
+                <rect class="sheetfill" x="52" y="62" width="8" height="18" />
+                <rect class="sheetfill" x="60" y="62" width="8" height="18" />
+                <rect class="amberfill" x="68" y="62" width="8" height="18" />
+                <rect class="sheetfill" x="76" y="62" width="8" height="18" />
+                <rect class="amberfill" x="84" y="62" width="8" height="18" />
+                <rect class="sheetfill" x="92" y="62" width="8" height="18" />
+                <rect class="sheetfill" x="100" y="62" width="8" height="18" />
+                <rect class="amberfill" x="108" y="62" width="8" height="18" />
+                <rect class="sheetfill" x="116" y="62" width="8" height="18" />
+                <rect class="amberfill" x="124" y="62" width="6" height="18" />
+              </svg>
+              <h3>Each passage is indexed twice</h3>
+              <p>By its words (top) and as a vector of 1,536 numbers (bottom).</p>
+            </li>
+            <li>
+              <svg viewBox="0 0 150 96" aria-hidden="true">
+                <rect class="amberfill" x="16" y="9" width="32" height="9" />
+                <rect class="sheetfill" x="16" y="21" width="32" height="9" />
+                <rect class="inkfill" x="16" y="33" width="32" height="9" />
+                <rect class="sheetfill" x="16" y="54" width="32" height="9" />
+                <rect class="amberfill" x="16" y="66" width="32" height="9" />
+                <rect class="faint" x="16" y="78" width="32" height="9" />
+                <path class="pen" d="M54 25.5h14v45H54M68 48h22" />
+                <path class="pen" d="M84 42l7 6-7 6" />
+                <rect class="amberfill" x="100" y="27" width="36" height="12" />
+                <rect class="sheetfill" x="100" y="42" width="36" height="12" />
+                <rect class="inkfill" x="100" y="57" width="36" height="12" />
+              </svg>
+              <h3>Two rankings become one</h3>
+              <p>Reciprocal rank fusion. By default the vector ranking counts double.</p>
+            </li>
+          </ol>
         </div>
-        <div class="caps">
-          <div class="cap c8 reveal">
-            <div>
-              <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2" stroke-linecap="round"/></svg></div>
-              <h3>Temporal memory</h3>
-              <p>Knowledge changes. When a new memory updates a fact already on record, the old one is marked superseded, so recall returns today's truth while the history stays intact.</p>
-            </div>
-            <div class="art temporal">
-              <div><span class="old">deploy target: Heroku</span></div>
-              <div><span class="new">deploy target: Fly.io</span> <span class="flag">&#9873; supersedes</span></div>
-              <div style="color:var(--muted)">recall &rarr; returns Fly.io</div>
-            </div>
-          </div>
-          <div class="cap c4 reveal">
-            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5h16v11H9l-4 3.5V16H4z"/><path d="M8 9h8M8 12h5"/></svg></div>
-            <h3>Answers with receipts</h3>
-            <p>RAG chat streams a grounded answer, each citation pointing back at the exact passage it came from.</p>
-          </div>
-          <div class="cap c4 reveal">
-            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" stroke-linejoin="round"/></svg></div>
-            <h3>Reads more than text</h3>
-            <p>OCRs images, transcribes audio with Whisper, extracts PDFs, and pulls transcripts out of video.</p>
-          </div>
-          <div class="cap c4 reveal">
-            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 3v5h5" /><path d="M6 3h9l5 5v13H6z" stroke-linejoin="round"/><path d="M9 13h6M9 16.5h6" stroke-linecap="round"/></svg></div>
-            <h3>Living playbooks</h3>
-            <p>Ask for a topic and CompanyBrain drafts a cited page from your memories: decisions, process, people, open questions. Regenerate it and it reflects what the team knows now.</p>
-          </div>
-          <div class="cap c4 reveal">
-            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2" stroke-linecap="round"/></svg></div>
-            <h3>Stays organized on its own</h3>
-            <p>Summaries, tags, and facts on ingest. Deduplication, version history, and signed webhooks on every change.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Pipeline (real sequence) -->
-    <section>
-      <div class="wrap">
-        <div class="sec-top">
-          <h2 class="reveal">From any source to a cited answer.</h2>
-          <p class="deck reveal">One pipeline runs end to end. Bring your own Postgres and providers. Nothing phones home.</p>
-        </div>
-        <div class="pipeline">
-          <div class="pstep reveal"><span class="no">01</span><h3>Connect</h3><p>Point a connector at Slack, Docs, GitHub, a folder, or a URL.</p></div>
-          <div class="pstep reveal"><span class="no">02</span><h3>Embed</h3><p>Chunk each document and embed it, with a full-text signal alongside.</p></div>
-          <div class="pstep reveal"><span class="no">03</span><h3>Index</h3><p>Store vectors and text in your Postgres with pgvector.</p></div>
-          <div class="pstep reveal"><span class="no">04</span><h3>Retrieve</h3><p>Fuse both signals, expand the query, and rerank the candidates.</p></div>
-          <div class="pstep reveal"><span class="no">05</span><h3>Cite</h3><p>Return an answer with a link back to every source passage.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Connectors -->
-    <section id="connectors" class="band">
-      <div class="wrap">
-        <div class="sec-top">
-          <h2 class="reveal">Forty-plus connectors, one store.</h2>
-          <p class="deck reveal">Configure and sync any source from the dashboard. It all lands in the same place, so search and chat work across every source at once.</p>
-        </div>
-      </div>
-      <div class="marquee" aria-label="Supported connectors">
-        <div class="row track1" id="row1"></div>
-        <div class="row track2" id="row2"></div>
-      </div>
-    </section>
-
-    <!-- MCP flow -->
-    <section id="agents">
-      <div class="wrap">
-        <div class="sec-top">
-          <h2 class="reveal">Record in one agent, recall in another.</h2>
-          <p class="deck reveal">The built-in Model Context Protocol server lets Claude, Cursor, and your own tools read and write the same memory. Context stops living in one chat window and starts following the work.</p>
-        </div>
-        <div class="flow reveal">
-          <h3>One brain, every agent</h3>
-          <p>Any MCP client writes a memory once. Every other client reads it back, with the same search, the same citations, the same store.</p>
-          <div class="track" aria-hidden="true">
-            <span class="box hi">claude</span>
-            <span class="arrow">&rarr; writes &rarr;</span>
-            <span class="box">companybrain</span>
-            <span class="arrow a2">&rarr; reads &rarr;</span>
-            <span class="box hi">cursor</span>
+      <section aria-labelledby="h-twelve">
+        <div class="wrap">
+          <h2 id="h-twelve">Twelve questions and what came back</h2>
+          <div class="prose">
+            <p>
+              The repository includes a small sample: twelve short company notes (a release process, an
+              expense policy, where the espresso machine is) and twelve questions that each have one right
+              note. The table shows where the right note landed in the results, in four setups. It was
+              recorded on 13 October 2026 from a fresh install of commit <code>e1945a0</code>.
+            </p>
           </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- Benchmarks -->
-    <section id="benchmarks" class="band">
-      <div class="wrap">
-        <div class="sec-top">
-          <h2 class="reveal">Retrieval you can benchmark.</h2>
-          <p class="deck reveal">On the public BEIR datasets, scored with the standard TREC evaluator, CompanyBrain tops nDCG@10 above published BM25 and dense-retriever baselines. The harness ships in the repo, so you can reproduce every number.</p>
-        </div>
-        <div class="benchwrap reveal">
           <div class="bench">
-            <div class="stat"><div class="n">0.439</div><div class="l">nDCG@10 &middot; BEIR NFCorpus</div></div>
-            <div class="stat"><div class="n">0.816</div><div class="l">nDCG@10 &middot; BEIR SciFact</div></div>
-            <div class="stat"><div class="n">100<span class="u">%</span></div><div class="l">Recall@5 &middot; zero-config</div></div>
-            <div class="stat"><div class="n">40<span class="u">+</span></div><div class="l">Built-in connectors</div></div>
-          </div>
-        </div>
-        <p class="reveal" style="margin-top: 26px;"><a class="btn btn-primary" href="./benchmarks.html">View the leaderboard</a></p>
-      </div>
-    </section>
+            <table class="sheet" role="table" aria-describedby="sheet-key">
+              <thead role="rowgroup">
+                <tr role="row">
+                  <th role="columnheader" scope="col">Question <span>Choose one to see its results</span></th>
+                  <th role="columnheader" scope="col">Words <span>full-text only</span></th>
+                  <th role="columnheader" scope="col">Vectors <span>built in, no key</span></th>
+                  <th role="columnheader" scope="col">Both <span>the default</span></th>
+                  <th role="columnheader" scope="col">Both <span>with a model</span></th>
+                </tr>
+              </thead>
+              <tbody role="rowgroup" id="rows">
+                <tr role="row">
+                  <th role="rowheader" scope="row"><button class="pick" type="button" aria-pressed="true">how do we ship a release?</button></th>
+                  <td role="cell" data-col="Words"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Vectors"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Both"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Model"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                </tr>
+                <tr role="row">
+                  <th role="rowheader" scope="row"><button class="pick" type="button" aria-pressed="false">what do I do to undo a broken deployment?</button></th>
+                  <td role="cell" data-col="Words"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Vectors"><span class="slots" aria-hidden="true"><i></i><i data-on></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>2nd</span></td>
+                  <td role="cell" data-col="Both"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Model"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                </tr>
+                <tr role="row">
+                  <th role="rowheader" scope="row"><button class="pick" type="button" aria-pressed="false">who is paged when something breaks and when does the rotation change?</button></th>
+                  <td role="cell" data-col="Words"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Vectors"><span class="slots" aria-hidden="true"><i></i><i></i><i></i><i></i><i data-on></i></span><span class="rank"><span class="sr">Right note came </span>5th</span></td>
+                  <td role="cell" data-col="Both"><span class="slots" aria-hidden="true"><i></i><i data-on></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>2nd</span></td>
+                  <td role="cell" data-col="Model"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                </tr>
+                <tr role="row">
+                  <th role="rowheader" scope="row"><button class="pick" type="button" aria-pressed="false">do I need approval to expense a 40 dollar lunch?</button></th>
+                  <td role="cell" data-col="Words"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Vectors"><span class="slots" aria-hidden="true"><i></i><i data-on></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>2nd</span></td>
+                  <td role="cell" data-col="Both"><span class="slots" aria-hidden="true"><i></i><i data-on></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>2nd</span></td>
+                  <td role="cell" data-col="Model"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                </tr>
+                <tr role="row">
+                  <th role="rowheader" scope="row"><button class="pick" type="button" aria-pressed="false">what happens on a new employee&#x27;s first day?</button></th>
+                  <td role="cell" data-col="Words"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Vectors"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Both"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Model"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                </tr>
+                <tr role="row">
+                  <th role="rowheader" scope="row"><button class="pick" type="button" aria-pressed="false">which payment provider handles invoices and who owns it?</button></th>
+                  <td role="cell" data-col="Words"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Vectors"><span class="slots" aria-hidden="true"><i></i><i data-on></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>2nd</span></td>
+                  <td role="cell" data-col="Both"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Model"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                </tr>
+                <tr role="row">
+                  <th role="rowheader" scope="row"><button class="pick" type="button" aria-pressed="false">how long are customer logs stored before deletion?</button></th>
+                  <td role="cell" data-col="Words"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Vectors"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Both"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Model"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                </tr>
+                <tr role="row">
+                  <th role="rowheader" scope="row"><button class="pick" type="button" aria-pressed="false">how fast do enterprise customers get a first response?</button></th>
+                  <td role="cell" data-col="Words"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Vectors"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Both"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Model"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                </tr>
+                <tr role="row">
+                  <th role="rowheader" scope="row"><button class="pick" type="button" aria-pressed="false">where is the espresso machine and how often is it descaled?</button></th>
+                  <td role="cell" data-col="Words"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Vectors"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Both"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Model"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                </tr>
+                <tr role="row">
+                  <th role="rowheader" scope="row"><button class="pick" type="button" aria-pressed="false">how do I get onto the VPN to reach staging?</button></th>
+                  <td role="cell" data-col="Words"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Vectors"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Both"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Model"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                </tr>
+                <tr role="row">
+                  <th role="rowheader" scope="row"><button class="pick" type="button" aria-pressed="false">how many approvals does a pull request need?</button></th>
+                  <td role="cell" data-col="Words"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Vectors"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Both"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Model"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                </tr>
+                <tr role="row">
+                  <th role="rowheader" scope="row"><button class="pick" type="button" aria-pressed="false">what do we produce after an outage?</button></th>
+                  <td role="cell" data-col="Words"><span class="slots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note was </span>none</span></td>
+                  <td role="cell" data-col="Vectors"><span class="slots" aria-hidden="true"><i data-on></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>1st</span></td>
+                  <td role="cell" data-col="Both"><span class="slots" aria-hidden="true"><i></i><i data-on></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>2nd</span></td>
+                  <td role="cell" data-col="Model"><span class="slots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span class="rank"><span class="sr">Right note came </span>6th</span></td>
+                </tr>
+              </tbody>
+            </table>
 
-    <!-- Clients -->
-    <section>
-      <div class="wrap">
-        <div class="sec-top">
-          <h2 class="reveal">Reach it from every surface.</h2>
-          <p class="deck reveal">The same store, however your team works: a REST API, typed SDKs, a CLI, MCP, and drop-in framework adapters.</p>
-        </div>
-        <div class="clients reveal">
-          <div class="client"><div class="t">TypeScript SDK</div><p>@companybrain/sdk</p></div>
-          <div class="client"><div class="t">Python SDK</div><p>pip install companybrain</p></div>
-          <div class="client"><div class="t">CLI</div><p>companybrain add / search / ask</p></div>
-          <div class="client"><div class="t">MCP server</div><p>Claude Desktop, Cursor</p></div>
-          <div class="client"><div class="t">Chrome extension</div><p>save any page</p></div>
-          <div class="client"><div class="t">Slack bot</div><p>/brain in Slack</p></div>
-          <div class="client"><div class="t">LangChain</div><p>drop-in retriever</p></div>
-          <div class="client"><div class="t">Vercel AI SDK</div><p>search / ask / add tools</p></div>
-          <div class="client"><div class="t">OpenAI tools</div><p>function calling</p></div>
-          <div class="client"><div class="t">n8n</div><p>no-code node</p></div>
-          <div class="client"><div class="t">Webhooks</div><p>signed events on ingest</p></div>
-          <div class="client"><div class="t">REST + OpenAPI</div><p>docs at /docs</p></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CTA -->
-    <section id="run">
-      <div class="wrap">
-        <div class="cta reveal">
-          <h2>Your company's memory, on your metal.</h2>
-          <p>One command clones, sets up, and starts everything. No account, no per-seat pricing. Deploy to Render, Railway, or Fly when you are ready.</p>
-          <div class="hero-actions">
-            <div class="cmd">
-              <span class="p">$</span><code><span class="k">npx</span> companybrain</code>
-              <button class="copy" id="copyBtn2" aria-label="Copy install command">copy</button>
+            <div class="back" id="back" aria-live="polite">
+              <h3>What came back, default setup</h3>
+              <p class="asked" id="asked">how do we ship a release?</p>
+              <ol class="hits" id="hits">
+                <li>
+                  <div class="hit-head"><span class="hit-title">Release process</span><span class="right">the right note</span><span class="score">1.00</span></div>
+                  <div class="parts">vectors 0.142, words 0.068</div>
+                  <p class="passage">We cut <mark>releases</mark> every Thursday. Tag main, run the <mark>release</mark> workflow, then announce in the #engineering channel. Hotfixes can <mark>ship</mark> any day with a lead&#x27;s approval.</p>
+                </li>
+                <li>
+                  <div class="hit-head"><span class="hit-title">Deploy rollback</span><span class="score">0.98</span></div>
+                  <div class="parts">vectors 0.046, words 0.030</div>
+                  <p class="passage">To roll back a bad deploy, re-run the <mark>release</mark> workflow with the previous git tag. Page the on-call engineer if customer traffic is affected.</p>
+                </li>
+                <li>
+                  <div class="hit-head"><span class="hit-title">Incident retro</span><span class="score">0.65</span></div>
+                  <div class="parts">vectors 0.045, no word match</div>
+                  <p class="passage">After any incident we run a blameless retro within three business days. The output is a written timeline, root cause, and action items with owners and due dates.</p>
+                </li>
+              </ol>
+              <p class="note">
+                Words shared with the question are marked. The score is relative to the best result for
+                that question, so the first result always reads 1.00.
+              </p>
             </div>
-            <a class="btn btn-iris" href="https://github.com/aayambansal/companybrain">Read the docs</a>
+          </div>
+
+          <div class="prose after">
+            <p id="sheet-key">
+              Each cell is the top five results. The filled square is where the right note was. “Both, with
+              a model” uses <code>nomic-embed-text</code> running locally through Ollama, which is free and
+              needs no key.
+            </p>
+            <p>
+              With nothing configured, the right note came first for 9 of the 12 questions and
+              first or second for all 12. With the embedding model it came first for 11, and sixth
+              for the other.
+            </p>
+            <p>
+              The last question shows what goes wrong. It asks about an “outage”. The right note says
+              “incident”. The note that came first is about support response times and happens to contain
+              the word “outages”. The built-in vectors are a hash of the words in the text, so they cannot
+              tell that two different words mean the same thing, and here the small embedding model did no
+              better.
+            </p>
+            <p>
+              Twelve notes is a smoke test. It shows that the install works and the kind of mistake each
+              setup makes. It says very little about how well this will search your documents.
+            </p>
+            <pre class="output">$ node bench/run.mjs --verbose</pre>
+            <p class="aside">
+              Run that in a checkout while CompanyBrain is up and it prints the ranks in the “Both, the
+              default” column. Add <code>--mode keyword</code> or <code>--mode semantic</code> for the
+              first two.
+            </p>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <section aria-labelledby="h-ask">
+        <div class="wrap">
+          <h2 id="h-ask">Asking instead of searching</h2>
+          <p class="prose">
+            Asking sends the best passages to a language model along with your question. These are two real
+            replies to “how do we ship a release?”, from the same twelve notes.
+          </p>
+          <div class="pair">
+            <div>
+              <h3>No model connected, the default</h3>
+              <pre class="output" tabindex="0">Here is the most relevant knowledge I found:
+
+[1] We cut releases every Thursday. Tag main, run the release workflow, then announce in the #engineering channel. Hotfixes can ship any day with a lead&#x27;s approval.
+
+[2] To roll back a bad deploy, re-run the release workflow with the previous git tag. Page the on-call engineer if customer traffic is affected.
+
+[3] After any incident we run a blameless retro within three business days. The output is a written timeline, root cause, and action items with owners and due dates.
+
+Sources:
+[1] Release process
+[2] Deploy rollback
+[3] Incident retro</pre>
+              <p>With no model there is nothing to write a sentence, so you get the top three passages.</p>
+            </div>
+            <div>
+              <h3>A small local model, llama3.2 through Ollama</h3>
+              <pre class="output" tabindex="0">Tag main, run the release workflow, then announce in the #engineering channel.
+
+Sources:
+[1] Release process
+[2] Deploy rollback
+[3] Incident retro
+[4] Expense policy
+[5] Onboarding checklist
+[6] Billing system
+[7] Data retention
+[8] Support SLA</pre>
+              <p>
+                The sources are every passage the model was shown, in rank order, not only the ones it used.
+                The model is asked to mark each claim with a number like [1]. This one did not, so check
+                the passage before you rely on the sentence.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-run">
+        <div class="wrap">
+          <h2 id="h-run">Run it</h2>
+          <ol class="steps">
+            <li>
+              <div>
+                Run <code>npx companybrain</code>. It clones the repository into
+                <code>~/.companybrain/app</code> and asks one thing: which model provider to use. Choose
+                “Local only” to start without a key.
+              </div>
+            </li>
+            <li>
+              <div>
+                It builds two Docker images and starts three containers: Postgres with pgvector, the API on
+                port 3333, and the dashboard on port 3000. Those two ports and 5432 need to be free.
+              </div>
+            </li>
+            <li>
+              <div>
+                Open <code>http://localhost:3000</code>. There is no sign-in. Paste some text, drop in
+                Markdown files, or set up a source under Connections.
+              </div>
+            </li>
+            <li>
+              <div>
+                Stop it with <code>npx companybrain down</code>. Your data stays in a Docker volume until
+                you run <code>npx companybrain uninstall</code>.
+              </div>
+            </li>
+          </ol>
+          <p class="aside" style="margin-top: 1rem">Installer 0.6.2, the current release, has a bug: once everything is running it prints <code>error: webPort is not defined</code> and exits. The stack is up regardless, so open the dashboard. The fix is merged and goes out with 0.6.3.</p>
+
+          <figure class="shot">
+            <img
+              src="dashboard-search.webp"
+              width="1440"
+              height="900"
+              loading="lazy"
+              alt="The CompanyBrain dashboard showing search results for “how do we ship a release”. The first result is the note titled Release process, with the matching words highlighted and its vector and keyword scores listed."
+            />
+            <figcaption>The dashboard's search page, with the twelve sample notes loaded.</figcaption>
+          </figure>
+
+          <div class="split">
+            <div>
+              <h3>Without Docker</h3>
+              <p>
+                <code>npx companybrain dev</code> runs the API and the dashboard directly against a Postgres
+                you already have: version 14 or newer, with the pgvector extension. It also needs pnpm.
+              </p>
+            </div>
+            <div>
+              <h3>Before it leaves your machine</h3>
+              <p>
+                The default has no login and the API listens on every network interface. That is fine on
+                your own computer. On a server, set <code>ACCESS_TOKEN</code> or
+                <code>AUTH_MODE=multi</code> in <code>.env</code> first, and go through the
+                <a href="https://github.com/aayambansal/companybrain/blob/main/docs/self-hosting.md">self-hosting checklist</a>.
+              </p>
+            </div>
+            <div>
+              <h3>Adding a model later</h3>
+              <p>
+                Settings, then Providers, in the dashboard. OpenAI, Anthropic and Ollama can write answers.
+                OpenAI, Google and Ollama can make embeddings. Changing the embedding model means
+                re-indexing, because vectors from two models cannot be compared.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-reads">
+        <div class="wrap">
+          <h2 id="h-reads">Where it reads from</h2>
+          <p class="prose">
+            There are 44 connectors in the repository. Every one is tested against recorded
+            responses, not live accounts, so expect some rough edges with real data.
+          </p>
+          <div class="sources">
+            <div>
+              <h3>The web</h3>
+              <p>Web page, Sitemap, RSS / Atom, YouTube, Hacker News, Reddit, Raindrop.io</p>
+            </div>
+            <div>
+              <h3>Notes, wikis and help desks</h3>
+              <p>Obsidian, Notion, Google Docs, Confluence, Zendesk, Intercom, Readwise, GitBook, Coda, Raycast</p>
+            </div>
+            <div>
+              <h3>Files and drives</h3>
+              <p>Local files, Google Drive, OneDrive, Dropbox, Box</p>
+            </div>
+            <div>
+              <h3>Code and tickets</h3>
+              <p>GitHub, Linear, Jira, GitLab, Bitbucket, Sentry</p>
+            </div>
+            <div>
+              <h3>Chat, mail and meetings</h3>
+              <p>Slack, Gmail, Discord, Telegram, Front, Freshdesk, Granola, Fathom</p>
+            </div>
+            <div>
+              <h3>Tasks and sales</h3>
+              <p>Trello, Airtable, Asana, ClickUp, Todoist, HubSpot, Pipedrive, Wispr Flow</p>
+            </div>
+          </div>
+          <div class="prose after">
+            <p>26 of them take an API token. 5 (Gmail, Google Drive, OneDrive, Dropbox and Box) take an OAuth access token that you obtain yourself and that expires, so treat those as one-off imports. 6 (Local files, Obsidian, Wispr Flow, Granola, Fathom and Raycast) read a folder. The other 7 need nothing, though a Google Doc has to be shared by link.</p>
+            <p>
+              The folder sources read a path on the machine the API runs on. In the Docker install that is
+              inside a container, so mount the folder in <code>docker-compose.yml</code> first, or use
+              <code>npx companybrain dev</code>.
+            </p>
+            <p>
+              Text you paste, files you upload, and anything you send to the API go into the same index.
+              PDFs are read as text. Images need a model that can see, and audio needs OpenAI's Whisper.
+              Video also needs ffmpeg, which the Docker image does not include.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-reach">
+        <div class="wrap">
+          <h2 id="h-reach">How you reach it</h2>
+          <p class="prose">
+            Several of these exist in the repository but have not been published to a package registry
+            yet. This list says which.
+          </p>
+          <dl class="reach">
+            <div>
+              <dt>Dashboard</dt>
+              <dd>
+                <span class="state" data-state="on">Runs with the install</span>
+                <p>Search, ask, browse what is stored, and manage sources and providers, at port 3000.</p>
+              </dd>
+            </div>
+            <div>
+              <dt>REST API</dt>
+              <dd>
+                <span class="state" data-state="on">Runs with the install</span>
+                <p>
+                  At port 3333, with an interactive reference at <code>/docs</code> and an OpenAPI 3.1
+                  document at <code>/v1/openapi.json</code>.
+                </p>
+              </dd>
+            </div>
+            <div>
+              <dt>MCP server</dt>
+              <dd>
+                <span class="state" data-state="off">In the repository only</span>
+                <p>
+                  Four tools: <code>search_memory</code>, <code>ask_memory</code>, <code>add_memory</code>
+                  and <code>list_spaces</code>. It is not on npm yet, so the
+                  <code>npx -y @companybrain/mcp</code> config that the installer prints does not work.
+                  Clone the repository, run <code>pnpm install</code>, and point your client at the checkout:
+                </p>
+                <pre class="output" tabindex="0">{
+  "mcpServers": {
+    "companybrain": {
+      "command": "pnpm",
+      "args": [
+        "--dir", "/path/to/companybrain",
+        "--filter", "@companybrain/mcp",
+        "exec", "tsx", "src/index.ts"
+      ],
+      "env": { "COMPANYBRAIN_API_URL": "http://localhost:3333" }
+    }
+  }
+}</pre>
+              </dd>
+            </div>
+            <div>
+              <dt>n8n node</dt>
+              <dd>
+                <span class="state" data-state="on">On npm</span>
+                <p>Published as <code>n8n-nodes-companybrain</code>: search, ask and add.</p>
+              </dd>
+            </div>
+            <div>
+              <dt>Command line and SDKs</dt>
+              <dd>
+                <span class="state" data-state="off">In the repository only</span>
+                <p>
+                  A <code>cb</code> command, a TypeScript SDK and a Python SDK. None is on npm or PyPI yet,
+                  so use them from a checkout.
+                </p>
+              </dd>
+            </div>
+            <div>
+              <dt>Framework adapters</dt>
+              <dd>
+                <span class="state" data-state="off">In the repository only</span>
+                <p>A LangChain retriever, Vercel AI SDK tools, and OpenAI function-calling tools.</p>
+              </dd>
+            </div>
+            <div>
+              <dt>Chrome extension</dt>
+              <dd>
+                <span class="state" data-state="off">In the repository only</span>
+                <p>Saves a page or a selection. Load <code>apps/extension</code> as an unpacked extension.</p>
+              </dd>
+            </div>
+            <div>
+              <dt>Slack</dt>
+              <dd>
+                <span class="state" data-state="on">Runs with the install</span>
+                <p>
+                  A <code>/brain</code> slash command is built into the API. You create the Slack app
+                  yourself; the
+                  <a href="https://github.com/aayambansal/companybrain/blob/main/docs/slack.md">Slack guide</a>
+                  has the steps.
+                </p>
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section aria-labelledby="benchmarks">
+        <div class="wrap">
+          <h2 id="benchmarks">A larger test</h2>
+          <div class="prose">
+            <p>
+              These are from two public
+              <a href="https://github.com/beir-cellar/beir">BEIR</a> datasets, measured in July 2026 and
+              scored with <code>pytrec_eval</code>. The metric is nDCG@10, where 1.0 would be a perfect
+              ranking. The grey bar is BM25, the standard keyword baseline, as reported in the BEIR paper.
+            </p>
+          </div>
+          <div class="ladders">
+            <div>
+              <h3>NFCorpus <span>3,633 documents, 323 questions</span></h3>
+              <ol class="ladder">
+                <li><span>BM25, from the BEIR paper</span><div class="bar" data-ref style="--v: 32.5%"></div><b>0.325</b></li>
+                <li><span>text-embedding-3-small</span><div class="bar" style="--v: 38.5%"></div><b>0.385</b></li>
+                <li><span>text-embedding-3-large</span><div class="bar" style="--v: 41.4%"></div><b>0.414</b></li>
+                <li><span>and a reranker</span><div class="bar" style="--v: 43.0%"></div><b>0.430</b></li>
+                <li><span>and query expansion</span><div class="bar" style="--v: 43.9%"></div><b>0.439</b></li>
+              </ol>
+            </div>
+            <div>
+              <h3>SciFact <span>5,183 documents, 300 questions</span></h3>
+              <ol class="ladder">
+                <li><span>BM25, from the BEIR paper</span><div class="bar" data-ref style="--v: 66.5%"></div><b>0.665</b></li>
+                <li><span>text-embedding-3-small</span><div class="bar" style="--v: 73.0%"></div><b>0.730</b></li>
+                <li><span>text-embedding-3-large</span><div class="bar" style="--v: 77.3%"></div><b>0.773</b></li>
+                <li><span>and a reranker</span><div class="bar" style="--v: 81.0%"></div><b>0.810</b></li>
+                <li><span>reranking one passage at a time</span><div class="bar" style="--v: 81.6%"></div><b>0.816</b></li>
+              </ol>
+            </div>
+          </div>
+          <div class="prose after">
+            <p>
+              Every amber bar uses an OpenAI embedding model, and the reranker and query expansion call a
+              language model on each search. So these numbers cost money to reach and to reproduce, and
+              most of the gain over BM25 comes from the embedding model.
+            </p>
+            <p>
+              The run files are not in the repository.
+              <a href="https://github.com/aayambansal/companybrain/blob/main/bench/BEIR.md">bench/BEIR.md</a>
+              has the commands. The only comparison here is with BM25. Nothing on this page says it beats
+              another product.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-limits">
+        <div class="wrap">
+          <h2 id="h-limits">What it does not do</h2>
+          <ul class="limits">
+            <li>
+              <b>It does not understand meaning without a model.</b> Out of the box, search matches words.
+              That works when your question uses the words in the document, and fails when it does not.
+            </li>
+            <li>
+              <b>It does not know when it is wrong.</b> A wrong passage comes back looking exactly like a
+              right one, with a score of 1.00, as the last question in the table shows.
+            </li>
+            <li>
+              <b>It does not run itself.</b> There is no hosted version. You install it, back up the
+              database, and upgrade it.
+            </li>
+            <li>
+              <b>It does not sign in to your accounts for you.</b> Sources take a token that you create and
+              paste in. There is no OAuth sign-in flow.
+            </li>
+            <li>
+              <b>It is not finished.</b> The installer is at version 0.6 and one person builds
+              this. Things break. If something does,
+              <a href="https://github.com/aayambansal/companybrain/issues">open an issue</a>.
+            </li>
+          </ul>
+        </div>
+      </section>
     </main>
 
-    <footer>
+    <footer class="colophon">
       <div class="wrap">
-        <span>CompanyBrain &middot; MIT licensed</span>
-        <a class="mono" href="https://github.com/aayambansal/companybrain">github.com/aayambansal/companybrain</a>
+        <p>
+          MIT licensed. Made by <a href="https://github.com/aayambansal">Aayam Bansal</a>.
+          <a href="https://github.com/aayambansal/companybrain">Source</a>,
+          <a href="https://github.com/aayambansal/companybrain/tree/main/docs">docs</a> and
+          <a href="https://github.com/aayambansal/companybrain/issues">issues</a> are on GitHub.
+        </p>
+        <p>
+          This page loads nothing from other sites and has no analytics. It is set in IBM Plex, served
+          from here under the SIL Open Font License.
+        </p>
       </div>
     </footer>
 
+    <script type="application/json" id="recorded">[{"q": "how do we ship a release?", "hits": [{"title": "Release process", "right": true, "score": "1.00", "parts": "vectors 0.142, words 0.068", "html": "We cut <mark>releases<\/mark> every Thursday. Tag main, run the <mark>release<\/mark> workflow, then announce in the #engineering channel. Hotfixes can <mark>ship<\/mark> any day with a lead&#x27;s approval."}, {"title": "Deploy rollback", "right": false, "score": "0.98", "parts": "vectors 0.046, words 0.030", "html": "To roll back a bad deploy, re-run the <mark>release<\/mark> workflow with the previous git tag. Page the on-call engineer if customer traffic is affected."}, {"title": "Incident retro", "right": false, "score": "0.65", "parts": "vectors 0.045, no word match", "html": "After any incident we run a blameless retro within three business days. The output is a written timeline, root cause, and action items with owners and due dates."}]}, {"q": "what do I do to undo a broken deployment?", "hits": [{"title": "Deploy rollback", "right": true, "score": "1.00", "parts": "vectors 0.037, words 0.020", "html": "To roll back a bad deploy, re-run the release workflow with the previous git tag. Page the on-call engineer if customer traffic is affected."}, {"title": "Release process", "right": false, "score": "0.67", "parts": "vectors 0.038, no word match", "html": "We cut releases every Thursday. Tag main, run the release workflow, then announce in the #engineering channel. Hotfixes can ship any day with a lead&#x27;s approval."}, {"title": "On-call rotation", "right": false, "score": "0.65", "parts": "vectors 0.035, no word match", "html": "On-call rotates weekly, handed off Mondays at 10am. The on-call engineer owns pages, incident response, and the incident retro. Escalate to the team lead after 30 minutes."}]}, {"q": "who is paged when something breaks and when does the rotation change?", "hits": [{"title": "Deploy rollback", "right": false, "score": "1.00", "parts": "vectors 0.088, words 0.012", "html": "To roll back a bad deploy, re-run the release workflow with the previous git tag. <mark>Page<\/mark> the on-call engineer if customer traffic is affected."}, {"title": "On-call rotation", "right": true, "score": "1.00", "parts": "vectors 0.083, words 0.024", "html": "On-call rotates weekly, handed off Mondays at 10am. The on-call engineer owns <mark>pages<\/mark>, incident response, and the incident retro. Escalate to the team lead after 30 minutes."}, {"title": "Code review", "right": false, "score": "0.92", "parts": "vectors -0.051, words 0.012", "html": "Every pull request needs one approval before merge. Reviews should happen within one business day. Large <mark>changes<\/mark> should be split into reviewable chunks."}]}, {"q": "do I need approval to expense a 40 dollar lunch?", "hits": [{"title": "Release process", "right": false, "score": "1.00", "parts": "vectors 0.073, words 0.010", "html": "We cut releases every Thursday. Tag main, run the release workflow, then announce in the #engineering channel. Hotfixes can ship any day with a lead&#x27;s <mark>approval<\/mark>."}, {"title": "Expense policy", "right": true, "score": "1.00", "parts": "vectors 0.072, words 0.043", "html": "<mark>Expenses<\/mark> under 100 <mark>dollars<\/mark> <mark>need<\/mark> no pre-<mark>approval<\/mark>. Submit receipts in the finance portal within 30 days. Travel over 500 <mark>dollars<\/mark> requires a manager sign-off first."}, {"title": "Code review", "right": false, "score": "0.97", "parts": "vectors 0.038, words 0.020", "html": "Every pull request <mark>needs<\/mark> one <mark>approval<\/mark> before merge. Reviews should happen within one business day. Large changes should be split into reviewable chunks."}]}, {"q": "what happens on a new employee's first day?", "hits": [{"title": "Onboarding checklist", "right": true, "score": "1.00", "parts": "vectors 0.165, words 0.040", "html": "<mark>New<\/mark> hires get a laptop on <mark>day<\/mark> one, access to Slack and the code repos by <mark>day<\/mark> two, and a buddy for their <mark>first<\/mark> month. Complete the security training within two weeks."}, {"title": "Billing system", "right": false, "score": "0.97", "parts": "vectors 0.097, words 0.024", "html": "The billing system runs on Stripe. Ada owns it. Invoices generate on the <mark>first<\/mark> of the month. Failed payments retry three times over ten <mark>days<\/mark> before the account is paused."}, {"title": "Support SLA", "right": false, "score": "0.96", "parts": "vectors 0.074, words 0.024", "html": "Enterprise customers get a four-hour <mark>first<\/mark>-response SLA during business hours. Standard customers get one business <mark>day<\/mark>. Critical outages are acknowledged within 30 minutes regardless of tier."}]}, {"q": "which payment provider handles invoices and who owns it?", "hits": [{"title": "Billing system", "right": true, "score": "1.00", "parts": "vectors 0.126, words 0.036", "html": "The billing system runs on Stripe. Ada <mark>owns<\/mark> it. <mark>Invoices<\/mark> generate on the first of the month. Failed <mark>payments<\/mark> retry three times over ten days before the account is paused."}, {"title": "On-call rotation", "right": false, "score": "0.96", "parts": "vectors 0.063, words 0.012", "html": "On-call rotates weekly, handed off Mondays at 10am. The on-call engineer <mark>owns<\/mark> pages, incident response, and the incident retro. Escalate to the team lead after 30 minutes."}, {"title": "VPN access", "right": false, "score": "0.67", "parts": "vectors 0.130, no word match", "html": "Request VPN access through the IT portal. Approvals take up to one business day. The VPN is required to reach staging and internal admin tools."}]}, {"q": "how long are customer logs stored before deletion?", "hits": [{"title": "Data retention", "right": true, "score": "1.00", "parts": "vectors 0.177, words 0.036", "html": "<mark>Customer<\/mark> <mark>logs<\/mark> are kept for 90 days, then deleted. Backups of the primary database are retained for one year in encrypted cold storage."}, {"title": "Deploy rollback", "right": false, "score": "0.96", "parts": "vectors 0.036, words 0.012", "html": "To roll back a bad deploy, re-run the release workflow with the previous git tag. Page the on-call engineer if <mark>customer<\/mark> traffic is affected."}, {"title": "Support SLA", "right": false, "score": "0.94", "parts": "vectors 0.034, words 0.015", "html": "Enterprise <mark>customers<\/mark> get a four-hour first-response SLA during business hours. Standard <mark>customers<\/mark> get one business day. Critical outages are acknowledged within 30 minutes regardless of tier."}]}, {"q": "how fast do enterprise customers get a first response?", "hits": [{"title": "Support SLA", "right": true, "score": "1.00", "parts": "vectors 0.346, words 0.056", "html": "<mark>Enterprise<\/mark> <mark>customers<\/mark> <mark>get<\/mark> a four-hour <mark>first<\/mark>-<mark>response<\/mark> SLA during business hours. Standard <mark>customers<\/mark> <mark>get<\/mark> one business day. Critical outages are acknowledged within 30 minutes regardless of tier."}, {"title": "Onboarding checklist", "right": false, "score": "0.97", "parts": "vectors 0.065, words 0.020", "html": "New hires <mark>get<\/mark> a laptop on day one, access to Slack and the code repos by day two, and a buddy for their <mark>first<\/mark> month. Complete the security training within two weeks."}, {"title": "On-call rotation", "right": false, "score": "0.96", "parts": "vectors 0.101, words 0.010", "html": "On-call rotates weekly, handed off Mondays at 10am. The on-call engineer owns pages, incident <mark>response<\/mark>, and the incident retro. Escalate to the team lead after 30 minutes."}]}, {"q": "where is the espresso machine and how often is it descaled?", "hits": [{"title": "Coffee machine", "right": true, "score": "1.00", "parts": "vectors 0.264, words 0.046", "html": "The office <mark>espresso<\/mark> <mark>machine<\/mark> is on the third floor kitchen. <mark>Descale<\/mark> it monthly. Beans are restocked every Friday."}, {"title": "Incident retro", "right": false, "score": "0.66", "parts": "vectors 0.186, no word match", "html": "After any incident we run a blameless retro within three business days. The output is a written timeline, root cause, and action items with owners and due dates."}, {"title": "VPN access", "right": false, "score": "0.65", "parts": "vectors 0.154, no word match", "html": "Request VPN access through the IT portal. Approvals take up to one business day. The VPN is required to reach staging and internal admin tools."}]}, {"q": "how do I get onto the VPN to reach staging?", "hits": [{"title": "VPN access", "right": true, "score": "1.00", "parts": "vectors 0.360, words 0.040", "html": "Request <mark>VPN<\/mark> access through the IT portal. Approvals take up to one business day. The <mark>VPN<\/mark> is required to <mark>reach<\/mark> <mark>staging<\/mark> and internal admin tools."}, {"title": "Onboarding checklist", "right": false, "score": "0.97", "parts": "vectors 0.113, words 0.012", "html": "New hires <mark>get<\/mark> a laptop on day one, access to Slack and the code repos by day two, and a buddy for their first month. Complete the security training within two weeks."}, {"title": "Support SLA", "right": false, "score": "0.94", "parts": "vectors 0.087, words 0.015", "html": "Enterprise customers <mark>get<\/mark> a four-hour first-response SLA during business hours. Standard customers <mark>get<\/mark> one business day. Critical outages are acknowledged within 30 minutes regardless of tier."}]}, {"q": "how many approvals does a pull request need?", "hits": [{"title": "Code review", "right": true, "score": "1.00", "parts": "vectors 0.122, words 0.049", "html": "Every <mark>pull<\/mark> <mark>request<\/mark> <mark>needs<\/mark> one <mark>approval<\/mark> before merge. Reviews should happen within one business day. Large changes should be split into reviewable chunks."}, {"title": "Expense policy", "right": false, "score": "0.98", "parts": "vectors 0.077, words 0.024", "html": "Expenses under 100 dollars <mark>need<\/mark> no pre-<mark>approval<\/mark>. Submit receipts in the finance portal within 30 days. Travel over 500 dollars requires a manager sign-off first."}, {"title": "VPN access", "right": false, "score": "0.97", "parts": "vectors 0.074, words 0.024", "html": "<mark>Request<\/mark> VPN access through the IT portal. <mark>Approvals<\/mark> take up to one business day. The VPN is required to reach staging and internal admin tools."}]}, {"q": "what do we produce after an outage?", "hits": [{"title": "Support SLA", "right": false, "score": "1.00", "parts": "vectors 0.037, words 0.030", "html": "Enterprise customers get a four-hour first-response SLA during business hours. Standard customers get one business day. Critical <mark>outages<\/mark> are acknowledged within 30 minutes regardless of tier."}, {"title": "Incident retro", "right": true, "score": "0.68", "parts": "vectors 0.076, no word match", "html": "After any incident we run a blameless retro within three business days. The output is a written timeline, root cause, and action items with owners and due dates."}, {"title": "Release process", "right": false, "score": "0.67", "parts": "vectors 0.039, no word match", "html": "We cut releases every Thursday. Tag main, run the release workflow, then announce in the #engineering channel. Hotfixes can ship any day with a lead&#x27;s approval."}]}]</script>
     <script>
-      document.documentElement.classList.add('js');
-      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      // Copy buttons
-      ['copyBtn', 'copyBtn2'].forEach(function (id) {
-        var b = document.getElementById(id);
-        if (!b) return;
-        b.addEventListener('click', async function () {
-          try { await navigator.clipboard.writeText('npx companybrain'); b.textContent = 'copied'; setTimeout(function () { b.textContent = 'copy'; }, 1500); }
-          catch (e) { b.textContent = 'npx companybrain'; }
-        });
-      });
-
-      // Nav border on scroll
-      var nav = document.getElementById('nav');
-      var onScroll = function () { nav.classList.toggle('scrolled', window.scrollY > 8); };
-      onScroll();
-      window.addEventListener('scroll', onScroll, { passive: true });
-
-      // Scroll reveal (enhances an already-visible default; never gates visibility)
-      var reveals = document.querySelectorAll('.reveal');
-      function revealAll() { reveals.forEach(function (el) { el.classList.add('in'); }); }
-      if (reduce || !('IntersectionObserver' in window)) {
-        revealAll();
-      } else {
-        var io = new IntersectionObserver(function (entries) {
-          entries.forEach(function (e, i) {
-            if (e.isIntersecting) { var el = e.target; setTimeout(function () { el.classList.add('in'); }, Math.min(i * 60, 180)); io.unobserve(el); }
-          });
-        }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-        reveals.forEach(function (el) { io.observe(el); });
-        // Safety net: a hidden tab, a headless crawler, or a fast anchor jump can
-        // stop the observer from firing. Never leave a section blank.
-        var safety = setTimeout(revealAll, 2600);
-        document.addEventListener('visibilitychange', function () { if (!document.hidden) { clearTimeout(safety); revealAll(); } });
-      }
-
-      // Connector marquee
-      var CONNECTORS = ['Web','Sitemap','Files & PDF','Obsidian','RSS','Google Docs','Google Drive','OneDrive','Dropbox','Box','Notion','Confluence','GitBook','Coda','Slack','Discord','Telegram','Gmail','GitHub','GitLab','Bitbucket','Sentry','Linear','Jira','Asana','ClickUp','Trello','Todoist','Airtable','Zendesk','Intercom','Freshdesk','Front','HubSpot','Pipedrive','YouTube','Hacker News','Reddit','Readwise','Raindrop','Wispr Flow','Granola','Fathom','Raycast'];
-      function fill(rowId, list) {
-        var row = document.getElementById(rowId);
-        if (!row) return;
-        var html = list.map(function (c) { return '<span class="connchip"><span class="dot"></span>' + c + '</span>'; }).join('');
-        row.innerHTML = html + html;
-      }
-      var half = Math.ceil(CONNECTORS.length / 2);
-      fill('row1', CONNECTORS.slice(0, half));
-      fill('row2', CONNECTORS.slice(half));
-
-      // ── Interactive ask console ──
-      (function () {
-        var SVGNS = 'http://www.w3.org/2000/svg';
-        var CX = 240, CY = 132;
-        var NODES = [
-          { id: 'adr',   x: 66,  y: 54,  l: 'ADR-014' },
-          { id: 'infra', x: 50,  y: 142, l: '#infra' },
-          { id: 'pr812', x: 106, y: 214, l: 'PR #812' },
-          { id: 'qbr',   x: 414, y: 52,  l: 'Acme QBR' },
-          { id: 'cal',   x: 428, y: 134, l: 'Calendar' },
-          { id: 'mail',  x: 404, y: 214, l: 'Email' },
-          { id: 'run',   x: 196, y: 32,  l: 'Runbook' },
-          { id: 'onb',   x: 300, y: 30,  l: 'Onboarding' },
-          { id: 'pr733', x: 322, y: 224, l: 'PR #733' }
-        ];
-        var QUERIES = [
-          {
-            q: 'Why did we choose Postgres over a vector DB?',
-            nodes: ['adr', 'infra', 'pr812'],
-            answer: 'You kept retrieval and the system of record in one database, Postgres with pgvector.<sup>1</sup> The infra thread weighed a dedicated vector store and rejected the extra operations surface,<sup>2</sup> and the switch shipped in one migration.<sup>3</sup>',
-            cites: ['ADR-014 · Datastore', 'Slack · #infra', 'PR #812']
-          },
-          {
-            q: 'What did we promise Acme in the last review?',
-            nodes: ['qbr', 'cal', 'mail'],
-            answer: 'SSO by the March release and a dedicated support channel.<sup>1</sup> The QBR was booked for the 12th,<sup>2</sup> and the follow-up email restated the SSO date in writing.<sup>3</sup>',
-            cites: ['Acme QBR deck', 'Calendar · QBR', 'Email · Acme']
-          },
-          {
-            q: 'How do we rotate a leaked API key?',
-            nodes: ['run', 'onb', 'pr733'],
-            answer: 'Revoke in the provider console, rotate the secret in the deploy environment, then redeploy.<sup>1</sup> Onboarding covers where each key lives,<sup>2</sup> and PR #733 moved every key to env-only.<sup>3</sup>',
-            cites: ['Runbook · Security', 'Onboarding · Secrets', 'PR #733']
-          }
-        ];
-
-        var graph = document.getElementById('graph');
-        var qText = document.getElementById('qText');
-        var aText = document.getElementById('aText');
-        var citesEl = document.getElementById('cites');
-        var answerEl = document.getElementById('answer');
-        var chipsEl = document.getElementById('chips');
-        var liveEl = document.getElementById('liveStatus');
-        if (!graph) return;
-
-        function setStatus(state) {
-          if (!liveEl) return;
-          liveEl.classList.toggle('done', state === 'answered');
-          liveEl.querySelector('.txt').textContent = state;
-        }
-
-        // Build edges then nodes
-        var nodeEls = {};
-        var edgeEls = {};
-        NODES.forEach(function (n) {
-          var len = Math.hypot(n.x - CX, n.y - CY);
-          var line = document.createElementNS(SVGNS, 'line');
-          line.setAttribute('x1', n.x); line.setAttribute('y1', n.y);
-          line.setAttribute('x2', CX); line.setAttribute('y2', CY);
-          line.setAttribute('class', 'edge');
-          line.style.strokeDasharray = len;
-          line.style.strokeDashoffset = len;
-          line._len = len;
-          graph.appendChild(line);
-          edgeEls[n.id] = line;
-        });
-        // Central brain node
-        var brain = document.createElementNS(SVGNS, 'g');
-        brain.setAttribute('class', 'brain-node');
-        brain.innerHTML = '<circle cx="' + CX + '" cy="' + CY + '" r="17"/>' +
-          '<g transform="translate(' + (CX - 11) + ',' + (CY - 11) + ') scale(0.92)" fill="none" stroke="var(--iris)" stroke-width="1.4" stroke-linejoin="round">' +
-          '<path d="M9 3.2C7 3.2 5.4 4.7 5.4 6.5c0 .35.05.65.12 1C4.5 8 3.9 8.9 3.9 10c0 .9.4 1.7 1.1 2.2-.14.35-.2.7-.2 1.1 0 1.7 1.35 3 3.1 3 .48 0 .95-.12 1.35-.33.33.76 1.13 1.25 2.05 1.25V3.4c-.66-.2-1.72-.2-2.75-.2Z"/>' +
-          '<path d="M15 3.2c1.9 0 3.4 1.4 3.4 3.2 0 .35-.05.65-.12 1 .86.5 1.42 1.4 1.42 2.5 0 .9-.4 1.7-1.1 2.2.14.35.2.7.2 1.1 0 1.7-1.35 3-3.1 3-.48 0-.95-.12-1.35-.33-.33.76-1.13 1.25-2.05 1.25"/>' +
-          '</g>';
-        graph.appendChild(brain);
-        // Source nodes
-        NODES.forEach(function (n) {
-          var g = document.createElementNS(SVGNS, 'g');
-          g.setAttribute('class', 'node');
-          var ring = document.createElementNS(SVGNS, 'circle');
-          ring.setAttribute('cx', n.x); ring.setAttribute('cy', n.y); ring.setAttribute('r', 6); ring.setAttribute('class', 'ring');
-          var core = document.createElementNS(SVGNS, 'circle');
-          core.setAttribute('cx', n.x); core.setAttribute('cy', n.y); core.setAttribute('r', 5.5); core.setAttribute('class', 'core');
-          var t = document.createElementNS(SVGNS, 'text');
-          var top = n.y < 46, bottom = n.y > 200;
-          var left = n.x < CX - 34, right = n.x > CX + 34;
-          if (top || bottom) { t.setAttribute('x', n.x); t.setAttribute('y', top ? n.y - 11 : n.y + 15); t.setAttribute('text-anchor', 'middle'); }
-          else if (left) { t.setAttribute('x', n.x + 10); t.setAttribute('y', n.y + 3.4); t.setAttribute('text-anchor', 'start'); }
-          else if (right) { t.setAttribute('x', n.x - 10); t.setAttribute('y', n.y + 3.4); t.setAttribute('text-anchor', 'end'); }
-          else { t.setAttribute('x', n.x); t.setAttribute('y', n.y - 11); t.setAttribute('text-anchor', 'middle'); }
-          t.textContent = n.l;
-          g.appendChild(ring); g.appendChild(core); g.appendChild(t);
-          graph.appendChild(g);
-          nodeEls[n.id] = g;
-        });
-
-        var gen = 0;
-        var chips = QUERIES.map(function (item, i) {
-          var b = document.createElement('button');
-          b.className = 'chip-q';
-          b.type = 'button';
-          b.textContent = item.q.replace(/\?$/, '');
-          b.setAttribute('aria-pressed', 'false');
-          b.addEventListener('click', function () { run(i, true); });
-          chipsEl.appendChild(b);
-          return b;
-        });
-
-        function clearState() {
-          Object.keys(nodeEls).forEach(function (id) { nodeEls[id].classList.remove('lit'); });
-          Object.keys(edgeEls).forEach(function (id) {
-            var e = edgeEls[id]; e.classList.remove('on'); e.style.strokeDashoffset = e._len;
-          });
-        }
-
-        function typeInto(el, text, isHTML, done) {
-          var myGen = gen;
-          // For HTML answers, reveal by clause for reliability with <sup> tags.
-          if (isHTML) {
-            el.innerHTML = '';
-            var parts = text.split(/(?<=[.,])\s/);
-            var i = 0;
-            (function next() {
-              if (myGen !== gen) return;
-              if (i >= parts.length) { if (done) done(); return; }
-              el.innerHTML += (i ? ' ' : '') + parts[i]; i++;
-              setTimeout(next, 190);
-            })();
-          } else {
-            el.textContent = '';
-            var j = 0;
-            (function step() {
-              if (myGen !== gen) return;
-              if (j > text.length) { if (done) done(); return; }
-              el.textContent = text.slice(0, j); j++;
-              setTimeout(step, 22);
-            })();
-          }
-        }
-
-        function run(idx, fromClick) {
-          gen++;
-          var myGen = gen;
-          var item = QUERIES[idx];
-          chips.forEach(function (c, i) { c.setAttribute('aria-pressed', i === idx ? 'true' : 'false'); });
-          clearState();
-          citesEl.classList.remove('show');
-          citesEl.innerHTML = '';
-          answerEl.classList.add('thinking');
-          setStatus('retrieving');
-
-          if (reduce) {
-            // Static resolved state, no animation
-            qText.innerHTML = item.q;
-            item.nodes.forEach(function (id) { nodeEls[id].classList.add('lit'); edgeEls[id].classList.add('on'); edgeEls[id].style.strokeDashoffset = 0; });
-            aText.innerHTML = item.answer;
-            renderCites(item);
-            answerEl.classList.remove('thinking');
-            setStatus('answered');
-            return;
-          }
-
-          // 1) type the question
-          qText.innerHTML = '';
-          var caret = document.createElement('span'); caret.className = 'caret';
-          typeInto(qText, item.q, false, function () {
-            qText.appendChild(caret);
-            if (myGen !== gen) return;
-            // 2) light nodes + draw edges in sequence
-            item.nodes.forEach(function (id, k) {
-              setTimeout(function () {
-                if (myGen !== gen) return;
-                nodeEls[id].classList.add('lit');
-                var e = edgeEls[id]; e.classList.add('on'); e.style.strokeDashoffset = 0;
-              }, 220 * k);
-            });
-            // 3) after edges, type the answer
-            setTimeout(function () {
-              if (myGen !== gen) return;
-              aText.innerHTML = '';
-              typeInto(aText, item.answer, true, function () {
-                if (myGen !== gen) return;
-                answerEl.classList.remove('thinking');
-                renderCites(item);
-                setStatus('answered');
-              });
-            }, 220 * item.nodes.length + 320);
-          });
-        }
-
-        function renderCites(item) {
-          citesEl.innerHTML = item.cites.map(function (c, i) {
-            return '<span class="cite"><span class="n">' + (i + 1) + '</span>' + c + '</span>';
-          }).join('');
-          citesEl.classList.add('show');
-        }
-
-        // Autoplay the first question once the console scrolls into view (or immediately if reduced motion)
-        if (reduce) {
-          run(0, false);
-        } else if ('IntersectionObserver' in window) {
-          var started = false;
-          var cio = new IntersectionObserver(function (entries) {
-            entries.forEach(function (e) {
-              if (e.isIntersecting && !started) { started = true; setTimeout(function () { run(0, false); }, 650); cio.disconnect(); }
-            });
-          }, { threshold: 0.4 });
-          cio.observe(document.querySelector('.console'));
-        } else {
-          setTimeout(function () { run(0, false); }, 800);
-        }
-      })();
-
-      // Hero constellation (ambient)
-      (function () {
-        var canvas = document.getElementById('constellation');
-        if (!canvas) return;
-        var ctx = canvas.getContext('2d');
-        var w, h, dpr, nodes, pulses, raf;
-        var SPARK = 'oklch(0.77 0.16 66)';
-        function resize() {
-          var host = canvas.parentElement;
-          dpr = Math.min(window.devicePixelRatio || 1, 2);
-          w = host.clientWidth; h = host.clientHeight;
-          canvas.width = w * dpr; canvas.height = h * dpr;
-          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-          var count = Math.max(22, Math.min(52, Math.floor((w * h) / 30000)));
-          nodes = Array.from({ length: count }, function () {
-            return { x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 0.2, vy: (Math.random() - 0.5) * 0.2, r: 1.3 + Math.random() * 1.7 };
-          });
-          pulses = [];
-        }
-        function step() {
-          ctx.clearRect(0, 0, w, h);
-          var R = 150;
-          for (var i = 0; i < nodes.length; i++) {
-            var n = nodes[i];
-            n.x += n.vx; n.y += n.vy;
-            if (n.x < 0 || n.x > w) n.vx *= -1;
-            if (n.y < 0 || n.y > h) n.vy *= -1;
-          }
-          for (var a = 0; a < nodes.length; a++) {
-            for (var b = a + 1; b < nodes.length; b++) {
-              var dx = nodes[a].x - nodes[b].x, dy = nodes[a].y - nodes[b].y;
-              var d = Math.hypot(dx, dy);
-              if (d < R) {
-                ctx.strokeStyle = 'oklch(0.54 0.21 264 / ' + (1 - d / R) * 0.16 + ')';
-                ctx.lineWidth = 1;
-                ctx.beginPath(); ctx.moveTo(nodes[a].x, nodes[a].y); ctx.lineTo(nodes[b].x, nodes[b].y); ctx.stroke();
-              }
+      (() => {
+        const copy = document.getElementById("copy");
+        if (copy && navigator.clipboard) {
+          copy.hidden = false;
+          copy.addEventListener("click", async () => {
+            try {
+              await navigator.clipboard.writeText(document.getElementById("command").textContent);
+              copy.textContent = "Copied";
+            } catch {
+              copy.textContent = "Select it";
             }
-          }
-          for (var c = 0; c < nodes.length; c++) {
-            ctx.beginPath(); ctx.arc(nodes[c].x, nodes[c].y, nodes[c].r, 0, Math.PI * 2);
-            ctx.fillStyle = 'oklch(0.54 0.21 264 / 0.5)'; ctx.fill();
-          }
-          if (Math.random() < 0.028 && nodes.length > 2) {
-            var p = nodes[(Math.random() * nodes.length) | 0], q = nodes[(Math.random() * nodes.length) | 0];
-            if (p !== q && Math.hypot(p.x - q.x, p.y - q.y) < R) pulses.push({ a: p, b: q, t: 0 });
-          }
-          for (var k = pulses.length - 1; k >= 0; k--) {
-            var pu = pulses[k]; pu.t += 0.035;
-            if (pu.t >= 1) { pulses.splice(k, 1); continue; }
-            var x = pu.a.x + (pu.b.x - pu.a.x) * pu.t, y = pu.a.y + (pu.b.y - pu.a.y) * pu.t;
-            ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2);
-            ctx.fillStyle = SPARK; ctx.shadowColor = SPARK; ctx.shadowBlur = 10; ctx.fill(); ctx.shadowBlur = 0;
-          }
-          if (running) raf = requestAnimationFrame(step);
+            setTimeout(() => (copy.textContent = "Copy"), 1600);
+          });
         }
-        function drawStatic() {
-          ctx.clearRect(0, 0, w, h);
-          for (var i = 0; i < nodes.length; i++) { ctx.beginPath(); ctx.arc(nodes[i].x, nodes[i].y, nodes[i].r, 0, Math.PI * 2); ctx.fillStyle = 'oklch(0.54 0.21 264 / 0.4)'; ctx.fill(); }
-        }
-        var running = false, visible = true;
-        function start() { if (running || reduce || !visible) return; running = true; raf = requestAnimationFrame(step); }
-        function stop() { running = false; cancelAnimationFrame(raf); }
-        resize();
-        window.addEventListener('resize', function () { stop(); resize(); if (reduce) drawStatic(); else start(); });
-        if (reduce) {
-          drawStatic();
-        } else if ('IntersectionObserver' in window) {
-          // Pause the ambient loop once the hero scrolls out of view. rAF only
-          // throttles when the whole tab is hidden, not when the canvas leaves
-          // the viewport, so on this long page it would otherwise keep burning
-          // CPU off-screen.
-          new IntersectionObserver(function (entries) {
-            visible = entries[0].isIntersecting;
-            if (visible) start(); else stop();
-          }, { threshold: 0 }).observe(canvas);
-        } else {
-          start();
-        }
+
+        const rows = JSON.parse(document.getElementById("recorded").textContent);
+        const back = document.getElementById("back");
+        const asked = document.getElementById("asked");
+        const hits = document.getElementById("hits");
+        const picks = [...document.querySelectorAll("#rows button")];
+        const still = matchMedia("(prefers-reduced-motion: reduce)");
+
+        const show = (index, moved) => {
+          const row = rows[index];
+          picks.forEach((b, i) => b.setAttribute("aria-pressed", String(i === index)));
+          asked.textContent = row.q;
+          hits.innerHTML = row.hits
+            .map(
+              (h) => `<li>
+                <div class="hit-head">
+                  <span class="hit-title">${h.title}</span>
+                  ${h.right ? '<span class="right">the right note</span>' : ""}
+                  <span class="score">${h.score}</span>
+                </div>
+                <div class="parts">${h.parts}</div>
+                <p class="passage">${h.html}</p>
+              </li>`,
+            )
+            .join("");
+          if (!moved) return;
+          // On a phone the results sit below the table; bring them into view.
+          const box = back.getBoundingClientRect();
+          if (box.top > innerHeight - 80 || box.bottom < 80) {
+            back.scrollIntoView({ behavior: still.matches ? "auto" : "smooth", block: "start" });
+          }
+        };
+        picks.forEach((b, i) => b.addEventListener("click", () => show(i, true)));
       })();
     </script>
   </body>
