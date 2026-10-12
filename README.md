@@ -103,7 +103,7 @@ dense-retriever baselines:
 | NFCorpus | **0.439**            | 0.325            | ~0.37             |
 | SciFact  | **0.816**            | 0.665            | ~0.72             |
 
-Full leaderboard and methodology: [companybrain benchmarks](https://aayambansal.github.io/companybrain/benchmarks.html).
+The numbers, the steps between them, and their caveats: [companybrain benchmarks](https://aayambansal.github.io/companybrain/#benchmarks).
 Reproduce every number with the harness in [`bench/`](./bench) — see [bench/BEIR.md](./bench/BEIR.md).
 
 ## How it fits together

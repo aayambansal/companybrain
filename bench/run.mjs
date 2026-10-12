@@ -4,10 +4,11 @@
  *
  *   COMPANYBRAIN_API_URL=http://localhost:3333 \
  *   COMPANYBRAIN_API_KEY=cb_... \
- *   node bench/run.mjs [--mode hybrid|semantic|keyword] [--k 5] [--space bench]
+ *   node bench/run.mjs [--mode hybrid|semantic|keyword] [--k 5] [--space bench] [--verbose]
  *
  * Ingests a small labeled corpus into a dedicated space, then runs question
- * probes and reports Recall@k, MRR, and search latency. Zero dependencies.
+ * probes and reports Recall@k, MRR, and search latency. With --verbose it also
+ * prints, per question, where the right document ranked. Zero dependencies.
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -25,6 +26,7 @@ const flag = (name, def) => {
 const MODE = flag('mode', 'hybrid');
 const K = Number(flag('k', '5'));
 const SPACE = flag('space', 'bench');
+const VERBOSE = args.includes('--verbose');
 
 function headers(json = false) {
   const h = {};
@@ -75,6 +77,7 @@ async function main() {
   let hitAtK = 0;
   let reciprocalRankSum = 0;
   const latencies = [];
+  const perProbe = [];
 
   for (const probe of probes) {
     const t0 = performance.now();
@@ -89,6 +92,16 @@ async function main() {
     const rank = titles.indexOf(probe.expect); // 0-based rank of the expected doc
     if (rank >= 0 && rank < K) hitAtK += 1;
     if (rank >= 0) reciprocalRankSum += 1 / (rank + 1);
+    // When the right document was not first, name the one that was: that is
+    // the useful part of a miss.
+    const first = rank === 0 ? '' : `   (first: ${titles[0] ?? 'nothing'})`;
+    perProbe.push(`  ${rank < 0 ? '   -' : String(rank + 1).padStart(4)}  ${probe.q}${first}`);
+  }
+
+  if (VERBOSE) {
+    console.log('\n  rank  question');
+    console.log('  ----  --------');
+    for (const line of perProbe) console.log(line);
   }
 
   const recall = hitAtK / probes.length;
