@@ -29,9 +29,9 @@
     "db:seed": "pnpm --filter @companybrain/db seed"
   },
   "devDependencies": {
-    "playwright": "^1.63.0",
-    "prettier": "^3.9.9",
-    "turbo": "^2.11.4",
+    "playwright": "^1.64.0",
+    "prettier": "^3.9.10",
+    "turbo": "^2.11.7",
     "typescript": "^5.6.2"
   },
   "pnpm": {
